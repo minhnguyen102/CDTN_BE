@@ -1,9 +1,7 @@
 import { Router } from "express"
+import { loginController } from "~/controllers/admins/accounts.controllers"
+const accountRoutes = Router()
 
-const AccountRoutes = Router()
+accountRoutes.post("/login", loginController)
 
-AccountRoutes.get("/", (req, res) => {
-  res.send("Hello World!")
-})
-
-export default AccountRoutes
+export default accountRoutes
