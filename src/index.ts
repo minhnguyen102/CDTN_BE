@@ -1,5 +1,5 @@
-import express, { Router } from "express"
-import { routesAdmin } from "./routes/admins/index.routes"
+import express from "express"
+import { routesAdmin } from "~/routes/admins/index.routes"
 import databaseService from "~/services/database.servies"
 const app = express()
 const port = 3000
