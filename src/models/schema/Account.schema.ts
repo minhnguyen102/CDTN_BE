@@ -1,15 +1,5 @@
 import { ObjectId } from "mongodb"
-
-enum RoleAccount {
-  Employee, // tương ứng = 0
-  Owner
-}
-
-enum AccountVerifyStatus {
-  Unverified, // chưa xác thực (Mặc định)
-  Verified, // Đã xác thực
-  Banner // Bị khóa (Đối với nhân viên được cho thôi hoặc nghỉ việc)
-}
+import { AccountVerifyStatus, RoleAccount } from "~/constants/enums"
 
 interface AccountType {
   _id?: ObjectId
