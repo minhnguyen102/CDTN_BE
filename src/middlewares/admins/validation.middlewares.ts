@@ -1,4 +1,5 @@
 import { checkSchema } from "express-validator"
+import databaseService from "~/services/database.servies"
 import { validate } from "~/utils/validation"
 
 export const registerValidation = validate(
@@ -18,7 +19,16 @@ export const registerValidation = validate(
       email: {
         isEmail: true,
         trim: true,
-        notEmpty: true
+        notEmpty: true,
+        custom: {
+          options: async (value, { req }) => {
+            const isEmailExits = await databaseService.accounts.findOne({ email: value })
+            if (isEmailExits) {
+              throw new Error("Email already exits")
+            }
+            return true
+          }
+        }
       },
       password: {
         notEmpty: true,
