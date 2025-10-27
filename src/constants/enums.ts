@@ -8,3 +8,10 @@ export enum AccountVerifyStatus {
   Verified, // Đã xác thực
   Banner // Bị khóa (Đối với nhân viên được cho thôi hoặc nghỉ việc)
 }
+
+export enum TokenType {
+  AccessToken,
+  RefreshToken,
+  EmailVerifyToken,
+  ForgotPasswordToken
+}
