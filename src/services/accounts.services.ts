@@ -4,6 +4,9 @@ import Account from "~/models/schema/Account.schema"
 import { hashPassword } from "~/utils/crypto"
 import { signToken } from "~/utils/jwt"
 import { TokenType } from "~/constants/enums"
+import { config } from "dotenv"
+config()
+import ms from "ms"
 
 class AccountsServices {
   private signAccessToken(user_id: string) {
@@ -11,6 +14,9 @@ class AccountsServices {
       payload: {
         user_id,
         token_type: TokenType.AccessToken
+      },
+      optionals: {
+        expiresIn: process.env.EXPIRES_IN_ACCESS_TOKEN as ms.StringValue
       }
     })
   }
@@ -20,8 +26,15 @@ class AccountsServices {
       payload: {
         user_id,
         token_type: TokenType.RefreshToken
+      },
+      optionals: {
+        expiresIn: process.env.EXPIRES_IN_REFRESH_TOKEN as ms.StringValue
       }
     })
+  }
+
+  private signAccessAndRefreshToken(user_id: string) {
+    return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
   }
 
   async login(payload: { email: string; password: string }) {
@@ -38,7 +51,12 @@ class AccountsServices {
         date_of_birth: new Date(payload.date_of_birth)
       })
     )
-    return result
+    const user_id = result.insertedId.toString()
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    return {
+      access_token,
+      refresh_token
+    }
   }
 }
 
