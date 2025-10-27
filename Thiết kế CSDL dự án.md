@@ -1,5 +1,5 @@
 # THIẾT KẾ CƠ SƠ DỮ LIỆU: QUẢN LÍ QUÁN ĂN
-    - Chuyển đổi từ SQL(7 bảng) -> 5 Collection (NoSQL)
+    - Chuyển đổi từ SQL (7 bảng) -> 6 Collection (NoSQL)
     - 5 rules 
         + 1 - 1: Ưu tiên cặp key-value trong document
         + 1 - ít: Ưu tiên nhúng
@@ -106,9 +106,9 @@ enum TableStatus {
 interface Table {
     "_id": ObjectId,
     "number": Number, // (Tạo unique index)
-    "capacity": Number, // số ghế ngồi
     "status": TableStatus, 
     "token": String, // Token cho QR code
+    "imageQR": string,
     "createdAt": Date,
     "updatedAt": Date
 }
@@ -158,8 +158,7 @@ interface OrderSession {
 }
 ```
 
-## 6. RefreshToken (Tách lại ra từ bảng Accounts)
-
+## 6. RefreshToken
 
 ```ts
 interface RefreshTokenType {
@@ -171,3 +170,19 @@ interface RefreshTokenType {
   exp: number
 }
 ```
+
+## 7. Igredients
+
+```ts
+interface Ingredient {
+  _id: ObjectId,
+  name: string,
+  description: string,
+  image: string,
+  quantity: number, // auto decrease when dish status is prepared
+  unit: string
+}
+```
+
+### Jwt
+  - Mục đích thiết kế signToken bất đồng bộ => dùng promiseAll cho RT và AT => Tối ưu performance
