@@ -33,6 +33,7 @@ const USER_MESSAGES = {
   EMAIL_MUST_BE_STRING: "Email must be a string",
 
   DATE_OF_BIRTH_MUST_BE_ISO8601: "Date of birth must be in ISO 8601 format",
+  DATE_OF_BIRTH_IS_REQUIRED: "Date_of_birth is required",
   IMAGE_IS_INVALID: "Image format is invalid",
 
   // === Follow ===
