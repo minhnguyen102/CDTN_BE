@@ -7,6 +7,8 @@ import { TokenType } from "~/constants/enums"
 import { config } from "dotenv"
 config()
 import ms from "ms"
+import RefreshToken from "~/models/schema/RefreshToken.schema"
+import { ObjectId } from "mongodb"
 
 class AccountsServices {
   private signAccessToken(user_id: string) {
@@ -39,6 +41,9 @@ class AccountsServices {
 
   async login(user_id: string) {
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    await databaseService.refresh_tokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
+    )
     return {
       access_token,
       refresh_token
@@ -55,6 +60,9 @@ class AccountsServices {
     )
     const user_id = result.insertedId.toString()
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    await databaseService.refresh_tokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
+    )
     return {
       access_token,
       refresh_token
