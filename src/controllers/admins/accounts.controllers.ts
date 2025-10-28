@@ -6,6 +6,7 @@ import USER_MESSAGES from "~/constants/message"
 import { ObjectId } from "mongodb"
 
 export const loginController = async (req: Request, res: Response) => {
+  // throw new Error("Loi o day")
   const user_id = req.account?._id as ObjectId
   const result = await accountsServices.login(user_id?.toString())
   res.json({
