@@ -1,4 +1,7 @@
 import { checkSchema } from "express-validator"
+import HTTP_STATUS from "~/constants/httpStatus"
+import USER_MESSAGES from "~/constants/message"
+import ErrorWithStatus from "~/models/Errors"
 import databaseService from "~/services/database.servies"
 import { validate } from "~/utils/validation"
 
@@ -24,7 +27,10 @@ export const registerValidation = validate(
           options: async (value, { req }) => {
             const isEmailExits = await databaseService.accounts.findOne({ email: value })
             if (isEmailExits) {
-              throw new Error("Email already exits")
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.EMAIL_ALREADY_EXISTS,
+                status: HTTP_STATUS.CONFLICT
+              })
             }
             return true
           }
