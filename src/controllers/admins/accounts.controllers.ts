@@ -18,6 +18,7 @@ export const loginController = async (req: Request, res: Response) => {
 }
 
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {
+  throw new Error("Loi roi")
   const result = await accountsServices.register(req.body)
   res.json({
     message: "Register success",
