@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from "express"
 import { ValidationChain, validationResult } from "express-validator"
 import { RunnableValidationChains } from "express-validator/lib/middlewares/schema"
-import ms from "ms"
 import HTTP_STATUS from "~/constants/httpStatus"
-import ErrorWithStatus from "~/models/Errors"
+import { EntityError, ErrorWithStatus } from "~/models/Errors"
 
 // can be reused by many routes
 export const validate = (validation: RunnableValidationChains<ValidationChain>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     await validation.run(req)
     const errors = validationResult(req)
+    const entityErrors = new EntityError({ errors: {} })
 
     // Nếu không có lỗi
     if (errors.isEmpty()) {
@@ -24,8 +24,9 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
       if (msg instanceof ErrorWithStatus && msg.status !== HTTP_STATUS.UNPROCESSABLE_ENTITY) {
         throw new ErrorWithStatus(msg)
       }
+      // Nếu là nhóm lỗi 422
+      entityErrors.errors[key] = errorsObject[key]
     }
-
-    return res.status(422).json({ errors: errorsObject })
+    next(entityErrors)
   }
 }

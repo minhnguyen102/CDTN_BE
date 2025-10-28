@@ -1,7 +1,7 @@
 import { checkSchema } from "express-validator"
 import HTTP_STATUS from "~/constants/httpStatus"
 import USER_MESSAGES from "~/constants/message"
-import ErrorWithStatus from "~/models/Errors"
+import { ErrorWithStatus } from "~/models/Errors"
 import databaseService from "~/services/database.servies"
 import { validate } from "~/utils/validation"
 
