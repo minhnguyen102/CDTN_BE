@@ -5,6 +5,7 @@ import { JwtPayload } from "jsonwebtoken"
 declare module "express" {
   interface Request {
     account?: Account
-    decode_access_token?: JwtPayload
+    decoded_access_token?: JwtPayload
+    decoded_refresh_token?: JwtPayload
   }
 }

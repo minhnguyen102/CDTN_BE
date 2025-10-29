@@ -1,4 +1,4 @@
-import { checkSchema } from "express-validator"
+import { check, checkSchema } from "express-validator"
 import HTTP_STATUS from "~/constants/httpStatus"
 import USER_MESSAGES from "~/constants/message"
 import { ErrorWithStatus } from "~/models/Errors"
@@ -7,6 +7,7 @@ import { hashPassword } from "~/utils/crypto"
 import { validate } from "~/utils/validation"
 import { Request } from "express"
 import { verifyToken } from "~/utils/jwt"
+import { JsonWebTokenError } from "jsonwebtoken"
 
 export const registerValidation = validate(
   checkSchema(
@@ -161,13 +162,54 @@ export const accessTokenValidation = validate(
               })
             }
             // decoded
-            const decode_access_token = await verifyToken({ token: access_token })
-            req.decode_access_token = decode_access_token
+            const decoded_access_token = await verifyToken({ token: access_token })
+            req.decoded_access_token = decoded_access_token
             return true
           }
         }
       }
     },
     ["headers"]
+  )
+)
+
+export const refreshTokenValidation = validate(
+  checkSchema(
+    {
+      refresh_token: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.REFRESH_TOKEN_IS_REQUIRED
+        },
+        custom: {
+          options: async (value, { req }) => {
+            try {
+              const [decoded_refresh_token, isExistRefreshToken] = await Promise.all([
+                verifyToken({ token: value }),
+                databaseService.refresh_tokens.findOne({ token: value })
+              ])
+
+              if (!isExistRefreshToken) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USED_REFRESH_TOKEN_OR_NOT_EXIST,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              ;(req as Request).decoded_refresh_token = decoded_refresh_token
+            } catch (error) {
+              // Lỗi do verify
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatus({
+                  message: error.message,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              throw error
+            }
+            return true
+          }
+        }
+      }
+    },
+    ["body"]
   )
 )

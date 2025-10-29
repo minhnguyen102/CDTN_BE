@@ -1,7 +1,12 @@
 import { Router } from "express"
 import USER_MESSAGES from "~/constants/message"
 import { loginController, registerController } from "~/controllers/admins/accounts.controllers"
-import { accessTokenValidation, loginValidation, registerValidation } from "~/middlewares/admins/validation.middlewares"
+import {
+  accessTokenValidation,
+  loginValidation,
+  refreshTokenValidation,
+  registerValidation
+} from "~/middlewares/admins/validation.middlewares"
 import { wrapHandlerFunction } from "~/utils/wrapHandler"
 const accountRoutes = Router()
 
@@ -27,7 +32,7 @@ accountRoutes.post("/register", registerValidation, wrapHandlerFunction(register
  * Body: { refresh_token: string}
  * Headers: {Authorization: Bearer access_token}
  */
-accountRoutes.post("/logout", accessTokenValidation, (req, res) => {
+accountRoutes.post("/logout", accessTokenValidation, refreshTokenValidation, (req, res) => {
   res.json({
     message: USER_MESSAGES.LOGOUT_SUCCESS
   })

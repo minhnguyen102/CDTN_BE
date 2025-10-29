@@ -15,7 +15,7 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
     if (errors.isEmpty()) {
       return next()
     }
-    // console.log(errors.mapped())
+    console.log("Loi ", errors.mapped())
 
     const errorsObject = errors.mapped()
     for (const key in errorsObject) {

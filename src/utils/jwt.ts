@@ -41,7 +41,7 @@ export const verifyToken = ({
       if (error) {
         return reject(error)
       }
-      resolve(decode as jwt.JwtPayload)
+      resolve(decoded as jwt.JwtPayload)
     })
   })
 }
