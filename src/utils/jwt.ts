@@ -1,5 +1,9 @@
+import { error } from "console"
 import { config } from "dotenv"
 import jwt, { SignOptions } from "jsonwebtoken"
+import { reject } from "lodash"
+import { resolve } from "path"
+import { decode } from "punycode"
 config()
 
 export const signToken = ({
@@ -21,6 +25,23 @@ export const signToken = ({
         throw reject(error)
       }
       resolve(token as string)
+    })
+  })
+}
+
+export const verifyToken = ({
+  token,
+  secretOrPublicKey = process.env.PRIVATE_KEY_SIGN_TOKEN as string
+}: {
+  token: string
+  secretOrPublicKey?: string
+}) => {
+  return new Promise<jwt.JwtPayload>((resolve, reject) => {
+    jwt.verify(token, secretOrPublicKey, (error, decoded) => {
+      if (error) {
+        return reject(error)
+      }
+      resolve(decode as jwt.JwtPayload)
     })
   })
 }

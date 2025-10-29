@@ -1,6 +1,7 @@
 import { Router } from "express"
+import USER_MESSAGES from "~/constants/message"
 import { loginController, registerController } from "~/controllers/admins/accounts.controllers"
-import { loginValidation, registerValidation } from "~/middlewares/admins/validation.middlewares"
+import { accessTokenValidation, loginValidation, registerValidation } from "~/middlewares/admins/validation.middlewares"
 import { wrapHandlerFunction } from "~/utils/wrapHandler"
 const accountRoutes = Router()
 
@@ -19,5 +20,17 @@ accountRoutes.post("/login", loginValidation, wrapHandlerFunction(loginControlle
  * Body: { name: string, email: string, password: string, confirm_password: string, date_of_birth: ISO8601, role: RoleAccount}
  */
 accountRoutes.post("/register", registerValidation, wrapHandlerFunction(registerController))
+
+/**
+ * Description: Logout
+ * PATH: admin/accounts/logout
+ * Body: { refresh_token: string}
+ * Headers: {Authorization: Bearer access_token}
+ */
+accountRoutes.post("/logout", accessTokenValidation, (req, res) => {
+  res.json({
+    message: USER_MESSAGES.LOGOUT_SUCCESS
+  })
+})
 
 export default accountRoutes

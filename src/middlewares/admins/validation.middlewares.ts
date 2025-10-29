@@ -6,6 +6,7 @@ import databaseService from "~/services/database.servies"
 import { hashPassword } from "~/utils/crypto"
 import { validate } from "~/utils/validation"
 import { Request } from "express"
+import { verifyToken } from "~/utils/jwt"
 
 export const registerValidation = validate(
   checkSchema(
@@ -143,5 +144,30 @@ export const loginValidation = validate(
       }
     },
     ["body"]
+  )
+)
+
+export const accessTokenValidation = validate(
+  checkSchema(
+    {
+      authorization: {
+        custom: {
+          options: async (value, { req }) => {
+            const access_token = value.split(" ")[1]
+            if (!access_token) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
+            }
+            // decoded
+            const decode_access_token = await verifyToken({ token: access_token })
+            req.decode_access_token = decode_access_token
+            return true
+          }
+        }
+      }
+    },
+    ["headers"]
   )
 )

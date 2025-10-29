@@ -22,7 +22,7 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
       const { msg } = errorsObject[key]
       // Nếu lỗi không thuộc nhóm lỗi 422(Liên quan đến điền form sai)
       if (msg instanceof ErrorWithStatus && msg.status !== HTTP_STATUS.UNPROCESSABLE_ENTITY) {
-        throw new ErrorWithStatus(msg)
+        return next(new ErrorWithStatus(msg))
       }
       // Nếu là nhóm lỗi 422
       entityErrors.errors[key] = errorsObject[key]
