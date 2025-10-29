@@ -11,7 +11,7 @@ import RefreshToken from "~/models/schema/RefreshToken.schema"
 import { ObjectId } from "mongodb"
 
 class AccountsServices {
-  private signAccessToken(user_id: string) {
+  private signAccessToken({ user_id }: { user_id: string }) {
     return signToken({
       payload: {
         user_id,
@@ -23,7 +23,7 @@ class AccountsServices {
     })
   }
 
-  private signRefreshToken(user_id: string) {
+  private signRefreshToken({ user_id }: { user_id: string }) {
     return signToken({
       payload: {
         user_id,
@@ -35,12 +35,12 @@ class AccountsServices {
     })
   }
 
-  private signAccessAndRefreshToken(user_id: string) {
-    return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
+  private signAccessAndRefreshToken({ user_id }: { user_id: string }) {
+    return Promise.all([this.signAccessToken({ user_id }), this.signRefreshToken({ user_id })])
   }
 
-  async login(user_id: string) {
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+  async login({ user_id }: { user_id: string }) {
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id })
     await databaseService.refresh_tokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
     )
@@ -50,7 +50,7 @@ class AccountsServices {
     }
   }
 
-  async logout(refresh_token: string) {
+  async logout({ refresh_token }: { refresh_token: string }) {
     await databaseService.refresh_tokens.deleteOne({ token: refresh_token })
     return true
   }
@@ -64,7 +64,7 @@ class AccountsServices {
       })
     )
     const user_id = result.insertedId.toString()
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id })
     await databaseService.refresh_tokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
     )
@@ -76,8 +76,8 @@ class AccountsServices {
 
   async refreshToken({ refresh_token, user_id }: { refresh_token: string; user_id: string }) {
     const [new_access_token, new_refresh_token] = await Promise.all([
-      this.signAccessToken(user_id),
-      this.signRefreshToken(user_id),
+      this.signAccessToken({ user_id }),
+      this.signRefreshToken({ user_id }),
       databaseService.refresh_tokens.deleteOne({ token: refresh_token })
     ])
     await databaseService.refresh_tokens.insertOne(

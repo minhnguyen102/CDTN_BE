@@ -8,7 +8,7 @@ import { ObjectId } from "mongodb"
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
   const user_id = req.account?._id as ObjectId
-  const result = await accountsServices.login(user_id?.toString())
+  const result = await accountsServices.login({ user_id: user_id?.toString() })
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
@@ -25,7 +25,7 @@ export const registerController = async (req: Request<ParamsDictionary, any, Reg
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.body
-  await accountsServices.logout(refresh_token)
+  await accountsServices.logout({ refresh_token })
   res.json({
     message: USER_MESSAGES.LOGOUT_SUCCESS
   })

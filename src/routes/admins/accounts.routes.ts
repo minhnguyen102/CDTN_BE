@@ -1,5 +1,4 @@
 import { Router } from "express"
-import USER_MESSAGES from "~/constants/message"
 import {
   loginController,
   logoutController,
