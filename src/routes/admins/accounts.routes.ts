@@ -7,6 +7,7 @@ import {
 } from "~/controllers/admins/accounts.controllers"
 import {
   accessTokenValidation,
+  emailVerifyTokenValidation,
   loginValidation,
   refreshTokenValidation,
   registerValidation
@@ -44,5 +45,16 @@ accountRoutes.post("/logout", accessTokenValidation, refreshTokenValidation, wra
  * Body: { refresh_token: string}
  */
 accountRoutes.post("/refresh-token", refreshTokenValidation, wrapHandlerFunction(refreshTokenController))
+
+/**
+ * Description: verify-email
+ * PATH: admin/accounts/verify-email
+ * Body: { email_verify_token: string}
+ */
+accountRoutes.post("/verify-email", emailVerifyTokenValidation, (req, res) => {
+  res.json({
+    message: "OK"
+  })
+})
 
 export default accountRoutes

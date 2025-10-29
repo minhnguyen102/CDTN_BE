@@ -37,6 +37,19 @@ class AccountsServices {
     })
   }
 
+  private signEmailVerifyToken({ user_id }: { user_id: string }) {
+    return signToken({
+      payload: {
+        user_id,
+        TokenType: TokenType.EmailVerifyToken
+      },
+      privateKey: process.env.PRIVATE_KEY_SIGN_EMAIL_VERIFY_TOKEN as string,
+      optionals: {
+        expiresIn: process.env.EXPIRES_IN_EMAIL_VERIFY_TOKEN as ms.StringValue
+      }
+    })
+  }
+
   private signAccessAndRefreshToken({ user_id }: { user_id: string }) {
     return Promise.all([this.signAccessToken({ user_id }), this.signRefreshToken({ user_id })])
   }
@@ -58,15 +71,20 @@ class AccountsServices {
   }
 
   async register(payload: RegisterReqBody) {
-    const result = await databaseService.accounts.insertOne(
+    const user_id = new ObjectId()
+    const email_verify_token = await this.signEmailVerifyToken({ user_id: user_id.toString() })
+    console.log("email_verify_token: ", email_verify_token)
+    await databaseService.accounts.insertOne(
       new Account({
+        _id: user_id,
         ...payload,
+        email_verify_token,
         password: hashPassword(payload.password),
         date_of_birth: new Date(payload.date_of_birth)
       })
     )
-    const user_id = result.insertedId.toString()
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id })
+    // const user_id = result.insertedId.toString()
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id: user_id.toString() })
     await databaseService.refresh_tokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
     )
