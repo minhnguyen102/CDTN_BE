@@ -195,7 +195,10 @@ export const refreshTokenValidation = validate(
     {
       refresh_token: {
         notEmpty: {
-          errorMessage: USER_MESSAGES.REFRESH_TOKEN_IS_REQUIRED
+          errorMessage: new ErrorWithStatus({
+            message: USER_MESSAGES.REFRESH_TOKEN_IS_REQUIRED,
+            status: HTTP_STATUS.UNAUTHORIZED
+          })
         },
         custom: {
           options: async (value, { req }) => {
