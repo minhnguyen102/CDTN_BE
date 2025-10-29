@@ -1,6 +1,6 @@
 import { Router } from "express"
 import USER_MESSAGES from "~/constants/message"
-import { loginController, registerController } from "~/controllers/admins/accounts.controllers"
+import { loginController, logoutController, registerController } from "~/controllers/admins/accounts.controllers"
 import {
   accessTokenValidation,
   loginValidation,
@@ -32,10 +32,6 @@ accountRoutes.post("/register", registerValidation, wrapHandlerFunction(register
  * Body: { refresh_token: string}
  * Headers: {Authorization: Bearer access_token}
  */
-accountRoutes.post("/logout", accessTokenValidation, refreshTokenValidation, (req, res) => {
-  res.json({
-    message: USER_MESSAGES.LOGOUT_SUCCESS
-  })
-})
+accountRoutes.post("/logout", accessTokenValidation, refreshTokenValidation, wrapHandlerFunction(logoutController))
 
 export default accountRoutes

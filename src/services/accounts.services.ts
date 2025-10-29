@@ -9,6 +9,7 @@ config()
 import ms from "ms"
 import RefreshToken from "~/models/schema/RefreshToken.schema"
 import { ObjectId } from "mongodb"
+import USER_MESSAGES from "~/constants/message"
 
 class AccountsServices {
   private signAccessToken(user_id: string) {
@@ -48,6 +49,11 @@ class AccountsServices {
       access_token,
       refresh_token
     }
+  }
+
+  async logout(refresh_token: string) {
+    await databaseService.refresh_tokens.deleteOne({ token: refresh_token })
+    return true
   }
 
   async register(payload: RegisterReqBody) {

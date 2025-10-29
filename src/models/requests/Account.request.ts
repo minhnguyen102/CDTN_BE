@@ -1,5 +1,6 @@
+import { JwtPayload } from "jsonwebtoken"
 import { ObjectId } from "mongodb"
-import { RoleAccount } from "~/constants/enums"
+import { RoleAccount, TokenType } from "~/constants/enums"
 
 export interface RegisterReqBody {
   name: string
@@ -9,4 +10,12 @@ export interface RegisterReqBody {
   date_of_birth: Date
   role: RoleAccount
   ownerId: ObjectId
+}
+export interface LogoutReqBody {
+  refresh_token: string
+}
+
+export interface TokenPayload extends JwtPayload {
+  user_id: string
+  token: TokenType
 }
