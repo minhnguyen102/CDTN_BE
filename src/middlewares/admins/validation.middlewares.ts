@@ -8,6 +8,7 @@ import { validate } from "~/utils/validation"
 import { Request } from "express"
 import { verifyToken } from "~/utils/jwt"
 import { JsonWebTokenError } from "jsonwebtoken"
+import _ from "lodash"
 
 export const registerValidation = validate(
   checkSchema(
@@ -199,7 +200,7 @@ export const refreshTokenValidation = validate(
               // Lỗi do verify
               if (error instanceof JsonWebTokenError) {
                 throw new ErrorWithStatus({
-                  message: error.message,
+                  message: _.capitalize(error.message),
                   status: HTTP_STATUS.UNAUTHORIZED
                 })
               }

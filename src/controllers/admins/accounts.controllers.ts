@@ -25,10 +25,9 @@ export const registerController = async (req: Request<ParamsDictionary, any, Reg
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.body
-  const result = await accountsServices.logout(refresh_token)
+  await accountsServices.logout(refresh_token)
   res.json({
-    message: USER_MESSAGES.LOGOUT_SUCCESS,
-    result
+    message: USER_MESSAGES.LOGOUT_SUCCESS
   })
 }
 
