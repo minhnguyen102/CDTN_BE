@@ -155,16 +155,27 @@ export const accessTokenValidation = validate(
       authorization: {
         custom: {
           options: async (value, { req }) => {
-            const access_token = value.split(" ")[1]
-            if (!access_token) {
-              throw new ErrorWithStatus({
-                message: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
-                status: HTTP_STATUS.UNAUTHORIZED
-              })
+            try {
+              const access_token = value.split(" ")[1]
+              if (!access_token) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              // decoded
+              const decoded_access_token = await verifyToken({ token: access_token })
+              req.decoded_access_token = decoded_access_token
+            } catch (error) {
+              // Lỗi do verify
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatus({
+                  message: _.capitalize(error.message),
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              throw error // bắt lỗi !access_token bên trên và throw sang cho vòng tiếp theo xử lí
             }
-            // decoded
-            const decoded_access_token = await verifyToken({ token: access_token })
-            req.decoded_access_token = decoded_access_token
             return true
           }
         }
