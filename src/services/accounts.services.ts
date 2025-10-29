@@ -17,6 +17,7 @@ class AccountsServices {
         user_id,
         token_type: TokenType.AccessToken
       },
+      privateKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string,
       optionals: {
         expiresIn: process.env.EXPIRES_IN_ACCESS_TOKEN as ms.StringValue
       }
@@ -29,6 +30,7 @@ class AccountsServices {
         user_id,
         token_type: TokenType.RefreshToken
       },
+      privateKey: process.env.PRIVATE_KEY_SIGN_REFRESH_TOKEN as string,
       optionals: {
         expiresIn: process.env.EXPIRES_IN_REFRESH_TOKEN as ms.StringValue
       }

@@ -9,6 +9,7 @@ import { Request } from "express"
 import { verifyToken } from "~/utils/jwt"
 import { JsonWebTokenError } from "jsonwebtoken"
 import _ from "lodash"
+import { TokenType } from "~/constants/enums"
 
 export const registerValidation = validate(
   checkSchema(
@@ -164,8 +165,12 @@ export const accessTokenValidation = validate(
                 })
               }
               // decoded
-              const decoded_access_token = await verifyToken({ token: access_token })
+              const decoded_access_token = await verifyToken({
+                token: access_token,
+                secretOrPublicKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string
+              })
               req.decoded_access_token = decoded_access_token
+              // console.log(decoded_access_token)
             } catch (error) {
               // Lỗi do verify
               if (error instanceof JsonWebTokenError) {
@@ -196,7 +201,7 @@ export const refreshTokenValidation = validate(
           options: async (value, { req }) => {
             try {
               const [decoded_refresh_token, isExistRefreshToken] = await Promise.all([
-                verifyToken({ token: value }),
+                verifyToken({ token: value, secretOrPublicKey: process.env.PRIVATE_KEY_SIGN_REFRESH_TOKEN as string }),
                 databaseService.refresh_tokens.findOne({ token: value })
               ])
 
@@ -207,6 +212,7 @@ export const refreshTokenValidation = validate(
                 })
               }
               ;(req as Request).decoded_refresh_token = decoded_refresh_token
+              // console.log(decoded_refresh_token)
             } catch (error) {
               // Lỗi do verify
               if (error instanceof JsonWebTokenError) {

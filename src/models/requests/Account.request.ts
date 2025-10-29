@@ -20,5 +20,5 @@ export interface RefreshTokenReqBody {
 
 export interface TokenPayload extends JwtPayload {
   user_id: string
-  token: TokenType
+  token_type: TokenType
 }
