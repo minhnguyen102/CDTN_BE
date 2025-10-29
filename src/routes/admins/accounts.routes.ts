@@ -1,6 +1,11 @@
 import { Router } from "express"
 import USER_MESSAGES from "~/constants/message"
-import { loginController, logoutController, registerController } from "~/controllers/admins/accounts.controllers"
+import {
+  loginController,
+  logoutController,
+  refreshTokenController,
+  registerController
+} from "~/controllers/admins/accounts.controllers"
 import {
   accessTokenValidation,
   loginValidation,
@@ -33,5 +38,12 @@ accountRoutes.post("/register", registerValidation, wrapHandlerFunction(register
  * Headers: {Authorization: Bearer access_token}
  */
 accountRoutes.post("/logout", accessTokenValidation, refreshTokenValidation, wrapHandlerFunction(logoutController))
+
+/**
+ * Description: Logout
+ * PATH: admin/accounts/refresh-token
+ * Body: { refresh_token: string}
+ */
+accountRoutes.post("/refresh-token", refreshTokenValidation, wrapHandlerFunction(refreshTokenController))
 
 export default accountRoutes

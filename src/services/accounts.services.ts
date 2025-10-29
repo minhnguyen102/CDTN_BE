@@ -74,6 +74,24 @@ class AccountsServices {
       refresh_token
     }
   }
+
+  async refreshToken({ refresh_token, user_id }: { refresh_token: string; user_id: string }) {
+    const [new_access_token, new_refresh_token] = await Promise.all([
+      this.signAccessToken(user_id),
+      this.signRefreshToken(user_id),
+      databaseService.refresh_tokens.deleteOne({ token: refresh_token })
+    ])
+    await databaseService.refresh_tokens.insertOne(
+      new RefreshToken({
+        user_id: new ObjectId(user_id),
+        token: new_refresh_token
+      })
+    )
+    return {
+      access_token: new_access_token,
+      refresh_token: new_refresh_token
+    }
+  }
 }
 
 const accountsServices = new AccountsServices()
