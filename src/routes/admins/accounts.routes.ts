@@ -2,6 +2,7 @@ import { Router } from "express"
 import {
   emailVerifyController,
   forgotPasswordController,
+  getMeController,
   loginController,
   logoutController,
   refreshTokenController,
@@ -103,5 +104,12 @@ accountRoutes.post(
   forgotPasswordTokenValidation, // kiểm tra forgot_password_token có hợp lệ và còn hạn không
   wrapHandlerFunction(resetPasswordTokenController)
 )
+
+/**
+ * Description: Get my profile
+ * PATH: admin/accounts/me
+ * * Headers: {Authorization: Bearer access_token}
+ */
+accountRoutes.get("/me", accessTokenValidation, wrapHandlerFunction(getMeController))
 
 export default accountRoutes

@@ -184,6 +184,7 @@ class AccountsServices {
     console.log("Giả định gửi link forgor_password_token cho người dùng: ", forgot_password_token)
     return true
   }
+
   async resetPassword({ user_id, new_password }: { user_id: string; new_password: string }) {
     await databaseService.accounts.updateOne(
       { _id: new ObjectId(user_id) },
@@ -198,6 +199,21 @@ class AccountsServices {
       }
     )
     return true
+  }
+
+  async getMe({ user_id }: { user_id: string }) {
+    const account = await databaseService.accounts.findOne(
+      { _id: new ObjectId(user_id) },
+      {
+        projection: {
+          email_verify_token: 0,
+          forgot_password_token: 0,
+          password: 0,
+          verify: 0
+        }
+      }
+    )
+    return account
   }
 }
 

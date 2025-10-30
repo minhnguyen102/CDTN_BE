@@ -63,7 +63,9 @@ const USER_MESSAGES = {
   FORGOT_PASSWORD_TOKEN_IS_REQUIRED: "Forgot password token is required.",
   FORFOT_PASSWORD_TOKEN_INVALID: "Forgot password token is invalid or has expired.",
   RESET_PASSWORD_SUCCESS: "Your password has been reset successfully. You can now login with your new password.",
-  VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS: "Verify forgot password token success"
+  VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS: "Verify forgot password token success",
+
+  GET_MY_PROFILE_SUCCESS: "Get my profile success"
 }
 
 export default USER_MESSAGES
