@@ -1,17 +1,17 @@
-import { check, checkSchema } from "express-validator"
+import { checkSchema } from "express-validator"
 import HTTP_STATUS from "~/constants/httpStatus"
 import USER_MESSAGES from "~/constants/message"
 import { ErrorWithStatus } from "~/models/Errors"
 import databaseService from "~/services/database.servies"
 import { hashPassword } from "~/utils/crypto"
 import { validate } from "~/utils/validation"
-import { Request } from "express"
+import { NextFunction, Request, Response } from "express"
 import { verifyToken } from "~/utils/jwt"
 import { JsonWebTokenError } from "jsonwebtoken"
 import _ from "lodash"
-import { TokenType } from "~/constants/enums"
-import { verify } from "crypto"
 import { ObjectId } from "mongodb"
+import { TokenPayload } from "~/models/requests/Account.request"
+import { AccountVerifyStatus } from "~/constants/enums"
 
 export const registerValidation = validate(
   checkSchema(
@@ -393,3 +393,17 @@ export const resetPasswordValidation = validate(
     ["body"]
   )
 )
+
+export const verifiedUserValidation = (req: Request, res: Response, next: NextFunction) => {
+  const { verify } = req.decoded_access_token as TokenPayload
+  // Nếu chưa được verify
+  if (verify === AccountVerifyStatus.Unverified) {
+    return next(
+      new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_VERIFY,
+        status: HTTP_STATUS.FORBIDDEN
+      })
+    )
+  }
+  next()
+}

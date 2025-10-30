@@ -142,3 +142,9 @@ export const getMeController = async (req: Request, res: Response) => {
     result
   })
 }
+
+export const updateMeController = async (req: Request, res: Response) => {
+  res.json({
+    message: "OK"
+  })
+}

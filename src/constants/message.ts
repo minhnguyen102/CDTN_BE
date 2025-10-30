@@ -52,6 +52,7 @@ const USER_MESSAGES = {
   ACCOUNT_NOT_VERIFIED: "Your account has not been verified. Please check your email.",
   EMAIL_VERIFICATION_TOKEN_INVALID: "The email verification token is invalid or has expired.",
   RESEND_VERIFY_EMAIL_SUCCESS: "A new verification email has been sent. Please check your inbox.",
+  USER_NOT_VERIFY: "Your account has not been verified.",
 
   // (You can use this message for the Register route to notify the user)
   REGISTER_SUCCESS_PENDING_VERIFICATION: "Registration successful. Please check your email to verify your account.",
