@@ -1,9 +1,17 @@
 import { Request, Response } from "express"
-import { LogoutReqBody, RefreshTokenReqBody, RegisterReqBody, TokenPayload } from "~/models/requests/Account.request"
+import {
+  EmailVerifyTokenReqBody,
+  LogoutReqBody,
+  RefreshTokenReqBody,
+  RegisterReqBody,
+  TokenPayload
+} from "~/models/requests/Account.request"
 import accountsServices from "~/services/accounts.services"
 import { ParamsDictionary } from "express-serve-static-core"
 import USER_MESSAGES from "~/constants/message"
 import { ObjectId } from "mongodb"
+import databaseService from "~/services/database.servies"
+import HTTP_STATUS from "~/constants/httpStatus"
 
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
@@ -18,7 +26,7 @@ export const loginController = async (req: Request, res: Response) => {
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {
   const result = await accountsServices.register(req.body)
   res.json({
-    message: "Register success",
+    message: USER_MESSAGES.REGISTER_SUCCESS_PENDING_VERIFICATION,
     result
   })
 }
@@ -40,6 +48,33 @@ export const refreshTokenController = async (
   const result = await accountsServices.refreshToken({ refresh_token, user_id })
   res.json({
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
+    result
+  })
+}
+
+export const emailVerifyController = async (
+  req: Request<ParamsDictionary, any, EmailVerifyTokenReqBody>,
+  res: Response
+) => {
+  const { user_id } = req.decoded_email_verify_token as TokenPayload
+  const account = await databaseService.accounts.findOne({
+    _id: new ObjectId(user_id)
+  })
+  // Nếu không tìm thấy account
+  if (!account) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGES.USER_NOT_FOUND
+    })
+  }
+  // Nếu đã verify email trước đó
+  if (account.email_verify_token === "") {
+    return res.json({
+      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
+    })
+  }
+  const result = await accountsServices.verifyEmail({ user_id })
+  res.json({
+    message: USER_MESSAGES.VERIFY_EMAIL_SUCCESS,
     result
   })
 }

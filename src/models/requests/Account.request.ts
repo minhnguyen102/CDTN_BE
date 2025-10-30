@@ -18,6 +18,10 @@ export interface RefreshTokenReqBody {
   refresh_token: string
 }
 
+export interface EmailVerifyTokenReqBody {
+  email_verify_token: string
+}
+
 export interface TokenPayload extends JwtPayload {
   user_id: string
   token_type: TokenType

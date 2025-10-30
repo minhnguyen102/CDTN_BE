@@ -255,14 +255,11 @@ export const emailVerifyTokenValidation = validate(
               ;(req as Request).decoded_email_verify_token = decoded_email_verify_token
               // console.log(decoded_email_verify_token)
             } catch (error) {
-              // Lỗi do verify: Tạm để như này
-              if (error instanceof JsonWebTokenError) {
-                throw new ErrorWithStatus({
-                  message: _.capitalize(error.message),
-                  status: HTTP_STATUS.UNAUTHORIZED
-                })
-              }
-              throw error
+              // Lỗi do verify:
+              throw new ErrorWithStatus({
+                message: _.capitalize((error as JsonWebTokenError).message),
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
             }
             return true
           }

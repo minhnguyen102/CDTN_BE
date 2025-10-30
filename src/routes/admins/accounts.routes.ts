@@ -1,5 +1,6 @@
 import { Router } from "express"
 import {
+  emailVerifyController,
   loginController,
   logoutController,
   refreshTokenController,
@@ -51,10 +52,6 @@ accountRoutes.post("/refresh-token", refreshTokenValidation, wrapHandlerFunction
  * PATH: admin/accounts/verify-email
  * Body: { email_verify_token: string}
  */
-accountRoutes.post("/verify-email", emailVerifyTokenValidation, (req, res) => {
-  res.json({
-    message: "OK"
-  })
-})
+accountRoutes.post("/verify-email", emailVerifyTokenValidation, wrapHandlerFunction(emailVerifyController))
 
 export default accountRoutes

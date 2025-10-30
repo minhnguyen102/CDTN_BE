@@ -3,12 +3,13 @@ import databaseService from "./database.servies"
 import Account from "~/models/schema/Account.schema"
 import { hashPassword } from "~/utils/crypto"
 import { signToken } from "~/utils/jwt"
-import { TokenType } from "~/constants/enums"
+import { AccountVerifyStatus, TokenType } from "~/constants/enums"
 import { config } from "dotenv"
 config()
 import ms from "ms"
 import RefreshToken from "~/models/schema/RefreshToken.schema"
 import { ObjectId } from "mongodb"
+import USER_MESSAGES from "~/constants/message"
 
 class AccountsServices {
   private signAccessToken({ user_id }: { user_id: string }) {
@@ -109,6 +110,27 @@ class AccountsServices {
     return {
       access_token: new_access_token,
       refresh_token: new_refresh_token
+    }
+  }
+
+  async verifyEmail({ user_id }: { user_id: string }) {
+    const [access_token, refresh_token] = await Promise.all([
+      this.signAccessToken({ user_id }),
+      this.signRefreshToken({ user_id }),
+      databaseService.accounts.updateOne(
+        { _id: new ObjectId(user_id) },
+        {
+          $set: {
+            email_verify_token: "",
+            verify: AccountVerifyStatus.Verified,
+            updatedAt: new Date()
+          }
+        }
+      )
+    ])
+    return {
+      access_token,
+      refresh_token
     }
   }
 }

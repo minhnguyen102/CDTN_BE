@@ -45,7 +45,16 @@ const USER_MESSAGES = {
   USED_REFRESH_TOKEN_OR_NOT_EXIST: "Used refresh token or not exist",
   REFRESH_TOKEN_IS_INVALID: "Refresh token is invalid",
   REFRESH_TOKEN_SUCCESS: "Refresh token success",
-  EMAIL_VERIFY_TOKEN_TOKEN_IS_REQUIRED: "Email verify token is required"
+  EMAIL_VERIFY_TOKEN_TOKEN_IS_REQUIRED: "Email verify token is required",
+  // === Email Verification ===
+  VERIFY_EMAIL_SUCCESS: "Verify email success",
+  EMAIL_ALREADY_VERIFIED: "This email has already been verified.",
+  ACCOUNT_NOT_VERIFIED: "Your account has not been verified. Please check your email.",
+  EMAIL_VERIFICATION_TOKEN_INVALID: "The email verification token is invalid or has expired.",
+  RESEND_VERIFY_EMAIL_SUCCESS: "A new verification email has been sent. Please check your inbox.",
+
+  // (You can use this message for the Register route to notify the user)
+  REGISTER_SUCCESS_PENDING_VERIFICATION: "Registration successful. Please check your email to verify your account."
 }
 
 export default USER_MESSAGES
