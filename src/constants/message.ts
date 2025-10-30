@@ -60,9 +60,10 @@ const USER_MESSAGES = {
   FORGOT_PASSWORD_INSTRUCTIONS_SENT:
     "If an account with that email exists, we have sent instructions to reset your password. Please check your inbox (and spam folder) to complete the process.",
   EMAIL_NOT_FOUND: "This email is not registered in our system.",
-  RESET_PASSWORD_TOKEN_IS_REQUIRED: "Password reset token is required.",
-  RESET_PASSWORD_TOKEN_INVALID: "The password reset token is invalid or has expired.",
-  RESET_PASSWORD_SUCCESS: "Your password has been reset successfully. You can now login with your new password."
+  FORGOT_PASSWORD_TOKEN_IS_REQUIRED: "Forgot password token is required.",
+  FORFOT_PASSWORD_TOKEN_INVALID: "Forgot password token is invalid or has expired.",
+  RESET_PASSWORD_SUCCESS: "Your password has been reset successfully. You can now login with your new password.",
+  VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS: "Verify forgot password token success"
 }
 
 export default USER_MESSAGES

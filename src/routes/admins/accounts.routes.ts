@@ -6,15 +6,17 @@ import {
   logoutController,
   refreshTokenController,
   registerController,
-  resendEmailVerifyController
+  resendEmailVerifyController,
+  verifyForgotPasswordTokenController
 } from "~/controllers/admins/accounts.controllers"
 import {
   accessTokenValidation,
   emailVerifyTokenValidation,
+  forgotPasswordTokenValidation,
   loginValidation,
   refreshTokenValidation,
   registerValidation,
-  resetPasswordValidation
+  forgotPasswordRequestValidation
 } from "~/middlewares/admins/validation.middlewares"
 import { wrapHandlerFunction } from "~/utils/wrapHandler"
 const accountRoutes = Router()
@@ -71,6 +73,21 @@ accountRoutes.post("/resend-verify-email", accessTokenValidation, wrapHandlerFun
  * PATH: admin/accounts/forgot-password
  * Body: { email: string}
  */
-accountRoutes.post("/forgot-password", resetPasswordValidation, wrapHandlerFunction(forgotPasswordController))
+accountRoutes.post(
+  "/forgot-password",
+  forgotPasswordRequestValidation, // kiểm tra email gửi lên có hợp lệ và trong hệ thống không
+  wrapHandlerFunction(forgotPasswordController)
+)
+
+/**
+ * Description: verify forgot-password-token
+ * PATH: admin/accounts/verify-forgot-password
+ * Body: { forgot-password-token: string}
+ */
+accountRoutes.post(
+  "/verify-forgot-password",
+  forgotPasswordTokenValidation, // kiểm tra forgot_password_token có hợp lệ và còn hạn không
+  wrapHandlerFunction(verifyForgotPasswordTokenController)
+)
 
 export default accountRoutes

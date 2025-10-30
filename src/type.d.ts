@@ -8,5 +8,6 @@ declare module "express" {
     decoded_access_token?: JwtPayload
     decoded_refresh_token?: JwtPayload
     decoded_email_verify_token?: JwtPayload
+    decoded_forgot_password_token?: JwtPayload
   }
 }

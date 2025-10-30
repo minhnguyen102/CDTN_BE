@@ -10,6 +10,8 @@ import { verifyToken } from "~/utils/jwt"
 import { JsonWebTokenError } from "jsonwebtoken"
 import _ from "lodash"
 import { TokenType } from "~/constants/enums"
+import { verify } from "crypto"
+import { ObjectId } from "mongodb"
 
 export const registerValidation = validate(
   checkSchema(
@@ -270,7 +272,7 @@ export const emailVerifyTokenValidation = validate(
   )
 )
 
-export const resetPasswordValidation = validate(
+export const forgotPasswordRequestValidation = validate(
   checkSchema(
     {
       email: {
@@ -291,6 +293,60 @@ export const resetPasswordValidation = validate(
               })
             }
             req.account = account
+            return true
+          }
+        }
+      }
+    },
+    ["body"]
+  )
+)
+
+export const forgotPasswordTokenValidation = validate(
+  checkSchema(
+    {
+      forgot_password_token: {
+        notEmpty: {
+          errorMessage: new ErrorWithStatus({
+            message: USER_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED,
+            status: HTTP_STATUS.BAD_REQUEST
+          })
+        },
+        custom: {
+          options: async (value, { req }) => {
+            // verifyToken
+            try {
+              const decoded_forgot_password_token = await verifyToken({
+                token: value,
+                secretOrPublicKey: process.env.PRIVATE_KEY_SIGN_FORGOT_PASSWORD_TOKEN as string
+              })
+              const { user_id } = decoded_forgot_password_token
+              const account = await databaseService.accounts.findOne({
+                _id: new ObjectId(user_id)
+              })
+              if (!account) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_NOT_FOUND,
+                  status: HTTP_STATUS.BAD_REQUEST
+                })
+              }
+              if (account.forgot_password_token !== value) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.FORFOT_PASSWORD_TOKEN_INVALID, // "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn."
+                  status: HTTP_STATUS.UNAUTHORIZED // 401
+                })
+              }
+              req.decoded_forgot_password_token = decoded_forgot_password_token
+            } catch (error) {
+              // Lỗi do verify
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatus({
+                  message: _.capitalize(error.message),
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              throw error
+            }
             return true
           }
         }

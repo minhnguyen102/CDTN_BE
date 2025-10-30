@@ -14,6 +14,8 @@ import databaseService from "~/services/database.servies"
 import HTTP_STATUS from "~/constants/httpStatus"
 import { AccountVerifyStatus } from "~/constants/enums"
 import Account from "~/models/schema/Account.schema"
+import { JwtPayload } from "jsonwebtoken"
+import { ErrorWithStatus } from "~/models/Errors"
 
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
@@ -109,5 +111,11 @@ export const forgotPasswordController = async (req: Request<ParamsDictionary, an
   await accountsServices.forgotPassword({ user_id: (_id as ObjectId).toString() })
   res.json({
     message: USER_MESSAGES.FORGOT_PASSWORD_INSTRUCTIONS_SENT
+  })
+}
+
+export const verifyForgotPasswordTokenController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+  res.json({
+    message: USER_MESSAGES.VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS
   })
 }
