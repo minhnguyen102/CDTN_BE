@@ -4,6 +4,7 @@ import {
   LogoutReqBody,
   RefreshTokenReqBody,
   RegisterReqBody,
+  resetPasswordReqBody,
   TokenPayload
 } from "~/models/requests/Account.request"
 import accountsServices from "~/services/accounts.services"
@@ -117,5 +118,17 @@ export const forgotPasswordController = async (req: Request<ParamsDictionary, an
 export const verifyForgotPasswordTokenController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
   res.json({
     message: USER_MESSAGES.VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS
+  })
+}
+
+export const resetPasswordTokenController = async (
+  req: Request<ParamsDictionary, any, resetPasswordReqBody>,
+  res: Response
+) => {
+  const { user_id } = req.decoded_forgot_password_token as TokenPayload
+  const { password } = req.body
+  await accountsServices.resetPassword({ user_id, new_password: password })
+  res.json({
+    message: USER_MESSAGES.RESET_PASSWORD_SUCCESS
   })
 }

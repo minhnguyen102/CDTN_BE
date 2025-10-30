@@ -355,3 +355,41 @@ export const forgotPasswordTokenValidation = validate(
     ["body"]
   )
 )
+
+export const resetPasswordValidation = validate(
+  checkSchema(
+    {
+      password: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
+        },
+        isStrongPassword: {
+          options: {
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minSymbols: 1
+          },
+          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRONG
+        }
+      },
+      confirm_password: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED
+        },
+        custom: {
+          options: (value, { req }) => {
+            if (value !== req.body.password) {
+              throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
+            }
+            return true
+          }
+        }
+      }
+    },
+    ["body"]
+  )
+)

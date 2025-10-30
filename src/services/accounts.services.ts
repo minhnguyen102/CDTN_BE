@@ -184,20 +184,21 @@ class AccountsServices {
     console.log("Giả định gửi link forgor_password_token cho người dùng: ", forgot_password_token)
     return true
   }
-  // async verifyForgotPassword({ user_id }: { user_id: string }) {
-  //   await databaseService.accounts.updateOne(
-  //     { _id: new ObjectId(user_id) },
-  //     {
-  //       $set: {
-  //         forgot_password_token: ""
-  //       },
-  //       $currentDate: {
-  //         updatedAt: true
-  //       }
-  //     }
-  //   )
-  //   return true
-  // }
+  async resetPassword({ user_id, new_password }: { user_id: string; new_password: string }) {
+    await databaseService.accounts.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          forgot_password_token: "",
+          password: hashPassword(new_password)
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      }
+    )
+    return true
+  }
 }
 
 const accountsServices = new AccountsServices()
