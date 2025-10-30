@@ -12,6 +12,7 @@ import USER_MESSAGES from "~/constants/message"
 import { ObjectId } from "mongodb"
 import databaseService from "~/services/database.servies"
 import HTTP_STATUS from "~/constants/httpStatus"
+import { AccountVerifyStatus } from "~/constants/enums"
 
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
@@ -67,7 +68,7 @@ export const emailVerifyController = async (
     })
   }
   // Nếu đã verify email trước đó
-  if (account.email_verify_token === "") {
+  if (account.email_verify_token === "" && account.verify === AccountVerifyStatus.Verified) {
     return res.json({
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
@@ -76,5 +77,28 @@ export const emailVerifyController = async (
   res.json({
     message: USER_MESSAGES.VERIFY_EMAIL_SUCCESS,
     result
+  })
+}
+
+export const resendEmailVerifyController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+  const { user_id } = req.decoded_access_token as TokenPayload
+  const account = await databaseService.accounts.findOne({
+    _id: new ObjectId(user_id)
+  })
+  // Nếu không tìm thấy account
+  if (!account) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGES.USER_NOT_FOUND
+    })
+  }
+  // Nếu đã verify email trước đó
+  if (account.verify === AccountVerifyStatus.Verified) {
+    return res.json({
+      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
+    })
+  }
+  await accountsServices.resendEmailVerify({ user_id })
+  res.json({
+    message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS
   })
 }

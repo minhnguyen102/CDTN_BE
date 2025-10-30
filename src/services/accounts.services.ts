@@ -74,7 +74,7 @@ class AccountsServices {
   async register(payload: RegisterReqBody) {
     const user_id = new ObjectId()
     const email_verify_token = await this.signEmailVerifyToken({ user_id: user_id.toString() })
-    console.log("email_verify_token: ", email_verify_token)
+    console.log("Giả lập gửi email_verify_token cho account: ", email_verify_token)
     await databaseService.accounts.insertOne(
       new Account({
         _id: user_id,
@@ -135,6 +135,22 @@ class AccountsServices {
       access_token,
       refresh_token
     }
+  }
+
+  async resendEmailVerify({ user_id }: { user_id: string }) {
+    const new_email_verify_token = await this.signEmailVerifyToken({ user_id })
+    console.log("Giả lập gửi new_email_verify_token cho account: ", new_email_verify_token)
+    await databaseService.accounts.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          email_verify_token: new_email_verify_token
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      }
+    )
   }
 }
 

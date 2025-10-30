@@ -4,7 +4,8 @@ import {
   loginController,
   logoutController,
   refreshTokenController,
-  registerController
+  registerController,
+  resendEmailVerifyController
 } from "~/controllers/admins/accounts.controllers"
 import {
   accessTokenValidation,
@@ -41,7 +42,7 @@ accountRoutes.post("/register", registerValidation, wrapHandlerFunction(register
 accountRoutes.post("/logout", accessTokenValidation, refreshTokenValidation, wrapHandlerFunction(logoutController))
 
 /**
- * Description: Logout
+ * Description: Refresh Token
  * PATH: admin/accounts/refresh-token
  * Body: { refresh_token: string}
  */
@@ -50,8 +51,17 @@ accountRoutes.post("/refresh-token", refreshTokenValidation, wrapHandlerFunction
 /**
  * Description: verify-email
  * PATH: admin/accounts/verify-email
- * Body: { email_verify_token: string}
+ * Body: { email_verify_token: string }
  */
 accountRoutes.post("/verify-email", emailVerifyTokenValidation, wrapHandlerFunction(emailVerifyController))
+
+/**
+ * Description: resend-verify-email
+ * Yêu cầu phải đăng nhập mới được resend
+ * PATH: admin/accounts/resend-verify-email
+ * Body: {}
+ * Headers: {Authorization: Bearer access_token}
+ */
+accountRoutes.post("/resend-verify-email", accessTokenValidation, wrapHandlerFunction(resendEmailVerifyController))
 
 export default accountRoutes
