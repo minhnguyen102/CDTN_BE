@@ -21,7 +21,8 @@ import { ErrorWithStatus } from "~/models/Errors"
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
   const user_id = req.account?._id as ObjectId
-  const result = await accountsServices.login({ user_id: user_id?.toString() })
+  const { verify } = req.account as Account
+  const result = await accountsServices.login({ user_id: user_id?.toString(), verify })
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
@@ -49,8 +50,8 @@ export const refreshTokenController = async (
   res: Response
 ) => {
   const { refresh_token } = req.body
-  const { user_id } = req.decoded_refresh_token as TokenPayload
-  const result = await accountsServices.refreshToken({ refresh_token, user_id })
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayload
+  const result = await accountsServices.refreshToken({ refresh_token, user_id, verify })
   res.json({
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
     result
@@ -61,7 +62,7 @@ export const emailVerifyController = async (
   req: Request<ParamsDictionary, any, EmailVerifyTokenReqBody>,
   res: Response
 ) => {
-  const { user_id } = req.decoded_email_verify_token as TokenPayload
+  const { user_id, verify } = req.decoded_email_verify_token as TokenPayload
   const account = await databaseService.accounts.findOne({
     _id: new ObjectId(user_id)
   })
@@ -77,7 +78,7 @@ export const emailVerifyController = async (
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
   }
-  const result = await accountsServices.verifyEmail({ user_id })
+  const result = await accountsServices.verifyEmail({ user_id, verify })
   res.json({
     message: USER_MESSAGES.VERIFY_EMAIL_SUCCESS,
     result
@@ -85,7 +86,7 @@ export const emailVerifyController = async (
 }
 
 export const resendEmailVerifyController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
-  const { user_id } = req.decoded_access_token as TokenPayload
+  const { user_id, verify } = req.decoded_access_token as TokenPayload
   const account = await databaseService.accounts.findOne({
     _id: new ObjectId(user_id)
   })
@@ -101,15 +102,15 @@ export const resendEmailVerifyController = async (req: Request<ParamsDictionary,
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
   }
-  await accountsServices.resendEmailVerify({ user_id })
+  await accountsServices.resendEmailVerify({ user_id, verify })
   res.json({
     message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS
   })
 }
 
 export const forgotPasswordController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
-  const { _id } = req.account as Account
-  await accountsServices.forgotPassword({ user_id: (_id as ObjectId).toString() })
+  const { _id, verify } = req.account as Account
+  await accountsServices.forgotPassword({ user_id: (_id as ObjectId).toString(), verify })
   res.json({
     message: USER_MESSAGES.FORGOT_PASSWORD_INSTRUCTIONS_SENT
   })

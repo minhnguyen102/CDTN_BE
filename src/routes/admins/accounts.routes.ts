@@ -108,8 +108,16 @@ accountRoutes.post(
 /**
  * Description: Get my profile
  * PATH: admin/accounts/me
- * * Headers: {Authorization: Bearer access_token}
+ * Headers: {Authorization: Bearer access_token}
  */
 accountRoutes.get("/me", accessTokenValidation, wrapHandlerFunction(getMeController))
+
+/**
+ * Description: update my profile
+ * Cần xác định xem user đã verify email hay chưa => Thêm trường verify vào payload mỗi khi sign token
+ * PATH: admin/accounts/me
+ * Headers: {Authorization: Bearer access_token}
+ */
+accountRoutes.patch("/me", accessTokenValidation, wrapHandlerFunction(getMeController))
 
 export default accountRoutes
