@@ -269,3 +269,33 @@ export const emailVerifyTokenValidation = validate(
     ["body"]
   )
 )
+
+export const resetPasswordValidation = validate(
+  checkSchema(
+    {
+      email: {
+        isEmail: {
+          errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
+        },
+        trim: true,
+        notEmpty: {
+          errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
+        },
+        custom: {
+          options: async (value, { req }) => {
+            const account = await databaseService.accounts.findOne({ email: value })
+            if (!account) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.EMAIL_NOT_FOUND,
+                status: HTTP_STATUS.BAD_REQUEST
+              })
+            }
+            req.account = account
+            return true
+          }
+        }
+      }
+    },
+    ["body"]
+  )
+)

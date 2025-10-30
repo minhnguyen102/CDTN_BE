@@ -51,6 +51,19 @@ class AccountsServices {
     })
   }
 
+  private signForgotPasswordToken({ user_id }: { user_id: string }) {
+    return signToken({
+      payload: {
+        user_id,
+        TokenType: TokenType.ForgotPasswordToken
+      },
+      privateKey: process.env.PRIVATE_KEY_SIGN_FORGOT_PASSWORD_TOKEN as string,
+      optionals: {
+        expiresIn: process.env.EXPIRES_IN_FORGOT_PASSWORD_TOKEN as ms.StringValue
+      }
+    })
+  }
+
   private signAccessAndRefreshToken({ user_id }: { user_id: string }) {
     return Promise.all([this.signAccessToken({ user_id }), this.signRefreshToken({ user_id })])
   }
@@ -151,6 +164,25 @@ class AccountsServices {
         }
       }
     )
+  }
+
+  async forgotPassword({ user_id }: { user_id: string }) {
+    // sign forgot_password_token và lưu vào db
+    const forgot_password_token = await this.signForgotPasswordToken({ user_id })
+    await databaseService.accounts.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          forgot_password_token
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      }
+    )
+    // Send email cho user để thực hiện điều hướng sang trang đổi mật khẩu
+    console.log("Giả định gửi link forgor_password_token cho người dùng: ", forgot_password_token)
+    return true
   }
 }
 

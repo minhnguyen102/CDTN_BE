@@ -54,7 +54,15 @@ const USER_MESSAGES = {
   RESEND_VERIFY_EMAIL_SUCCESS: "A new verification email has been sent. Please check your inbox.",
 
   // (You can use this message for the Register route to notify the user)
-  REGISTER_SUCCESS_PENDING_VERIFICATION: "Registration successful. Please check your email to verify your account."
+  REGISTER_SUCCESS_PENDING_VERIFICATION: "Registration successful. Please check your email to verify your account.",
+
+  // === Forgot/Reset Password ===
+  FORGOT_PASSWORD_INSTRUCTIONS_SENT:
+    "If an account with that email exists, we have sent instructions to reset your password. Please check your inbox (and spam folder) to complete the process.",
+  EMAIL_NOT_FOUND: "This email is not registered in our system.",
+  RESET_PASSWORD_TOKEN_IS_REQUIRED: "Password reset token is required.",
+  RESET_PASSWORD_TOKEN_INVALID: "The password reset token is invalid or has expired.",
+  RESET_PASSWORD_SUCCESS: "Your password has been reset successfully. You can now login with your new password."
 }
 
 export default USER_MESSAGES

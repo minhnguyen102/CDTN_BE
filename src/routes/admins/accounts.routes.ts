@@ -1,6 +1,7 @@
 import { Router } from "express"
 import {
   emailVerifyController,
+  forgotPasswordController,
   loginController,
   logoutController,
   refreshTokenController,
@@ -12,7 +13,8 @@ import {
   emailVerifyTokenValidation,
   loginValidation,
   refreshTokenValidation,
-  registerValidation
+  registerValidation,
+  resetPasswordValidation
 } from "~/middlewares/admins/validation.middlewares"
 import { wrapHandlerFunction } from "~/utils/wrapHandler"
 const accountRoutes = Router()
@@ -63,5 +65,12 @@ accountRoutes.post("/verify-email", emailVerifyTokenValidation, wrapHandlerFunct
  * Headers: {Authorization: Bearer access_token}
  */
 accountRoutes.post("/resend-verify-email", accessTokenValidation, wrapHandlerFunction(resendEmailVerifyController))
+
+/**
+ * Description: forgot-password
+ * PATH: admin/accounts/forgot-password
+ * Body: { email: string}
+ */
+accountRoutes.post("/forgot-password", resetPasswordValidation, wrapHandlerFunction(forgotPasswordController))
 
 export default accountRoutes

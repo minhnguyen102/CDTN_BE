@@ -13,6 +13,7 @@ import { ObjectId } from "mongodb"
 import databaseService from "~/services/database.servies"
 import HTTP_STATUS from "~/constants/httpStatus"
 import { AccountVerifyStatus } from "~/constants/enums"
+import Account from "~/models/schema/Account.schema"
 
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
@@ -100,5 +101,13 @@ export const resendEmailVerifyController = async (req: Request<ParamsDictionary,
   await accountsServices.resendEmailVerify({ user_id })
   res.json({
     message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS
+  })
+}
+
+export const forgotPasswordController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+  const { _id } = req.account as Account
+  await accountsServices.forgotPassword({ user_id: (_id as ObjectId).toString() })
+  res.json({
+    message: USER_MESSAGES.FORGOT_PASSWORD_INSTRUCTIONS_SENT
   })
 }
