@@ -122,8 +122,11 @@ class AccountsServices {
         {
           $set: {
             email_verify_token: "",
-            verify: AccountVerifyStatus.Verified,
-            updatedAt: new Date()
+            verify: AccountVerifyStatus.Verified
+            // updatedAt: new Date() // Khởi tạo thời gian khi code chạy (thời điểm trước)
+          },
+          $currentDate: {
+            updatedAt: true // Cập nhật thời gian khi lưu vào bản ghi (thời điểm sau)
           }
         }
       )
