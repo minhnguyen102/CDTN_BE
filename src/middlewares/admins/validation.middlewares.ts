@@ -402,3 +402,31 @@ export const updateMeValidation = validate(
     ["body"]
   )
 )
+
+export const changePasswordValidation = validate(
+  checkSchema(
+    {
+      old_password: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
+        }
+      },
+      password: {
+        ...passwordValidation,
+        custom: {
+          options: (value, { req }) => {
+            if (value === req.body.old_password) {
+              throw new Error(USER_MESSAGES.NEW_PASSWORD_CANNOT_BE_THE_SAME_AS_OLD_PASSWORD)
+            }
+            return true
+          }
+        }
+      },
+      confirm_password: confirmPasswordValidation
+    },
+    ["body"]
+  )
+)

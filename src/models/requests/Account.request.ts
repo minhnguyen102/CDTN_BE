@@ -38,3 +38,9 @@ export interface updateMeReqBody {
   date_of_birth?: string
   avatar?: string
 }
+
+export interface changePasswordReqBody {
+  old_password: string
+  password: string
+  confirm_password: string
+}

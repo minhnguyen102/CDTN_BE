@@ -10,6 +10,9 @@ import ms from "ms"
 import RefreshToken from "~/models/schema/RefreshToken.schema"
 import { ObjectId } from "mongodb"
 import USER_MESSAGES from "~/constants/message"
+import { ErrorWithStatus } from "~/models/Errors"
+import HTTP_STATUS from "~/constants/httpStatus"
+import { error } from "console"
 
 class AccountsServices {
   private signAccessToken({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
@@ -241,6 +244,9 @@ class AccountsServices {
       {
         $set: {
           ...(_payload as updateMeReqBody & { date_of_birth?: Date })
+        },
+        $currentDate: {
+          updatedAt: true
         }
       },
       {
@@ -254,6 +260,43 @@ class AccountsServices {
       }
     )
     return result
+  }
+
+  async changePassword({
+    user_id,
+    old_password,
+    new_password
+  }: {
+    user_id: string
+    old_password: string
+    new_password: string
+  }) {
+    const account = await databaseService.accounts.findOne({ _id: new ObjectId(user_id) })
+    if (!account) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    // Kiểm tra mật khẩu cũ
+    if (account.password !== hashPassword(old_password)) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.OLD_PASSWORD_IS_INCORRECT,
+        status: HTTP_STATUS.UNAUTHORIZED
+      })
+    }
+    await databaseService.accounts.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          password: hashPassword(new_password)
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      }
+    )
+    return true
   }
 }
 

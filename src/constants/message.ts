@@ -69,7 +69,17 @@ const USER_MESSAGES = {
   GET_MY_PROFILE_SUCCESS: "Get my profile success",
 
   AVATAR_URL_MUST_BE_STRING: "Avatar URL must be a string",
-  AVATAR_URL_LENGTH: "Avatar URL must be between 1 and 500 characters long"
+  AVATAR_URL_LENGTH: "Avatar URL must be between 1 and 500 characters long",
+  UPDATE_INFOR_SUCCESS: "Update infor success",
+
+  // === Change Password ===
+  CHANGE_PASSWORD_SUCCESS: "Your password has been changed successfully.",
+  OLD_PASSWORD_IS_REQUIRED: "Old password is required.",
+  NEW_PASSWORD_IS_REQUIRED: "New password is required.",
+  CONFIRM_NEW_PASSWORD_IS_REQUIRED: "Confirm new password is required.",
+  OLD_PASSWORD_IS_INCORRECT: "Your old password is not correct.",
+  NEW_PASSWORD_AND_CONFIRM_PASSWORD_DO_NOT_MATCH: "New password and confirmation password do not match.",
+  NEW_PASSWORD_CANNOT_BE_THE_SAME_AS_OLD_PASSWORD: "Your new password cannot be the same as your old password."
 }
 
 export default USER_MESSAGES

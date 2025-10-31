@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import {
+  changePasswordReqBody,
   EmailVerifyTokenReqBody,
   LogoutReqBody,
   RefreshTokenReqBody,
@@ -150,7 +151,19 @@ export const updateMeController = async (req: Request<ParamsDictionary, any, upd
   const payload = pick(req.body, ["avatar", "name", "date_of_birth"]) // Chỉ cho upadate những key này, tránh bị phá bởi Postman
   const result = await accountsServices.updateMe({ user_id, payload: payload })
   res.json({
-    message: "OK",
+    message: USER_MESSAGES.UPDATE_INFOR_SUCCESS,
     result
+  })
+}
+
+export const changePasswordController = async (
+  req: Request<ParamsDictionary, any, changePasswordReqBody>,
+  res: Response
+) => {
+  const { old_password, password } = req.body
+  const { user_id } = req.decoded_access_token as TokenPayload
+  await accountsServices.changePassword({ user_id, old_password, new_password: password })
+  res.json({
+    message: USER_MESSAGES.CHANGE_PASSWORD_SUCCESS
   })
 }

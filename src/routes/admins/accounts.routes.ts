@@ -1,5 +1,6 @@
 import { Router } from "express"
 import {
+  changePasswordController,
   emailVerifyController,
   forgotPasswordController,
   getMeController,
@@ -22,7 +23,8 @@ import {
   forgotPasswordRequestValidation,
   resetPasswordValidation,
   verifiedUserValidation,
-  updateMeValidation
+  updateMeValidation,
+  changePasswordValidation
 } from "~/middlewares/admins/validation.middlewares"
 import { wrapHandlerFunction } from "~/utils/wrapHandler"
 const accountRoutes = Router()
@@ -127,6 +129,19 @@ accountRoutes.patch(
   verifiedUserValidation,
   updateMeValidation,
   wrapHandlerFunction(updateMeController)
+)
+
+/**
+ * Description: Change password
+ * PATH: admin/accounts/change-password
+ * Headers: {Authorization: Bearer access_token}
+ */
+accountRoutes.patch(
+  "/change-password",
+  accessTokenValidation,
+  verifiedUserValidation, // chỉ email verify mới được change
+  changePasswordValidation,
+  wrapHandlerFunction(changePasswordController)
 )
 
 export default accountRoutes
