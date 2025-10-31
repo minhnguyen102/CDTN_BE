@@ -2,6 +2,7 @@ import express from "express"
 import { routesAdmin } from "~/routes/admins/index.routes"
 import databaseService from "~/services/database.servies"
 import { defaultErrorHandler } from "./middlewares/error.middlewares"
+import { pick } from "lodash"
 const app = express()
 const port = 3000
 

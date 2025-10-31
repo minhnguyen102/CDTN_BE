@@ -18,6 +18,7 @@ import { AccountVerifyStatus } from "~/constants/enums"
 import Account from "~/models/schema/Account.schema"
 import { JwtPayload } from "jsonwebtoken"
 import { ErrorWithStatus } from "~/models/Errors"
+import { pick } from "lodash"
 
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
@@ -146,8 +147,8 @@ export const getMeController = async (req: Request, res: Response) => {
 
 export const updateMeController = async (req: Request<ParamsDictionary, any, updateMeReqBody>, res: Response) => {
   const { user_id } = req.decoded_access_token as TokenPayload
-  const { body } = req
-  const result = await accountsServices.updateMe({ user_id, payload: body })
+  const payload = pick(req.body, ["avatar", "name", "date_of_birth"]) // Chỉ cho upadate những key này, tránh bị phá bởi Postman
+  const result = await accountsServices.updateMe({ user_id, payload: payload })
   res.json({
     message: "OK",
     result
