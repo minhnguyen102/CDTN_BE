@@ -5,7 +5,8 @@ import {
   RefreshTokenReqBody,
   RegisterReqBody,
   resetPasswordReqBody,
-  TokenPayload
+  TokenPayload,
+  updateMeReqBody
 } from "~/models/requests/Account.request"
 import accountsServices from "~/services/accounts.services"
 import { ParamsDictionary } from "express-serve-static-core"
@@ -143,8 +144,12 @@ export const getMeController = async (req: Request, res: Response) => {
   })
 }
 
-export const updateMeController = async (req: Request, res: Response) => {
+export const updateMeController = async (req: Request<ParamsDictionary, any, updateMeReqBody>, res: Response) => {
+  const { user_id } = req.decoded_access_token as TokenPayload
+  const { body } = req
+  const result = await accountsServices.updateMe({ user_id, payload: body })
   res.json({
-    message: "OK"
+    message: "OK",
+    result
   })
 }

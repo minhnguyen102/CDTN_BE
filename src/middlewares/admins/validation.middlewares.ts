@@ -1,4 +1,4 @@
-import { checkSchema } from "express-validator"
+import { checkSchema, ParamSchema } from "express-validator"
 import HTTP_STATUS from "~/constants/httpStatus"
 import USER_MESSAGES from "~/constants/message"
 import { ErrorWithStatus } from "~/models/Errors"
@@ -13,25 +13,72 @@ import { ObjectId } from "mongodb"
 import { TokenPayload } from "~/models/requests/Account.request"
 import { AccountVerifyStatus } from "~/constants/enums"
 
+const nameValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.NAME_IS_REQUIRED
+  },
+  isString: {
+    errorMessage: USER_MESSAGES.NAME_MUST_BE_STRING
+  },
+  trim: true,
+  isLength: {
+    options: {
+      min: 1,
+      max: 50
+    },
+    errorMessage: USER_MESSAGES.NAME_LENGTH
+  }
+}
+
+const passwordValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED
+  },
+  isString: {
+    errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
+  },
+  isStrongPassword: {
+    options: {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minSymbols: 1
+    },
+    errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRONG
+  }
+}
+
+const confirmPasswordValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED
+  },
+  custom: {
+    options: (value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
+      }
+      return true
+    }
+  }
+}
+
+const dateOfBirthValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.DATE_OF_BIRTH_IS_REQUIRED
+  },
+  isISO8601: {
+    options: {
+      strict: true,
+      strictSeparator: true
+    },
+    errorMessage: USER_MESSAGES.DATE_OF_BIRTH_MUST_BE_ISO8601
+  }
+}
+
 export const registerValidation = validate(
   checkSchema(
     {
-      name: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.NAME_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: USER_MESSAGES.NAME_MUST_BE_STRING
-        },
-        trim: true,
-        isLength: {
-          options: {
-            min: 1,
-            max: 50
-          },
-          errorMessage: USER_MESSAGES.NAME_LENGTH
-        }
-      },
+      name: nameValidation,
       email: {
         isEmail: {
           errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
@@ -53,48 +100,9 @@ export const registerValidation = validate(
           }
         }
       },
-      password: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
-        },
-        isStrongPassword: {
-          options: {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minSymbols: 1
-          },
-          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRONG
-        }
-      },
-      confirm_password: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED
-        },
-        custom: {
-          options: (value, { req }) => {
-            if (value !== req.body.password) {
-              throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
-            }
-            return true
-          }
-        }
-      },
-      date_of_birth: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.DATE_OF_BIRTH_IS_REQUIRED
-        },
-        isISO8601: {
-          options: {
-            strict: true,
-            strictSeparator: true
-          },
-          errorMessage: USER_MESSAGES.DATE_OF_BIRTH_MUST_BE_ISO8601
-        }
-      }
+      password: passwordValidation,
+      confirm_password: confirmPasswordValidation,
+      date_of_birth: dateOfBirthValidation
     },
     ["body"]
   )
@@ -130,23 +138,7 @@ export const loginValidation = validate(
           }
         }
       },
-      password: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
-        },
-        isStrongPassword: {
-          options: {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minSymbols: 1
-          },
-          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRONG
-        }
-      }
+      password: passwordValidation
     },
     ["body"]
   )
@@ -359,36 +351,8 @@ export const forgotPasswordTokenValidation = validate(
 export const resetPasswordValidation = validate(
   checkSchema(
     {
-      password: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
-        },
-        isStrongPassword: {
-          options: {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minSymbols: 1
-          },
-          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRONG
-        }
-      },
-      confirm_password: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED
-        },
-        custom: {
-          options: (value, { req }) => {
-            if (value !== req.body.password) {
-              throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
-            }
-            return true
-          }
-        }
-      }
+      password: passwordValidation,
+      confirm_password: confirmPasswordValidation
     },
     ["body"]
   )
@@ -407,3 +371,34 @@ export const verifiedUserValidation = (req: Request, res: Response, next: NextFu
   }
   next()
 }
+
+export const updateMeValidation = validate(
+  checkSchema(
+    {
+      name: {
+        optional: true,
+        ...nameValidation,
+        notEmpty: false
+      },
+      date_of_birth: {
+        optional: true,
+        ...dateOfBirthValidation,
+        notEmpty: false
+      },
+      avatar: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGES.AVATAR_URL_MUST_BE_STRING
+        },
+        isLength: {
+          options: {
+            min: 1,
+            max: 500
+          },
+          errorMessage: USER_MESSAGES.AVATAR_URL_LENGTH
+        }
+      }
+    },
+    ["body"]
+  )
+)

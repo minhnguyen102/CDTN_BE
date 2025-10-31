@@ -1,4 +1,4 @@
-import { RegisterReqBody } from "~/models/requests/Account.request"
+import { RegisterReqBody, updateMeReqBody } from "~/models/requests/Account.request"
 import databaseService from "./database.servies"
 import Account from "~/models/schema/Account.schema"
 import { hashPassword } from "~/utils/crypto"
@@ -232,6 +232,28 @@ class AccountsServices {
       }
     )
     return account
+  }
+
+  async updateMe({ user_id, payload }: { user_id: string; payload: updateMeReqBody }) {
+    const _payload = payload.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload
+    const result = await databaseService.accounts.findOneAndUpdate(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          ...(_payload as updateMeReqBody & { date_of_birth?: Date })
+        }
+      },
+      {
+        projection: {
+          email_verify_token: 0,
+          forgot_password_token: 0,
+          password: 0,
+          verify: 0
+        },
+        returnDocument: "after"
+      }
+    )
+    return result
   }
 }
 

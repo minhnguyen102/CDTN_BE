@@ -66,7 +66,10 @@ const USER_MESSAGES = {
   RESET_PASSWORD_SUCCESS: "Your password has been reset successfully. You can now login with your new password.",
   VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS: "Verify forgot password token success",
 
-  GET_MY_PROFILE_SUCCESS: "Get my profile success"
+  GET_MY_PROFILE_SUCCESS: "Get my profile success",
+
+  AVATAR_URL_MUST_BE_STRING: "Avatar URL must be a string",
+  AVATAR_URL_LENGTH: "Avatar URL must be between 1 and 500 characters long"
 }
 
 export default USER_MESSAGES

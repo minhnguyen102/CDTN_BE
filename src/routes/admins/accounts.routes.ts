@@ -21,7 +21,8 @@ import {
   registerValidation,
   forgotPasswordRequestValidation,
   resetPasswordValidation,
-  verifiedUserValidation
+  verifiedUserValidation,
+  updateMeValidation
 } from "~/middlewares/admins/validation.middlewares"
 import { wrapHandlerFunction } from "~/utils/wrapHandler"
 const accountRoutes = Router()
@@ -120,6 +121,12 @@ accountRoutes.get("/me", accessTokenValidation, wrapHandlerFunction(getMeControl
  * PATH: admin/accounts/me
  * Headers: {Authorization: Bearer access_token}
  */
-accountRoutes.patch("/me", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(updateMeController))
+accountRoutes.patch(
+  "/me",
+  accessTokenValidation,
+  verifiedUserValidation,
+  updateMeValidation,
+  wrapHandlerFunction(updateMeController)
+)
 
 export default accountRoutes
