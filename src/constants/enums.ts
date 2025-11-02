@@ -15,3 +15,10 @@ export enum TokenType {
   EmailVerifyToken,
   ForgotPasswordToken
 }
+
+export enum TableStatus {
+  Available, // còn trống
+  Occupied, // đã có khách
+  Reserved, // đã đặt trước
+  Needs_cleaning // cần dọn dẹp
+}

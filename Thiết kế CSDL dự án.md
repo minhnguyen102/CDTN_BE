@@ -99,8 +99,8 @@ interface DishSnapshot {
 // Collection tables
 
 enum TableStatus {
-    Available,
-    Occupied
+  Available,
+  Occupied
 }
 
 interface Table {
