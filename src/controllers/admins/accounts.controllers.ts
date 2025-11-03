@@ -8,17 +8,17 @@ import {
   resetPasswordReqBody,
   TokenPayload,
   updateMeReqBody
-} from "~/models/requests/Account.request"
-import accountsServices from "~/services/accounts.services"
+} from "../../models/requests/Account.request"
+import accountsServices from "../../services/accounts.services"
 import { ParamsDictionary } from "express-serve-static-core"
-import USER_MESSAGES from "~/constants/message"
+import USER_MESSAGES from "../../constants/message"
 import { ObjectId } from "mongodb"
-import databaseService from "~/services/database.servies"
-import HTTP_STATUS from "~/constants/httpStatus"
-import { AccountVerifyStatus } from "~/constants/enums"
-import Account from "~/models/schema/Account.schema"
+import databaseService from "../../services/database.servies"
+import HTTP_STATUS from "../../constants/httpStatus"
+import { AccountVerifyStatus } from "../../constants/enums"
+import Account from "../../models/schema/Account.schema"
 import { JwtPayload } from "jsonwebtoken"
-import { ErrorWithStatus } from "~/models/Errors"
+import { ErrorWithStatus } from "../../models/Errors"
 import { pick } from "lodash"
 
 export const loginController = async (req: Request, res: Response) => {

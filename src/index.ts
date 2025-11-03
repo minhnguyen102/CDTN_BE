@@ -1,6 +1,6 @@
 import express from "express"
-import { routesAdmin } from "~/routes/admins/index.routes"
-import databaseService from "~/services/database.servies"
+import { routesAdmin } from "./routes/admins/index.routes"
+import databaseService from "./services/database.servies"
 import { defaultErrorHandler } from "./middlewares/error.middlewares"
 const app = express()
 const port = 3000

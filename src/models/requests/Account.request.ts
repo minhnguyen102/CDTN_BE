@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken"
 import { ObjectId } from "mongodb"
-import { AccountVerifyStatus, RoleAccount, TableStatus, TokenType } from "~/constants/enums"
+import { AccountVerifyStatus, RoleAccount, TableStatus, TokenType } from "../../constants/enums"
 
 export interface RegisterReqBody {
   name: string

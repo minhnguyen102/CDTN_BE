@@ -12,7 +12,7 @@ import {
   resetPasswordTokenController,
   updateMeController,
   verifyForgotPasswordTokenController
-} from "~/controllers/admins/accounts.controllers"
+} from "../../controllers/admins/accounts.controllers"
 import {
   accessTokenValidation,
   emailVerifyTokenValidation,
@@ -25,8 +25,8 @@ import {
   verifiedUserValidation,
   updateMeValidation,
   changePasswordValidation
-} from "~/middlewares/admins/accounts.middlewares"
-import { wrapHandlerFunction } from "~/utils/wrapHandler"
+} from "../../middlewares/admins/accounts.middlewares"
+import { wrapHandlerFunction } from "../../utils/wrapHandler"
 const accountRoutes = Router()
 
 /**

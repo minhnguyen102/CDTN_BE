@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb"
-import { TableStatus } from "~/constants/enums"
+import { TableStatus } from "../../constants/enums"
 
 interface TableType {
   _id?: ObjectId

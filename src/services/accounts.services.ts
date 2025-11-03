@@ -1,18 +1,17 @@
-import { RegisterReqBody, updateMeReqBody } from "~/models/requests/Account.request"
+import { RegisterReqBody, updateMeReqBody } from "../models/requests/Account.request"
 import databaseService from "./database.servies"
-import Account from "~/models/schema/Account.schema"
-import { hashPassword } from "~/utils/crypto"
-import { signToken } from "~/utils/jwt"
-import { AccountVerifyStatus, TokenType } from "~/constants/enums"
+import Account from "../models/schema/Account.schema"
+import { hashPassword } from "../utils/crypto"
+import { signToken } from "../utils/jwt"
+import { AccountVerifyStatus, TokenType } from "../constants/enums"
 import { config } from "dotenv"
 config()
 import ms from "ms"
-import RefreshToken from "~/models/schema/RefreshToken.schema"
+import RefreshToken from "../models/schema/RefreshToken.schema"
 import { ObjectId } from "mongodb"
-import USER_MESSAGES from "~/constants/message"
-import { ErrorWithStatus } from "~/models/Errors"
-import HTTP_STATUS from "~/constants/httpStatus"
-import { error } from "console"
+import USER_MESSAGES from "../constants/message"
+import { ErrorWithStatus } from "../models/Errors"
+import HTTP_STATUS from "../constants/httpStatus"
 
 class AccountsServices {
   private signAccessToken({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {

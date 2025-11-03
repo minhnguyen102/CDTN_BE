@@ -1,7 +1,7 @@
 import { Db, MongoClient, Collection } from "mongodb"
 import { config } from "dotenv"
-import Account from "~/models/schema/Account.schema"
-import RefreshToken from "~/models/schema/RefreshToken.schema"
+import Account from "../models/schema/Account.schema"
+import RefreshToken from "../models/schema/RefreshToken.schema"
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.sqjfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 

@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb"
-import { AccountVerifyStatus, RoleAccount } from "~/constants/enums"
+import { AccountVerifyStatus, RoleAccount } from "../../constants/enums"
 
 interface AccountType {
   _id?: ObjectId
