@@ -14,6 +14,9 @@ databaseService.connect().catch(console.dir)
 routesAdmin(app)
 
 app.use(defaultErrorHandler)
+app.get("/", (req, res) => {
+  res.send("API Backend (CDTN_BE) đang chạy!")
+})
 
 // app.listen(port, () => {
 //   console.log(`Example app listening on port ${port}`)
