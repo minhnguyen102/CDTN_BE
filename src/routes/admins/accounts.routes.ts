@@ -25,7 +25,7 @@ import {
   verifiedUserValidation,
   updateMeValidation,
   changePasswordValidation
-} from "~/middlewares/admins/validation.middlewares"
+} from "~/middlewares/admins/accounts.middlewares"
 import { wrapHandlerFunction } from "~/utils/wrapHandler"
 const accountRoutes = Router()
 

@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken"
 import { ObjectId } from "mongodb"
-import { AccountVerifyStatus, RoleAccount, TokenType } from "~/constants/enums"
+import { AccountVerifyStatus, RoleAccount, TableStatus, TokenType } from "~/constants/enums"
 
 export interface RegisterReqBody {
   name: string
@@ -43,4 +43,10 @@ export interface changePasswordReqBody {
   old_password: string
   password: string
   confirm_password: string
+}
+export interface createTableReqBody {
+  number: number
+  capacity: number
+  status?: TableStatus
+  qrToken?: string // Token cho QR code
 }

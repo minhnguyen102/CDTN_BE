@@ -1,6 +1,9 @@
 import { Request, Response } from "express"
-export const createTableController = async (req: Request, res: Response) => {
+import { ParamsDictionary } from "express-serve-static-core"
+import { createTableReqBody } from "~/models/requests/Account.request"
+
+export const createTableController = async (req: Request<ParamsDictionary, any, createTableReqBody>, res: Response) => {
   res.json({
-    message: "OK"
+    message: "Ok"
   })
 }

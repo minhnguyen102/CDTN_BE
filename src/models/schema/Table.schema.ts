@@ -29,7 +29,7 @@ export default class Table {
     this.capacity = table.capacity
     this.status = table.status
     this.qrToken = table.qrToken
-    this.currentOrderId = table.currentOrderId
+    this.currentOrderId = table.currentOrderId || null
     this.createdAt = table.createdAt || date
     this.updatedAt = table.updatedAt || date
   }

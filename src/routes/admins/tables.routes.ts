@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { createTableController } from "~/controllers/admins/tables.controllers"
-import { accessTokenValidation, verifiedUserValidation } from "~/middlewares/admins/validation.middlewares"
+import { accessTokenValidation, verifiedUserValidation } from "~/middlewares/admins/accounts.middlewares"
+import { createTableValidation } from "~/middlewares/admins/tables.middlewares"
 
 const tableRoutes = Router()
 
@@ -10,6 +11,6 @@ const tableRoutes = Router()
  * Method: POST
  * Body: { number: number, capacity: number }
  */
-tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, createTableController)
+tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, createTableValidation, createTableController)
 
 export default tableRoutes
