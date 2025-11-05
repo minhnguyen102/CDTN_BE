@@ -3,7 +3,7 @@ import databaseService from "./database.servies"
 import Account from "../models/schema/Account.schema"
 import { hashPassword } from "../utils/crypto"
 import { signToken } from "../utils/jwt"
-import { AccountVerifyStatus, TokenType } from "../constants/enums"
+import { AccountVerifyStatus, RoleAccount, TokenType } from "../constants/enums"
 import { config } from "dotenv"
 config()
 import ms from "ms"
@@ -14,12 +14,21 @@ import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 
 class AccountsServices {
-  private signAccessToken({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
+  private signAccessToken({
+    user_id,
+    verify,
+    role
+  }: {
+    user_id: string
+    verify: AccountVerifyStatus
+    role: RoleAccount
+  }) {
     return signToken({
       payload: {
         user_id,
         token_type: TokenType.AccessToken,
-        verify
+        verify,
+        role
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string,
       optionals: {
@@ -28,12 +37,21 @@ class AccountsServices {
     })
   }
 
-  private signRefreshToken({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
+  private signRefreshToken({
+    user_id,
+    verify,
+    role
+  }: {
+    user_id: string
+    verify: AccountVerifyStatus
+    role: RoleAccount
+  }) {
     return signToken({
       payload: {
         user_id,
         token_type: TokenType.RefreshToken,
-        verify
+        verify,
+        role
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_REFRESH_TOKEN as string,
       optionals: {
@@ -70,12 +88,23 @@ class AccountsServices {
     })
   }
 
-  private signAccessAndRefreshToken({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
-    return Promise.all([this.signAccessToken({ user_id, verify }), this.signRefreshToken({ user_id, verify })])
+  private signAccessAndRefreshToken({
+    user_id,
+    verify,
+    role
+  }: {
+    user_id: string
+    verify: AccountVerifyStatus
+    role: RoleAccount
+  }) {
+    return Promise.all([
+      this.signAccessToken({ user_id, verify, role }),
+      this.signRefreshToken({ user_id, verify, role })
+    ])
   }
 
-  async login({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify })
+  async login({ user_id, verify, role }: { user_id: string; verify: AccountVerifyStatus; role: RoleAccount }) {
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify, role })
     await databaseService.refresh_tokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
     )
@@ -109,7 +138,8 @@ class AccountsServices {
     // const user_id = result.insertedId.toString()
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
       user_id: user_id.toString(),
-      verify: AccountVerifyStatus.Unverified
+      verify: AccountVerifyStatus.Unverified,
+      role: payload.role
     })
     await databaseService.refresh_tokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
@@ -123,15 +153,17 @@ class AccountsServices {
   async refreshToken({
     refresh_token,
     user_id,
-    verify
+    verify,
+    role
   }: {
     refresh_token: string
     user_id: string
     verify: AccountVerifyStatus
+    role: RoleAccount
   }) {
     const [new_access_token, new_refresh_token] = await Promise.all([
-      this.signAccessToken({ user_id, verify }),
-      this.signRefreshToken({ user_id, verify }),
+      this.signAccessToken({ user_id, verify, role }),
+      this.signRefreshToken({ user_id, verify, role }),
       databaseService.refresh_tokens.deleteOne({ token: refresh_token })
     ])
     await databaseService.refresh_tokens.insertOne(
@@ -146,10 +178,10 @@ class AccountsServices {
     }
   }
 
-  async verifyEmail({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
+  async verifyEmail({ user_id, verify, role }: { user_id: string; verify: AccountVerifyStatus; role: RoleAccount }) {
     const [access_token, refresh_token] = await Promise.all([
-      this.signAccessToken({ user_id, verify }),
-      this.signRefreshToken({ user_id, verify }),
+      this.signAccessToken({ user_id, verify, role }),
+      this.signRefreshToken({ user_id, verify, role }),
       databaseService.accounts.updateOne(
         { _id: new ObjectId(user_id) },
         {

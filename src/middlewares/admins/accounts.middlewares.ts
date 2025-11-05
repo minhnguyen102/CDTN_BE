@@ -164,6 +164,7 @@ export const accessTokenValidation = validate(
                 secretOrPublicKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string
               })
               req.decoded_access_token = decoded_access_token
+              console.log("decoded_access_token", decoded_access_token)
               // console.log(decoded_access_token)
             } catch (error) {
               // Lỗi do verify
