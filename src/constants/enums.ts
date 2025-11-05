@@ -1,6 +1,6 @@
 export enum RoleAccount {
-  Employee, // tương ứng = 0
-  Owner
+  Employee = "EMPLOYEE", // tương ứng = 0
+  Owner = "OWNER"
 }
 
 export enum AccountVerifyStatus {

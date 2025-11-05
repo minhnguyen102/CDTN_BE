@@ -164,7 +164,7 @@ export const accessTokenValidation = validate(
                 secretOrPublicKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string
               })
               req.decoded_access_token = decoded_access_token
-              console.log("decoded_access_token", decoded_access_token)
+              // console.log("decoded_access_token", decoded_access_token)
               // console.log(decoded_access_token)
             } catch (error) {
               // Lỗi do verify
@@ -210,7 +210,7 @@ export const refreshTokenValidation = validate(
                 })
               }
               ;(req as Request).decoded_refresh_token = decoded_refresh_token
-              // console.log(decoded_refresh_token)
+              console.log(decoded_refresh_token)
             } catch (error) {
               // Lỗi do verify
               if (error instanceof JsonWebTokenError) {
