@@ -4,6 +4,7 @@ import { randomBytes } from "crypto"
 import { TableStatus } from "../constants/enums"
 import { genQRtable } from "../utils/qr"
 import { randomQrToken } from "../utils/crypto"
+import { table } from "console"
 
 class TableServices {
   async createTable({ capacity }: { capacity: number }) {
@@ -35,6 +36,20 @@ class TableServices {
       QRcode: qrCodeImageString,
       table: newTable
     }
+  }
+
+  async viewTableController() {
+    const tables = await databaseService.tables
+      .find(
+        {},
+        {
+          projection: {
+            qrToken: 0
+          }
+        }
+      )
+      .toArray()
+    return tables
   }
 }
 

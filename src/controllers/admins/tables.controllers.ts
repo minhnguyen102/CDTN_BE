@@ -11,3 +11,13 @@ export const createTableController = async (req: Request<ParamsDictionary, any, 
     result
   })
 }
+
+export const getAllTablesController = async (
+  req: Request<ParamsDictionary, any, createTableReqBody>,
+  res: Response
+) => {
+  const result = await tableServices.viewTableController()
+  res.json({
+    result
+  })
+}
