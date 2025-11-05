@@ -1,4 +1,4 @@
-import { createHash } from "crypto"
+import { createHash, randomBytes } from "crypto"
 import { config } from "dotenv"
 config()
 function sha256(content: string) {
@@ -7,4 +7,8 @@ function sha256(content: string) {
 
 export function hashPassword(password: string) {
   return sha256(password + process.env.HASH_PASSWORD_SECRET)
+}
+
+export function randomQrToken(tokenLength: number = 20) {
+  return randomBytes(tokenLength).toString("hex")
 }

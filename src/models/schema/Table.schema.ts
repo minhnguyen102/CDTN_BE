@@ -7,9 +7,9 @@ interface TableType {
   capacity: number
   status: TableStatus
   qrToken: string // Token cho QR code
-  currentOrderId: ObjectId | null
-  createdAt: Date
-  updatedAt: Date
+  currentOrderId?: ObjectId | null
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export default class Table {

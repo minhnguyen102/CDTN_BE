@@ -45,8 +45,5 @@ export interface changePasswordReqBody {
   confirm_password: string
 }
 export interface createTableReqBody {
-  number: number
   capacity: number
-  status?: TableStatus
-  qrToken?: string // Token cho QR code
 }
