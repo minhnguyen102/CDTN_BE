@@ -5,6 +5,8 @@ import { genQRtable } from "../utils/qr"
 import { randomQrToken } from "../utils/crypto"
 import { paginationHelper } from "../utils/helpers"
 import { table } from "console"
+import { ErrorWithStatus } from "../models/Errors"
+import HTTP_STATUS from "../constants/httpStatus"
 
 class TableServices {
   async createTable({ capacity }: { capacity: number }) {
@@ -38,7 +40,10 @@ class TableServices {
     }
   }
 
-  async getAllTablesController({ page }: { page: number }) {
+  async getAllTablesController({ page, status }: { page: number; status?: string }) {
+    const objectFind: { status?: TableStatus } = {}
+
+    // Pagination
     const objectPagination: {
       currentPage: number
       skip?: number
@@ -46,44 +51,55 @@ class TableServices {
       totalPage?: number
     } = {
       currentPage: page,
-      limit: 2
+      limit: 4
     }
     const totalDocument = await databaseService.tables.countDocuments()
-    const newObjectPagination = paginationHelper({
+    paginationHelper({
       totalDocument,
       objectPagination
     })
     // console.log("newObjectPagination: ", newObjectPagination)
     // console.log("objectPagination: ", objectPagination)
+
+    // FilterStatus
+    if (status) {
+      if (isNaN(Number(status)) && status in TableStatus) {
+        // nếu truyền là chữ
+        // console.log(TableStatus[status as keyof typeof TableStatus]) // return 0
+        objectFind.status = TableStatus[status as keyof typeof TableStatus]
+      } else if (!isNaN(Number(status)) && TableStatus[Number(status)]) {
+        // nếu truyền là số
+        objectFind.status = Number(status)
+      } else {
+        throw new ErrorWithStatus({
+          message: `Trạng thái filter không hợp lệ`,
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+    }
+
     const tables = await databaseService.tables
-      .find()
+      .find(objectFind)
       .limit(objectPagination.limit)
       .skip(objectPagination.skip as number)
       .toArray()
 
+    // Xử lí trả về QRcode cho trang quản lí
     const qrGenerationPromises = tables.map(async (table) => {
-      // a. Tạo link URL từ qrToken (token bí mật)
-      const qrToken = table.qrToken
-
-      // b. Tạo ảnh QR (dạng Data URL)
+      const { qrToken } = table
       const qrCodeImage = await genQRtable({ qrToken })
-
-      // c. Trả về một OBJECT MỚI.
-      //    **QUAN TRỌNG**: Không được trả về qrToken (chuỗi bí mật) cho client!
       return {
         _id: table._id,
         number: table.number,
         capacity: table.capacity,
         status: table.status,
-        // (Thêm các trường khác bạn cần hiển thị...)
 
         QRcode: qrCodeImage // Thêm thuộc tính mới là ảnh QR
       }
     })
 
-    // 3. Đợi TẤT CẢ các "lời hứa" (hàm tạo QR) chạy xong
     const tablesWithQR = await Promise.all(qrGenerationPromises)
-    // console.log(tablesWithQR)
+
     return {
       tables: tablesWithQR,
       ...objectPagination

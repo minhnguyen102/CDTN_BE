@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
 import { createTableReqBody } from "../../models/requests/Account.request"
 import tableServices from "../../services/tables.services"
-import { paginationHelper } from "../../utils/helpers"
+import { TableStatus } from "../../constants/enums"
 
 export const createTableController = async (req: Request<ParamsDictionary, any, createTableReqBody>, res: Response) => {
   const { capacity } = req.body
@@ -15,6 +15,7 @@ export const createTableController = async (req: Request<ParamsDictionary, any, 
 
 export const getAllTablesController = async (req: Request, res: Response) => {
   const { page } = req.query
+  // Xử lí page
   let pageQuery = 1
   if (typeof page === "string") {
     const parsePage = parseInt(page, 10)
@@ -22,7 +23,10 @@ export const getAllTablesController = async (req: Request, res: Response) => {
       pageQuery = parsePage
     }
   }
-  const result = await tableServices.getAllTablesController({ page: pageQuery })
+
+  // Xử lí status
+  const status = (req.query.status as string) || undefined
+  const result = await tableServices.getAllTablesController({ page: pageQuery, status })
   res.json({
     message: "OK",
     ...result

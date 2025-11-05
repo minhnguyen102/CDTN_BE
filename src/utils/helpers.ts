@@ -1,5 +1,3 @@
-import { Request } from "express"
-
 /**
  *  Tham số nhận vào (1 object có dạng định trả về, totalDocument)
  *

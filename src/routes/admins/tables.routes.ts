@@ -10,7 +10,7 @@ const tableRoutes = Router()
  * PATH: admin/tables/create
  * Method: POST
  * Body: { number: number, capacity: number }
- * * Headers: {Authorization: Bearer access_token}
+ * Headers: {Authorization: Bearer access_token}
  */
 tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, createTableValidation, createTableController)
 
