@@ -1,18 +1,13 @@
 import { Router } from "express"
-import { createTableController, getAllTablesController } from "../../controllers/admins/tables.controllers"
+import {
+  createTableController,
+  getAllTablesController,
+  updateTableController
+} from "../../controllers/admins/tables.controllers"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { createTableValidation } from "../../middlewares/admins/tables.middlewares"
 
 const tableRoutes = Router()
-
-/**
- * Description: Create table
- * PATH: admin/tables/create
- * Method: POST
- * Body: { number: number, capacity: number }
- * Headers: {Authorization: Bearer access_token}
- */
-tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, createTableValidation, createTableController)
 
 /**
  * Description: view all table
@@ -21,5 +16,29 @@ tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, creat
  * Headers: {Authorization: Bearer access_token}
  */
 tableRoutes.get("/", accessTokenValidation, verifiedUserValidation, getAllTablesController)
+
+/**
+ * Description: Create table
+ * PATH: admin/tables/create
+ * Method: POST
+ * Body: { capacity: number }
+ * Headers: {Authorization: Bearer access_token}
+ */
+tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, createTableValidation, createTableController)
+
+/**
+ * Description: update table
+ * PATH: admin/tables/update
+ * Method: PATCH
+ * Body: { capacity: number }
+ * Headers: {Authorization: Bearer access_token}
+ */
+tableRoutes.patch(
+  "/update/:id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  createTableValidation,
+  updateTableController
+)
 
 export default tableRoutes

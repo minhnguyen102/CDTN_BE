@@ -210,7 +210,7 @@ export const refreshTokenValidation = validate(
                 })
               }
               ;(req as Request).decoded_refresh_token = decoded_refresh_token
-              console.log(decoded_refresh_token)
+              // console.log(decoded_refresh_token)
             } catch (error) {
               // Lỗi do verify
               if (error instanceof JsonWebTokenError) {

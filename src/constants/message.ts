@@ -79,7 +79,10 @@ const USER_MESSAGES = {
   CONFIRM_NEW_PASSWORD_IS_REQUIRED: "Confirm new password is required.",
   OLD_PASSWORD_IS_INCORRECT: "Your old password is not correct.",
   NEW_PASSWORD_AND_CONFIRM_PASSWORD_DO_NOT_MATCH: "New password and confirmation password do not match.",
-  NEW_PASSWORD_CANNOT_BE_THE_SAME_AS_OLD_PASSWORD: "Your new password cannot be the same as your old password."
+  NEW_PASSWORD_CANNOT_BE_THE_SAME_AS_OLD_PASSWORD: "Your new password cannot be the same as your old password.",
+
+  CAPACITY_REQUIRED: "Capacity is required.",
+  CAPACITY_MUST_BE_POSITIVE_INTEGER: "Capacity must be a positive integer."
 }
 
 export default USER_MESSAGES

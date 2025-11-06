@@ -1,20 +1,20 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../../utils/validation"
+import USER_MESSAGES from "../../constants/message"
 
 export const createTableValidation = validate(
   checkSchema(
     {
-      // capacity: {
-      //   notEmpty: {
-      //     errorMessage: "Số ghế là bắt buộc"
-      //   },
-      //   isInt: {
-      //     options: { gt: 0 },
-      //     errorMessage: "số ghế phải là một số nguyên dương."
-      //   },
-      //   // Sanitizer
-      //   toInt: true
-      // }
+      capacity: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.CAPACITY_REQUIRED
+        },
+        isInt: {
+          options: { gt: 0 },
+          errorMessage: USER_MESSAGES.CAPACITY_MUST_BE_POSITIVE_INTEGER
+        },
+        toInt: true
+      }
     },
     ["body"]
   )

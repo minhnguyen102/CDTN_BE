@@ -7,6 +7,7 @@ import { paginationHelper } from "../utils/helpers"
 import { table } from "console"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
+import { ObjectId } from "mongodb"
 
 class TableServices {
   async createTable({ capacity }: { capacity: number }) {
@@ -104,6 +105,25 @@ class TableServices {
       tables: tablesWithQR,
       ...objectPagination
     }
+  }
+
+  async updateTable({ capacity, id }: { capacity: number; id: string }) {
+    const result = await databaseService.tables.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          capacity: capacity
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      },
+      {
+        returnDocument: "after"
+      }
+    )
+
+    return result
   }
 }
 

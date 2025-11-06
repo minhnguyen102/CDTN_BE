@@ -48,3 +48,6 @@ export interface changePasswordReqBody {
 export interface createTableReqBody {
   capacity: number
 }
+export interface updateTableReqBody {
+  capacity: number
+}

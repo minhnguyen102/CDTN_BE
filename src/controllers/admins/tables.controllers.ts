@@ -1,8 +1,9 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import { createTableReqBody } from "../../models/requests/Account.request"
+import { createTableReqBody, updateTableReqBody } from "../../models/requests/Account.request"
 import tableServices from "../../services/tables.services"
 import { TableStatus } from "../../constants/enums"
+import { table } from "console"
 
 export const createTableController = async (req: Request<ParamsDictionary, any, createTableReqBody>, res: Response) => {
   const { capacity } = req.body
@@ -30,5 +31,15 @@ export const getAllTablesController = async (req: Request, res: Response) => {
   res.json({
     message: "OK",
     ...result
+  })
+}
+
+export const updateTableController = async (req: Request<ParamsDictionary, any, updateTableReqBody>, res: Response) => {
+  const { capacity } = req.body
+  const { id } = req.params
+  const result = await tableServices.updateTable({ capacity, id })
+  res.json({
+    message: "OK",
+    table: result
   })
 }
