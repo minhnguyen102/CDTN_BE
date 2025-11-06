@@ -90,7 +90,25 @@ const USER_MESSAGES = {
 
   ID_IS_REQUIRED: "ID cannot be empty.",
   INVALID_MONGODB_ID_FORMAT: "The provided ID is not a valid MongoDB ObjectId format.",
-  REGENERATE_QR_TOKEN_SUCCESS: "QR token regenerated successfully."
+  REGENERATE_QR_TOKEN_SUCCESS: "QR token regenerated successfully.",
+
+  //supplier
+  SUPPLIER_NAME_REQUIRED: "Supplier name is required.",
+  SUPPLIER_NAME_INVALID: "Supplier name must be a string.",
+  SUPPLIER_TAX_CODE_REQUIRED: "Tax code is required.",
+  SUPPLIER_TAX_CODE_INVALID: "Tax code must contain only letters and numbers.",
+  SUPPLIER_TAX_CODE_LENGTH_INVALID: "Tax code must be between 5 and 20 characters long.",
+  SUPPLIER_STATUS_REQUIRED: "Supplier status is required.",
+  SUPPLIER_STATUS_INVALID: "Supplier status must be one of: Active, Inactive",
+  SUPPLIER_CONTACT_PERSON_REQUIRED: "Contact person name is required.",
+  SUPPLIER_CONTACT_PERSON_INVALID: "Contact person name must be a string.",
+  SUPPLIER_PHONE_REQUIRED: "Phone number is required.",
+  SUPPLIER_PHONE_INVALID: "Invalid phone number format.",
+  SUPPLIER_EMAIL_INVALID: "Invalid email address.",
+  SUPPLIER_ADDRESS_REQUIRED: "Address is required.",
+  SUPPLIER_ADDRESS_INVALID: "Address must be a string.",
+
+  CREATE_SUPPLIER_SUCCESS: "Supplier created successfully."
 }
 
 export default USER_MESSAGES

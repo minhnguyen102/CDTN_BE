@@ -22,3 +22,8 @@ export enum TableStatus {
   Reserved, // đã đặt trước
   Needs_cleaning // cần dọn dẹp
 }
+
+export enum SupplierStatus {
+  Active = "Active",
+  Inactive = "Inactive"
+}

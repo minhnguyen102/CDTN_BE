@@ -11,6 +11,7 @@ import {
   regenerateQrTokenValidation,
   updateTableValidation
 } from "../../middlewares/admins/tables.middlewares"
+import { wrapHandlerFunction } from "../../utils/wrapHandler"
 
 const tableRoutes = Router()
 
@@ -20,7 +21,7 @@ const tableRoutes = Router()
  * Method: GET
  * Headers: {Authorization: Bearer access_token}
  */
-tableRoutes.get("/", accessTokenValidation, verifiedUserValidation, getAllTablesController)
+tableRoutes.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(getAllTablesController))
 
 /**
  * Description: Create table
@@ -29,7 +30,13 @@ tableRoutes.get("/", accessTokenValidation, verifiedUserValidation, getAllTables
  * Body: { capacity: number }
  * Headers: {Authorization: Bearer access_token}
  */
-tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, createTableValidation, createTableController)
+tableRoutes.post(
+  "/create",
+  accessTokenValidation,
+  verifiedUserValidation,
+  createTableValidation,
+  wrapHandlerFunction(createTableController)
+)
 
 /**
  * Description: update table
@@ -43,7 +50,7 @@ tableRoutes.patch(
   accessTokenValidation,
   verifiedUserValidation,
   updateTableValidation,
-  updateTableController
+  wrapHandlerFunction(updateTableController)
 )
 
 /**
@@ -57,7 +64,7 @@ tableRoutes.patch(
   accessTokenValidation,
   verifiedUserValidation,
   regenerateQrTokenValidation,
-  regenerateQrTokenController
+  wrapHandlerFunction(regenerateQrTokenController)
 )
 
 export default tableRoutes

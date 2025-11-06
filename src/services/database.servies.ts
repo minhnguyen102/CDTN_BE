@@ -3,6 +3,9 @@ import { config } from "dotenv"
 import Account from "../models/schema/Account.schema"
 import RefreshToken from "../models/schema/RefreshToken.schema"
 import Table from "../models/schema/Table.schema"
+import Supplier from "../models/schema/Supplier.schema"
+import Ingredient from "../models/schema/Ingredient.schema"
+import ImportOrder from "../models/schema/ImportOrder.schema"
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.sqjfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -37,6 +40,17 @@ class DatabaseService {
 
   get tables(): Collection<Table> {
     return this.db.collection("tables")
+  }
+
+  get suppliers(): Collection<Supplier> {
+    return this.db.collection("suppliers")
+  }
+
+  get ingredients(): Collection<Ingredient> {
+    return this.db.collection("ingredients")
+  }
+  get import_orders(): Collection<ImportOrder> {
+    return this.db.collection("import_orders")
   }
 }
 
