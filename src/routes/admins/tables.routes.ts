@@ -35,7 +35,7 @@ tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, creat
  * Description: update table
  * PATH: admin/tables/update/:id
  * Method: PATCH
- * Body: { capacity: number }
+ * Body: { capacity?: number, status?: TableStatus }
  * Headers: {Authorization: Bearer access_token}
  */
 tableRoutes.patch(

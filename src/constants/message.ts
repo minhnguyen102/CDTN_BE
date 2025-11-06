@@ -89,7 +89,8 @@ const USER_MESSAGES = {
   DELETE_TABLE_SUCCESS: "Table deleted successfully.",
 
   ID_IS_REQUIRED: "ID cannot be empty.",
-  INVALID_MONGODB_ID_FORMAT: "The provided ID is not a valid MongoDB ObjectId format."
+  INVALID_MONGODB_ID_FORMAT: "The provided ID is not a valid MongoDB ObjectId format.",
+  REGENERATE_QR_TOKEN_SUCCESS: "QR token regenerated successfully."
 }
 
 export default USER_MESSAGES

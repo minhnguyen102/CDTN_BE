@@ -46,9 +46,9 @@ export const updateTableController = async (req: Request<ParamsDictionary, any, 
 
 export const regenerateQrTokenController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
   const { id } = req.params
-
   const table = await tableServices.regenerateQrToken({ id })
   res.json({
+    message: USER_MESSAGES.REGENERATE_QR_TOKEN_SUCCESS,
     table
   })
 }
