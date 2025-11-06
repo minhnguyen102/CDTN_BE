@@ -86,7 +86,10 @@ const USER_MESSAGES = {
   GET_ALL_TABLES_SUCCESS: "Get all tables successfully.",
   UPDATE_TABLE_SUCCESS: "Table updated successfully.",
   CREATE_TABLE_SUCCESS: "Table created successfully.",
-  DELETE_TABLE_SUCCESS: "Table deleted successfully."
+  DELETE_TABLE_SUCCESS: "Table deleted successfully.",
+
+  ID_IS_REQUIRED: "ID cannot be empty.",
+  INVALID_MONGODB_ID_FORMAT: "The provided ID is not a valid MongoDB ObjectId format."
 }
 
 export default USER_MESSAGES

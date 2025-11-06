@@ -126,6 +126,31 @@ class TableServices {
 
     return result
   }
+
+  async regenerateQrToken({ id }: { id: string }) {
+    const new_qrToken = randomQrToken()
+    const result = await databaseService.tables.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          qrToken: new_qrToken
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      },
+      {
+        returnDocument: "after"
+      }
+    )
+    const qrToken = result?.qrToken as string
+    const orderUrl = `https://your-app-frontend.com/order?token=${qrToken}`
+    const newQRtable = await genQRtable({ qrToken })
+    return {
+      orderUrl,
+      QRtable: newQRtable
+    }
+  }
 }
 
 const tableServices = new TableServices()

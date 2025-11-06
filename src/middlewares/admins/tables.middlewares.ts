@@ -2,6 +2,8 @@ import { checkSchema, ParamSchema } from "express-validator"
 import { validate } from "../../utils/validation"
 import USER_MESSAGES from "../../constants/message"
 import { TableStatus } from "../../constants/enums"
+import { ErrorWithStatus } from "../../models/Errors"
+import HTTP_STATUS from "../../constants/httpStatus"
 
 const capacityValidation: ParamSchema = {
   notEmpty: {
@@ -14,6 +16,17 @@ const capacityValidation: ParamSchema = {
   toInt: true
 }
 
+const idParamValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.ID_IS_REQUIRED
+  },
+  isMongoId: {
+    errorMessage: new ErrorWithStatus({
+      message: USER_MESSAGES.INVALID_MONGODB_ID_FORMAT,
+      status: HTTP_STATUS.BAD_REQUEST
+    })
+  }
+}
 export const createTableValidation = validate(
   checkSchema(
     {
@@ -24,19 +37,32 @@ export const createTableValidation = validate(
 )
 
 export const updateTableValidation = validate(
-  checkSchema({
-    capacity: {
-      optional: true,
-      ...capacityValidation,
-      notEmpty: false
-    },
-    status: {
-      optional: true,
-      isIn: {
-        options: [Object.values(TableStatus)],
-        errorMessage: "Status must be one of the following: Available, Occupied, Reserved, or Needs_cleaning."
+  checkSchema(
+    {
+      id: idParamValidation,
+      capacity: {
+        optional: true,
+        ...capacityValidation,
+        notEmpty: false
       },
-      toInt: true
-    }
-  })
+      status: {
+        optional: true,
+        isIn: {
+          options: [Object.values(TableStatus)],
+          errorMessage: "Status must be one of the following: Available, Occupied, Reserved, or Needs_cleaning."
+        },
+        toInt: true
+      }
+    },
+    ["body", "headers"]
+  )
+)
+
+export const regenerateQrTokenValidation = validate(
+  checkSchema(
+    {
+      id: idParamValidation
+    },
+    ["params"]
+  )
 )

@@ -2,10 +2,15 @@ import { Router } from "express"
 import {
   createTableController,
   getAllTablesController,
+  regenerateQrTokenController,
   updateTableController
 } from "../../controllers/admins/tables.controllers"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
-import { createTableValidation, updateTableValidation } from "../../middlewares/admins/tables.middlewares"
+import {
+  createTableValidation,
+  regenerateQrTokenValidation,
+  updateTableValidation
+} from "../../middlewares/admins/tables.middlewares"
 
 const tableRoutes = Router()
 
@@ -28,7 +33,7 @@ tableRoutes.post("/create", accessTokenValidation, verifiedUserValidation, creat
 
 /**
  * Description: update table
- * PATH: admin/tables/update
+ * PATH: admin/tables/update/:id
  * Method: PATCH
  * Body: { capacity: number }
  * Headers: {Authorization: Bearer access_token}
@@ -39,6 +44,20 @@ tableRoutes.patch(
   verifiedUserValidation,
   updateTableValidation,
   updateTableController
+)
+
+/**
+ * Description: Regenarate QR token
+ * PATH: admin/tables/update/:id/qr-token
+ * Method: PATCH
+ * Headers: {Authorization: Bearer access_token}
+ */
+tableRoutes.patch(
+  "/update/:id/qr-token",
+  accessTokenValidation,
+  verifiedUserValidation,
+  regenerateQrTokenValidation,
+  regenerateQrTokenController
 )
 
 export default tableRoutes
