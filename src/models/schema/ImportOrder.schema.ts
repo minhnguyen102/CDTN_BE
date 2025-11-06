@@ -1,0 +1,68 @@
+import { ObjectId } from "mongodb"
+
+interface ImportOrderItem {
+  ingredientId: ObjectId // -> ingredient
+  ingredientName: string
+  quantity: number
+  importPrice: number
+  total: number
+}
+
+interface ImportOrderType {
+  _id?: ObjectId
+  orderNumber: string // auto gen
+  supplierId: ObjectId // -> supplier
+  importedById: ObjectId // -> account
+  importDate: Date
+  status: string // nên cải thiện thành enum
+  items: ImportOrderItem[]
+  subtotal: number
+  taxRate: number
+  taxAmount: number
+  totalAmount: number
+  notes: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export default class ImportOrder {
+  _id?: ObjectId
+  orderNumber: string // auto gen
+  supplierId: ObjectId // -> supplier
+  importedById: ObjectId // -> account
+  importDate: Date
+  status: string // nên cải thiện thành enum
+  items: ImportOrderItem[]
+  subtotal: number
+  taxRate: number
+  taxAmount: number
+  totalAmount: number
+  notes: string
+  createdAt: Date
+  updatedAt: Date
+
+  constructor(importOrder: ImportOrderType) {
+    const date = new Date()
+    this._id = importOrder._id
+    this.orderNumber = importOrder.orderNumber
+    this.supplierId = importOrder.supplierId
+    this.importedById = importOrder.importedById
+    this.importDate = importOrder.importDate
+    this.status = importOrder.status
+    this.items = importOrder.items.map((item) => ({
+      // map() để đảm bảo cấu trúc
+      ingredientId: new ObjectId(item.ingredientId),
+      ingredientName: item.ingredientName,
+      quantity: item.quantity,
+      importPrice: item.importPrice,
+      total: item.total
+    }))
+    this.subtotal = importOrder.subtotal
+    this.taxRate = importOrder.taxRate
+    this.taxAmount = importOrder.taxAmount
+    this.totalAmount = importOrder.totalAmount
+    this.notes = importOrder.notes || "" // Gán default value để tránh lỗi
+    this.createdAt = importOrder.createdAt || date
+    this.updatedAt = importOrder.updatedAt || date
+  }
+}
