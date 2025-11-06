@@ -108,7 +108,8 @@ const USER_MESSAGES = {
   SUPPLIER_ADDRESS_REQUIRED: "Address is required.",
   SUPPLIER_ADDRESS_INVALID: "Address must be a string.",
 
-  CREATE_SUPPLIER_SUCCESS: "Supplier created successfully."
+  CREATE_SUPPLIER_SUCCESS: "Supplier created successfully.",
+  SUPPLIER_UPDATE_SUCCESS: "Supplier updated successfully."
 }
 
 export default USER_MESSAGES
