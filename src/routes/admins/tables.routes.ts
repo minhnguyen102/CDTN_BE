@@ -5,7 +5,7 @@ import {
   updateTableController
 } from "../../controllers/admins/tables.controllers"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
-import { createTableValidation } from "../../middlewares/admins/tables.middlewares"
+import { createTableValidation, updateTableValidation } from "../../middlewares/admins/tables.middlewares"
 
 const tableRoutes = Router()
 
@@ -37,7 +37,7 @@ tableRoutes.patch(
   "/update/:id",
   accessTokenValidation,
   verifiedUserValidation,
-  createTableValidation,
+  updateTableValidation,
   updateTableController
 )
 

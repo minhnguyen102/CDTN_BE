@@ -8,6 +8,7 @@ import { table } from "console"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { ObjectId } from "mongodb"
+import { updateTableReqBody } from "../models/requests/Account.request"
 
 class TableServices {
   async createTable({ capacity }: { capacity: number }) {
@@ -107,12 +108,12 @@ class TableServices {
     }
   }
 
-  async updateTable({ capacity, id }: { capacity: number; id: string }) {
+  async updateTable({ payload, id }: { payload: updateTableReqBody; id: string }) {
     const result = await databaseService.tables.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
-          capacity: capacity
+          ...payload
         },
         $currentDate: {
           updatedAt: true

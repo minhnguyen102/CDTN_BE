@@ -82,7 +82,11 @@ const USER_MESSAGES = {
   NEW_PASSWORD_CANNOT_BE_THE_SAME_AS_OLD_PASSWORD: "Your new password cannot be the same as your old password.",
 
   CAPACITY_REQUIRED: "Capacity is required.",
-  CAPACITY_MUST_BE_POSITIVE_INTEGER: "Capacity must be a positive integer."
+  CAPACITY_MUST_BE_POSITIVE_INTEGER: "Capacity must be a positive integer.",
+  GET_ALL_TABLES_SUCCESS: "Get all tables successfully.",
+  UPDATE_TABLE_SUCCESS: "Table updated successfully.",
+  CREATE_TABLE_SUCCESS: "Table created successfully.",
+  DELETE_TABLE_SUCCESS: "Table deleted successfully."
 }
 
 export default USER_MESSAGES

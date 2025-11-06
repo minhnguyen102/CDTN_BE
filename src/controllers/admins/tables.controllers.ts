@@ -2,14 +2,14 @@ import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
 import { createTableReqBody, updateTableReqBody } from "../../models/requests/Account.request"
 import tableServices from "../../services/tables.services"
-import { TableStatus } from "../../constants/enums"
-import { table } from "console"
+import USER_MESSAGES from "../../constants/message"
+import { pick } from "lodash"
 
 export const createTableController = async (req: Request<ParamsDictionary, any, createTableReqBody>, res: Response) => {
   const { capacity } = req.body
   const result = await tableServices.createTable({ capacity })
   res.json({
-    message: "OK",
+    message: USER_MESSAGES.CREATE_TABLE_SUCCESS,
     result
   })
 }
@@ -29,17 +29,17 @@ export const getAllTablesController = async (req: Request, res: Response) => {
   const status = (req.query.status as string) || undefined
   const result = await tableServices.getAllTablesController({ page: pageQuery, status })
   res.json({
-    message: "OK",
+    message: USER_MESSAGES.GET_ALL_TABLES_SUCCESS,
     ...result
   })
 }
 
 export const updateTableController = async (req: Request<ParamsDictionary, any, updateTableReqBody>, res: Response) => {
-  const { capacity } = req.body
   const { id } = req.params
-  const result = await tableServices.updateTable({ capacity, id })
+  const payload = pick(req.body, ["capacity", "status"])
+  const result = await tableServices.updateTable({ payload, id })
   res.json({
-    message: "OK",
+    message: USER_MESSAGES.UPDATE_TABLE_SUCCESS,
     table: result
   })
 }

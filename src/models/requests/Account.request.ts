@@ -49,5 +49,6 @@ export interface createTableReqBody {
   capacity: number
 }
 export interface updateTableReqBody {
-  capacity: number
+  capacity?: number
+  status?: TableStatus
 }
