@@ -27,3 +27,8 @@ export enum SupplierStatus {
   Active = "Active",
   Inactive = "Inactive"
 }
+
+export enum CategoryTypeStatus {
+  Active = "Active",
+  Inactive = "Inactive"
+}
