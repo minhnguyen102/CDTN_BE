@@ -42,7 +42,7 @@ class TableServices {
     }
   }
 
-  async getAllTablesController({ page, status }: { page: number; status?: string }) {
+  async getAllTables({ page, status }: { page: number; status?: string }) {
     const objectFind: { status?: TableStatus } = {}
 
     // Pagination

@@ -31,7 +31,7 @@ tableRoutes.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerF
  * Headers: {Authorization: Bearer access_token}
  */
 tableRoutes.post(
-  "/create",
+  "/",
   accessTokenValidation,
   verifiedUserValidation,
   createTableValidation,
@@ -46,7 +46,7 @@ tableRoutes.post(
  * Headers: {Authorization: Bearer access_token}
  */
 tableRoutes.patch(
-  "/update/:id",
+  "/:id",
   accessTokenValidation,
   verifiedUserValidation,
   updateTableValidation,
@@ -60,7 +60,7 @@ tableRoutes.patch(
  * Headers: {Authorization: Bearer access_token}
  */
 tableRoutes.patch(
-  "/update/:id/qr-token",
+  "/:id/qr-token",
   accessTokenValidation,
   verifiedUserValidation,
   regenerateQrTokenValidation,

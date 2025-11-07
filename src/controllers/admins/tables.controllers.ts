@@ -27,7 +27,7 @@ export const getAllTablesController = async (req: Request, res: Response) => {
 
   // Xử lí status
   const status = (req.query.status as string) || undefined
-  const result = await tableServices.getAllTablesController({ page: pageQuery, status })
+  const result = await tableServices.getAllTables({ page: pageQuery, status })
   res.json({
     message: USER_MESSAGES.GET_ALL_TABLES_SUCCESS,
     ...result
