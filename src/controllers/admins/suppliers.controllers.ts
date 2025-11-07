@@ -4,6 +4,14 @@ import { createSupplierReqBody, updateSupplierReqBody } from "../../models/reque
 import supplierServices from "../../services/suppliers.services"
 import USER_MESSAGES from "../../constants/message"
 
+export const viewAllSupplierController = async (req: Request, res: Response) => {
+  const result = await supplierServices.getAllSuppliers()
+  res.json({
+    message: USER_MESSAGES.GET_ALL_SUPPLIERS_SUCCESS,
+    result
+  })
+}
+
 export const createSupplierController = async (
   req: Request<ParamsDictionary, any, createSupplierReqBody>,
   res: Response

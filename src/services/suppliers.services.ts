@@ -4,6 +4,12 @@ import Supplier from "../models/schema/Supplier.schema"
 import { ObjectId } from "mongodb"
 
 class SupplierServices {
+  async getAllSuppliers() {
+    // Cần thiết sẽ mở rộng phân trang
+    const result = await databaseService.suppliers.find().toArray()
+    return result
+  }
+
   async createSupplier({ payload }: { payload: createSupplierReqBody }) {
     const supplier = await databaseService.suppliers.insertOne(new Supplier(payload))
     const { insertedId } = supplier
