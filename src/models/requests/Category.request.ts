@@ -5,3 +5,8 @@ export interface createCategoryReqBody {
   description: string
   status: CategoryTypeStatus
 }
+export interface updateCategoryReqBody {
+  name?: string
+  description?: string
+  status?: CategoryTypeStatus
+}

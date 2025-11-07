@@ -1,6 +1,8 @@
 import { validate } from "../../utils/validation"
 import { checkSchema, ParamSchema } from "express-validator"
 import USER_MESSAGES from "../../constants/message"
+import { ErrorWithStatus } from "../../models/Errors"
+import HTTP_STATUS from "../../constants/httpStatus"
 
 const nameValidation: ParamSchema = {
   notEmpty: {
@@ -81,6 +83,19 @@ const addressValidation: ParamSchema = {
   },
   trim: true
 }
+
+// Validate cho Id
+const idParamValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.ID_IS_REQUIRED
+  },
+  isMongoId: {
+    errorMessage: new ErrorWithStatus({
+      message: USER_MESSAGES.INVALID_MONGODB_ID_FORMAT,
+      status: HTTP_STATUS.BAD_REQUEST
+    })
+  }
+}
 export const createSupplierValidation = validate(
   checkSchema(
     {
@@ -99,6 +114,7 @@ export const createSupplierValidation = validate(
 export const updateSupplierValidation = validate(
   checkSchema(
     {
+      id: idParamValidation,
       name: {
         optional: true,
         ...nameValidation,
@@ -135,6 +151,6 @@ export const updateSupplierValidation = validate(
         notEmpty: false
       }
     },
-    ["body"]
+    ["body", "params"]
   )
 )

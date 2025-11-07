@@ -1,4 +1,4 @@
-import { createCategoryReqBody } from "../models/requests/Category.request"
+import { createCategoryReqBody, updateCategoryReqBody } from "../models/requests/Category.request"
 import databaseService from "./database.servies"
 import Category from "../models/schema/Category.schema"
 import { ObjectId } from "mongodb"
@@ -9,6 +9,24 @@ class CategoryServices {
     const { insertedId } = result
     const category = await databaseService.categories.findOne({ _id: new ObjectId(insertedId) })
     return category
+  }
+
+  async updateCategory({ id, payload }: { id: string; payload: updateCategoryReqBody }) {
+    const result = await databaseService.categories.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...payload
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      },
+      {
+        returnDocument: "after"
+      }
+    )
+    return result
   }
 }
 

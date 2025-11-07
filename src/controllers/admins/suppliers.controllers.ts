@@ -3,6 +3,7 @@ import { ParamsDictionary } from "express-serve-static-core"
 import { createSupplierReqBody, updateSupplierReqBody } from "../../models/requests/Supplier.request"
 import supplierServices from "../../services/suppliers.services"
 import USER_MESSAGES from "../../constants/message"
+import { pick } from "lodash"
 
 export const viewAllSupplierController = async (req: Request, res: Response) => {
   const result = await supplierServices.getAllSuppliers()
@@ -27,7 +28,7 @@ export const updateSupplierController = async (
   req: Request<ParamsDictionary, any, updateSupplierReqBody>,
   res: Response
 ) => {
-  const payload = req.body
+  const payload = pick(req.body, ["name", "taxCode", "status", "contactPerson", "phone", "email", "address"])
   const { id } = req.params
   const result = await supplierServices.updateSupplier({ payload, id })
   res.json({
