@@ -1,0 +1,56 @@
+import { validate } from "../../utils/validation"
+import { checkSchema, ParamSchema } from "express-validator"
+import USER_MESSAGES from "../../constants/message"
+
+// Validate cho name
+const nameValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.CATEGORY_NAME_REQUIRED
+  },
+  isString: {
+    errorMessage: USER_MESSAGES.CATEGORY_NAME_INVALID
+  },
+  trim: true,
+  isLength: {
+    options: { min: 1, max: 50 },
+    errorMessage: USER_MESSAGES.CATEGORY_NAME_LENGTH
+  }
+}
+
+// Validate cho description
+const descriptionValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.CATEGORY_DESCRIPTION_REQUIRED
+  },
+  isString: {
+    errorMessage: USER_MESSAGES.CATEGORY_DESCRIPTION_INVALID
+  },
+  trim: true,
+  isLength: {
+    options: { max: 255 },
+    errorMessage: USER_MESSAGES.CATEGORY_DESCRIPTION_LENGTH
+  }
+}
+
+// Validate cho status
+const statusValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.CATEGORY_STATUS_REQUIRED
+  },
+  isIn: {
+    options: [["Active", "Inactive"]],
+    errorMessage: USER_MESSAGES.CATEGORY_STATUS_INVALID
+  }
+}
+
+// Validation cho tạo mới category
+export const createCategoryValidation = validate(
+  checkSchema(
+    {
+      name: nameValidation,
+      description: descriptionValidation,
+      status: statusValidation
+    },
+    ["body"]
+  )
+)

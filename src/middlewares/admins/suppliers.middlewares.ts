@@ -1,6 +1,5 @@
 import { validate } from "../../utils/validation"
-import HTTP_STATUS from "../../constants/httpStatus"
-import { check, checkSchema, ParamSchema } from "express-validator"
+import { checkSchema, ParamSchema } from "express-validator"
 import USER_MESSAGES from "../../constants/message"
 
 const nameValidation: ParamSchema = {

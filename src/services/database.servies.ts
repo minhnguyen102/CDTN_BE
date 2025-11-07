@@ -6,6 +6,7 @@ import Table from "../models/schema/Table.schema"
 import Supplier from "../models/schema/Supplier.schema"
 import Ingredient from "../models/schema/Ingredient.schema"
 import ImportOrder from "../models/schema/ImportOrder.schema"
+import Category from "../models/schema/Category.schema"
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.sqjfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -51,6 +52,9 @@ class DatabaseService {
   }
   get import_orders(): Collection<ImportOrder> {
     return this.db.collection("import_orders")
+  }
+  get categories(): Collection<Category> {
+    return this.db.collection("categories")
   }
 }
 

@@ -110,7 +110,19 @@ const USER_MESSAGES = {
 
   CREATE_SUPPLIER_SUCCESS: "Supplier created successfully.",
   SUPPLIER_UPDATE_SUCCESS: "Supplier updated successfully.",
-  GET_ALL_SUPPLIERS_SUCCESS: "GET ALL SUPPLIERS SUCCESS"
+  GET_ALL_SUPPLIERS_SUCCESS: "GET ALL SUPPLIERS SUCCESS",
+
+  // Category
+  CATEGORY_NAME_REQUIRED: "Category name is required.",
+  CATEGORY_NAME_INVALID: "Category name must be a string.",
+  CATEGORY_NAME_LENGTH: "Category name must be between 1 and 50 characters.",
+  CATEGORY_DESCRIPTION_REQUIRED: "Category description is required.",
+  CATEGORY_DESCRIPTION_INVALID: "Category description must be a string.",
+  CATEGORY_DESCRIPTION_LENGTH: "Category description cannot exceed 255 characters.",
+  CATEGORY_STATUS_REQUIRED: "Category status is required.",
+  CATEGORY_STATUS_INVALID: "Category status must be either 'Active' or 'Inactive'.",
+  CREATE_CATEGORY_SUCCESS: "Category created successfully.",
+  UPDATE_CATEGORY_SUCCESS: "Category updated successfully."
 }
 
 export default USER_MESSAGES
