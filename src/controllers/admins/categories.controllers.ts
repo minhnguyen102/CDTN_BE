@@ -5,6 +5,13 @@ import categoryServices from "../../services/categories.services"
 import USER_MESSAGES from "../../constants/message"
 import { pick } from "lodash"
 
+export const getAllCategoryController = async (req: Request, res: Response) => {
+  const result = await categoryServices.getAllCategories()
+  res.json({
+    result
+  })
+}
+
 export const createCategoryController = async (
   req: Request<ParamsDictionary, any, createCategoryReqBody>,
   res: Response

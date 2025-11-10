@@ -1,9 +1,9 @@
 import { checkSchema, ParamSchema } from "express-validator"
 import { validate } from "../../utils/validation"
 import USER_MESSAGES from "../../constants/message"
-import { TableStatus } from "../../constants/enums"
-import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
+import { ErrorWithStatus } from "../../models/Errors"
+import { TableStatus } from "../../constants/enums"
 
 const capacityValidation: ParamSchema = {
   notEmpty: {
@@ -27,6 +27,7 @@ const idParamValidation: ParamSchema = {
     })
   }
 }
+
 export const createTableValidation = validate(
   checkSchema(
     {
@@ -54,7 +55,7 @@ export const updateTableValidation = validate(
         toInt: true
       }
     },
-    ["body", "headers"]
+    ["body", "params"]
   )
 )
 

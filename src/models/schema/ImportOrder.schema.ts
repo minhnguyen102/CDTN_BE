@@ -5,7 +5,7 @@ interface ImportOrderItem {
   ingredientName: string
   quantity: number
   importPrice: number
-  total: number
+  total: number // k luu
 }
 
 interface ImportOrderType {

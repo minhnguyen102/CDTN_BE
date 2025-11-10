@@ -120,7 +120,10 @@ class TableServices {
         }
       },
       {
-        returnDocument: "after"
+        returnDocument: "after",
+        projection: {
+          qrToken: 0
+        }
       }
     )
 

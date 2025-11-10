@@ -4,6 +4,11 @@ import Category from "../models/schema/Category.schema"
 import { ObjectId } from "mongodb"
 
 class CategoryServices {
+  async getAllCategories() {
+    const categories = await databaseService.categories.find().toArray()
+    return categories
+  }
+
   async createCategory({ payload }: { payload: createCategoryReqBody }) {
     const result = await databaseService.categories.insertOne(new Category(payload))
     const { insertedId } = result

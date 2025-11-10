@@ -1,0 +1,358 @@
+openapi: 3.0.4
+info:
+  title: Chuyên đề tốt nghiệp quản lí quán ăn
+  description: |-
+    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
+    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
+    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+
+    Some useful links:
+    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+  termsOfService: https://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+externalDocs:
+  description: Find out more about Swagger
+  url: https://swagger.io
+servers:
+  - url: http://localhost:3000/admin
+tags:
+  - name: accounts
+    description: Các logic liên quan đến accounts
+  - name: tables
+    description: Các logic liên quan đến tables
+    
+
+paths:
+  /accounts/login:
+    post:
+      tags:
+        - accounts
+      summary: Đăng nhập
+      description: Đăng nhập
+      operationId: login
+      requestBody:
+        description: Thông tin đăng nhập
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: benten19@example.com
+                password:
+                  type: string
+                  example: MinhOkela123#@
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "Login successful"
+                  result: 
+                    type: object
+                    example:
+                      accesss_token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkwMzY4ZWYxODkwZmU1YWFmYzIyYmYxIiwidG9rZW5fdHlwZSI6MCwidmVyaWZ5IjoxLCJyb2xlIjoxLCJpYXQiOjE3NjI2OTg4ODIsImV4cCI6MTc2MjY5OTE4Mn0.m5OrlzFwQSW96FQhLA3cFegikk8rsSJHqxoJQZsLXCo
+                      refresh_token: 
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkwMzY4ZWYxODkwZmU1YWFmYzIyYmYxIiwidG9rZW5fdHlwZSI6MSwidmVyaWZ5IjoxLCJyb2xlIjoxLCJpYXQiOjE3NjI2OTg4ODIsImV4cCI6MTc3MTMzODg4Mn0.P7nCfb5bxmKxkI4Hn8YJzHLyMiZ0NEP_bGFw3tEoJqk
+        '400':
+          description: Email or password is incorrect
+        '422':
+          description: Validation error
+  /tables:
+    post:
+        tags:
+          - tables
+        summary: Tạo mới tables
+        description: Tạo mới tables
+        operationId: createTable
+        requestBody:
+          description: Thông tin tạo mới table
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  capacity:
+                    type: number
+                    example: 8
+          required: true
+        security:
+          - BearerAuth: []
+        responses:
+          '200':
+            description: successful operation
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message: 
+                      type: string
+                      example: Table created successfully.
+                    result: 
+                      type: object
+                      example:
+                        QRcode:
+                          type: string
+                          example: "data:image/png;base64,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"
+                        table: 
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: MongoId
+                              example: 69114df7111e533f4e76600e
+                            number:
+                              type: integer
+                              example: 9
+                            capacity:
+                              type: integer
+                              example: 12
+                            status:
+                              type: integer
+                              example: 0
+                            currentOrderId:
+                              type: string
+                              nullable: true
+                              example: null
+                            createdAt:
+                              type: string
+                              format: date-time
+                              example: 2025-11-10T02:29:11.676Z
+                            updatedAt:
+                              type: string
+                              format: date-time
+                              example: 2025-11-10T02:29:11.676Z
+          '401':
+            description: Access token is required
+          '422':
+            description: Validation error
+    get:
+      tags:
+        - tables
+      summary: Lấy danh sách bàn
+      description: Lấy danh sách bàn bao gồm phân trang và lọc theo trạng thái (Sử dụng 0, 1, 2, 3 tương ứng với Available, Occupied, Reserved, Needs_cleaning)
+      operationId: getAllTable
+      parameters:
+        - name: page
+          in: query
+          description: Phân trang
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Tìm kiếm theo trạng thái bàn
+          required: false
+          schema:
+            type: number
+
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "Get all tables successfully."
+                  tables: 
+                    type: array
+                    description: Danh sách các bàn
+                    items:
+                      $ref: '#/components/schemas/Table'
+                  currentPage:
+                    type: integer
+                    description: Trang hiện tại
+                    example: 1
+                  limit:
+                    type: integer
+                    description: Số lượng bàn trên mỗi trang
+                    example: 4
+                  skip:
+                    type: integer
+                    description: Số lượng bàn đã bỏ qua
+                    example: 0
+                  totalPage:
+                    type: integer
+                    description: Tổng số trang
+                    example: 3
+        '401':
+          description: Access token is required
+        '422':
+          description: Validation error
+
+  /tables/{id}:
+    patch:
+      tags:
+        - tables
+      summary: Cập nhật thông tin bàn
+      description: Cập nhật thông tin bàn (Hiện tại là Số ghế và trạng thái)
+      operationId: updateTable
+      parameters:
+        - name: id
+          in: path
+          description: Id của bàn cập nhật
+          required: true
+          schema:
+            type: string
+            format: MongoId
+            example: "6908bd8b93418ddd670d7098" 
+      requestBody:
+        description: Các trường cần cập nhật. Bạn có thể gửi 1 trong 2 trường, hoặc cả 2.
+        required: true # Bản thân object body là bắt buộc, nhưng các trường bên trong là không
+        content:
+          application/json:
+            schema:
+              # Tham chiếu đến một schema mới ta sẽ tạo ở bước 2
+              $ref: '#/components/schemas/UpdateTableRequest'
+
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cập nhật bàn thành công. Trả về thông tin bàn đã được cập nhật.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table' 
+        '400':
+          description: Dữ liệu gửi lên không hợp lệ
+        '401':
+          description: Lỗi xác thực (chưa đăng nhập hoặc không có quyền)
+        '404':
+          description: Không tìm thấy bàn với ID được cung cấp
+
+  /tables/{id}/qr-token:
+    patch:
+      tags:
+        - tables
+      summary: Thay đổi mã QRCode
+      description: Thay đổi qrToken -> thay đổi QRCode
+      operationId: regenerateQrToken
+      parameters:
+        - name: id
+          in: path
+          description: Id của bàn cập nhật
+          required: true
+          schema:
+            type: string
+            format: MongoId
+            example: "6908bd8b93418ddd670d7098" 
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cập nhật bàn thành công. Trả về thông tin bàn đã được cập nhật.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "QR token regenerated successfully."
+                  table:
+                    type: object
+                    properties:
+                      orderUrl: 
+                        type: string
+                        example: "https://your-app-frontend.com/order?token=0d1b932af96cc87a3e575e0cfbb1aba7dba64713"
+                      QRtable: 
+                        type: string
+                        example: "data:image/png;base64,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"
+
+        '400':
+          description: Dữ liệu gửi lên không hợp lệ
+        '401':
+          description: Lỗi xác thực (chưa đăng nhập hoặc không có quyền)
+        '404':
+          description: Không tìm thấy bàn với ID được cung cấp
+
+components:
+  schemas:
+    Table:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID duy nhất của bàn (MongoDB ObjectId)
+          example: "6908bd8b93418ddd670d7098"
+        number:
+          type: integer
+          description: Số thứ tự của bàn
+          example: 1
+        capacity:
+          type: integer
+          description: Sức chứa của bàn (số người)
+          example: 10
+        status:
+          $ref: '#/components/schemas/TableStatus'
+        currentOrderId:
+          type: string
+          nullable: true
+          example: null
+        QRcode:
+          type: string
+          description: Mã QR của bàn dưới dạng Data URL (base64)
+          example: "data:image/png;base64,iVBORw0KGgo...[dữ liệu base64]..."
+      # Các trường bắt buộc
+      required:
+        - _id
+        - number
+        - capacity
+        - status
+        - QRcode
+    
+    UpdateTableRequest: 
+      type: object
+      description: Dữ liệu để cập nhật một bàn (chỉ chứa các trường có thể cập nhật)
+      properties:
+        capacity:
+          type: integer
+          description: Sức chứa mới của bàn
+          example: 6
+        status:
+          $ref: '#/components/schemas/TableStatus'
+      # Không có require đồng nghĩa các trường không bắt buộc phải gửi lên
+
+    TableStatus:
+      type: integer # Vì enum của TypeScript mặc định là số
+      description: |
+        Trạng thái của bàn:
+        * `0`: Available (còn trống)
+        * `1`: Occupied (đã có khách)
+        * `2`: Reserved (đã đặt trước)
+        * `3`: Needs_cleaning (cần dọn dẹp)
+      enum:
+        - 0 # Available
+        - 1 # Occupied
+        - 2 # Reserved
+        - 3 # Needs_cleaning
+      example: 0 # Đưa ra một giá trị ví dụ
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

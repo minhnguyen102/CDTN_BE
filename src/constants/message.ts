@@ -122,7 +122,23 @@ const USER_MESSAGES = {
   CATEGORY_STATUS_REQUIRED: "Category status is required.",
   CATEGORY_STATUS_INVALID: "Category status must be either 'Active' or 'Inactive'.",
   CREATE_CATEGORY_SUCCESS: "Category created successfully.",
-  UPDATE_CATEGORY_SUCCESS: "Category updated successfully."
+  UPDATE_CATEGORY_SUCCESS: "Category updated successfully.",
+
+  // Messages for Ingredients
+  INGREDIENT_NAME_IS_REQUIRED: "Ingredient name is required",
+  INGREDIENT_NAME_MUST_BE_STRING: "Ingredient name must be a string",
+  INGREDIENT_NAME_MIN_LENGTH: "Ingredient name must be at least 2 characters long",
+  CATEGORY_ID_IS_REQUIRED: "Category name is required",
+  CATEGORY_ID_INVALID: "Invalid Category ID (must be a MongoID)",
+  UNIT_IS_REQUIRED: "Unit is required",
+  UNIT_MUST_BE_STRING: "Unit must be a string",
+  UNIT_PRICE_IS_REQUIRED: "Unit price is required",
+  UNIT_PRICE_MUST_BE_POSITIVE: "Unit price must be a number greater than 0",
+  MIN_STOCK_IS_REQUIRED: "Minimum stock is required",
+  MIN_STOCK_MUST_BE_POSITIVE_INTEGER: "Minimum stock must be an integer greater than or equal to 0",
+  // Ingredient Success Messages
+  INGREDIENT_CREATED_SUCCESSFULLY: "Ingredient created successfully",
+  INGREDIENT_UPDATED_SUCCESSFULLY: "Ingredient updated successfully"
 }
 
 export default USER_MESSAGES

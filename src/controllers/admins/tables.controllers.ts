@@ -1,9 +1,9 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import { createTableReqBody, updateTableReqBody } from "../../models/requests/Account.request"
-import tableServices from "../../services/tables.services"
 import USER_MESSAGES from "../../constants/message"
 import { pick } from "lodash"
+import { createTableReqBody, updateTableReqBody } from "../../models/requests/Account.request"
+import tableServices from "../../services/tables.services"
 
 export const createTableController = async (req: Request<ParamsDictionary, any, createTableReqBody>, res: Response) => {
   const { capacity } = req.body
