@@ -7,7 +7,7 @@ interface AccountType {
   email: string // (Tạo unique index)
   password: string // (Lưu dạng hash)
   date_of_birth: Date
-  role: ObjectId // "Owner" hoặc "Employee"
+  role: RoleAccount // "Owner" hoặc "Employee"
   avatar?: string
   createdAt?: Date
   updatedAt?: Date
@@ -22,7 +22,7 @@ export default class Account {
   email: string // (Tạo unique index)
   password: string // (Lưu dạng hash)
   date_of_birth: Date
-  role: ObjectId // "Owner" hoặc "Employee"
+  role: RoleAccount // "Owner" hoặc "Employee"
   avatar: string // optional
   createdAt: Date
   updatedAt: Date

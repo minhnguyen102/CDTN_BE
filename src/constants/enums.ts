@@ -1,6 +1,6 @@
 export enum RoleAccount {
-  Employee, // tương ứng = 0
-  Owner
+  Employee = "Employee", // tương ứng = 0
+  Owner = "Owner"
 }
 
 export enum AccountVerifyStatus {
@@ -31,4 +31,9 @@ export enum SupplierStatus {
 export enum CategoryTypeStatus {
   Active = "Active",
   Inactive = "Inactive"
+}
+
+export enum RoleStatus {
+  ACTIVE = "active",
+  INACTIVE = "inactive"
 }

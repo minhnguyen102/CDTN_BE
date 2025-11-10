@@ -11,7 +11,7 @@ import { JsonWebTokenError } from "jsonwebtoken"
 import _ from "lodash"
 import { ObjectId } from "mongodb"
 import { TokenPayload } from "../../models/requests/Account.request"
-import { AccountVerifyStatus } from "../../constants/enums"
+import { AccountVerifyStatus, RoleAccount } from "../../constants/enums"
 
 const nameValidation: ParamSchema = {
   notEmpty: {
@@ -165,7 +165,7 @@ export const accessTokenValidation = validate(
               })
               req.decoded_access_token = decoded_access_token
               // console.log("decoded_access_token", decoded_access_token)
-              // console.log(decoded_access_token)
+              // console.log(decoded_access_token.role === RoleAccount.Employee)
             } catch (error) {
               // Lỗi do verify
               if (error instanceof JsonWebTokenError) {
