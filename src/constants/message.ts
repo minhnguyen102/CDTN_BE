@@ -138,7 +138,18 @@ const USER_MESSAGES = {
   MIN_STOCK_MUST_BE_POSITIVE_INTEGER: "Minimum stock must be an integer greater than or equal to 0",
   // Ingredient Success Messages
   INGREDIENT_CREATED_SUCCESSFULLY: "Ingredient created successfully",
-  INGREDIENT_UPDATED_SUCCESSFULLY: "Ingredient updated successfully"
+  INGREDIENT_UPDATED_SUCCESSFULLY: "Ingredient updated successfully",
+
+  // New Messages for Roles
+  ROLE_ID_IS_REQUIRED: "Role ID is required.",
+  ROLE_NAME_REQUIRED: "Role name is required.",
+  ROLE_NAME_MUST_BE_STRING: "Role name must be a string.",
+  ROLE_DESCRIPTION_MUST_BE_STRING: "Role description must be a string.",
+  ROLE_STATUS_REQUIRED: "Role status is required.",
+  INVALID_ROLE_STATUS: "Invalid role status.", // (You can add valid statuses here, e.g., "Status must be 'active' or 'inactive'")
+  ROLE_PERMISSION_IDS_REQUIRED: "Permission IDs are required.",
+  ROLE_PERMISSION_IDS_MUST_BE_ARRAY: "Permission IDs must be an array.",
+  ROLE_NAME_ALREADY_EXISTS: "Role name already exists"
 }
 
 export default USER_MESSAGES

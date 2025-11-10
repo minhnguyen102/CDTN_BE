@@ -7,6 +7,8 @@ import Supplier from "../models/schema/Supplier.schema"
 import Ingredient from "../models/schema/Ingredient.schema"
 import ImportOrder from "../models/schema/ImportOrder.schema"
 import Category from "../models/schema/Category.schema"
+import Role from "../models/schema/Role.schema"
+import Permission from "../models/schema/Permission.schema"
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.sqjfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -55,6 +57,12 @@ class DatabaseService {
   }
   get categories(): Collection<Category> {
     return this.db.collection("categories")
+  }
+  get roles(): Collection<Role> {
+    return this.db.collection("roles")
+  }
+  get permissions(): Collection<Permission> {
+    return this.db.collection("permissions")
   }
 }
 
