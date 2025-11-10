@@ -149,7 +149,16 @@ const USER_MESSAGES = {
   INVALID_ROLE_STATUS: "Invalid role status.", // (You can add valid statuses here, e.g., "Status must be 'active' or 'inactive'")
   ROLE_PERMISSION_IDS_REQUIRED: "Permission IDs are required.",
   ROLE_PERMISSION_IDS_MUST_BE_ARRAY: "Permission IDs must be an array.",
-  ROLE_NAME_ALREADY_EXISTS: "Role name already exists"
+  ROLE_NAME_ALREADY_EXISTS: "Role name already exists",
+
+  // New Messages for Permissions
+  PERMISSION_ID_IS_REQUIRED: "Permission ID is required.",
+  PERMISSION_NAME_REQUIRED: "Permission name is required.",
+  PERMISSION_NAME_MUST_BE_STRING: "Permission name must be a string.",
+  PERMISSION_DESCRIPTION_MUST_BE_STRING: "Permission description must be a string.",
+  PERMISSION_MODULE_MUST_BE_STRING: "Permission module must be a string.",
+  PERMISSION_NAME_ALREADY_EXISTS: "Permission name already exists.",
+  GET_ALL_PERMISSIONS_SUCCESS: "Get all permissions success"
 }
 
 export default USER_MESSAGES

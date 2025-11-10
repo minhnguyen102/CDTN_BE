@@ -5,6 +5,7 @@ import supplierRoutes from "./suppliers.routes"
 import categoriesRouter from "./categories.routes"
 import ingredientsRouter from "./ingredients.routes"
 import rolesRouter from "./roles.routes"
+import permissionsRouter from "./permissions.routes"
 
 export const routesAdmin = (app: Express) => {
   const PATH_ADMIN = "/admin"
@@ -14,4 +15,5 @@ export const routesAdmin = (app: Express) => {
   app.use(PATH_ADMIN + "/categories", categoriesRouter)
   app.use(PATH_ADMIN + "/ingredients", ingredientsRouter)
   app.use(PATH_ADMIN + "/roles", rolesRouter)
+  app.use(PATH_ADMIN + "/permissions", permissionsRouter)
 }

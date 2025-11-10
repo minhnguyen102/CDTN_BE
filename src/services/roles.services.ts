@@ -1,6 +1,6 @@
 import { createRoleReqBody } from "../models/requests/Role.request"
-import databaseService from "./database.servies"
 import Role from "../models/schema/Role.schema"
+import databaseService from "./database.servies"
 import { ObjectId } from "mongodb"
 
 class RoleServices {

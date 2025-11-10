@@ -28,9 +28,6 @@ const nameValidation: ParamSchema = {
   },
   custom: {
     options: async (value: string) => {
-      // value chính là "name" mà người dùng gửi lên
-
-      // Giả sử bạn có databaseService để truy cập collection 'roles'
       const role = await databaseService.roles.findOne({ name: value })
 
       if (role) {
@@ -41,7 +38,6 @@ const nameValidation: ParamSchema = {
         })
       }
 
-      // Nếu không tìm thấy, name hợp lệ
       return true
     }
   },
