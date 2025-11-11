@@ -26,7 +26,7 @@ class AccountsServices {
     return signToken({
       payload: {
         user_id,
-        token_type: TokenType.AccessToken,
+        token_type: TokenType.ACCESS_TOKEN,
         verify,
         role
       },
@@ -49,7 +49,7 @@ class AccountsServices {
     return signToken({
       payload: {
         user_id,
-        token_type: TokenType.RefreshToken,
+        token_type: TokenType.REFRESH_TOKEN,
         verify,
         role
       },
@@ -64,7 +64,7 @@ class AccountsServices {
     return signToken({
       payload: {
         user_id,
-        TokenType: TokenType.EmailVerifyToken,
+        TokenType: TokenType.EMAIL_VERIFY_TOKEN,
         verify
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_EMAIL_VERIFY_TOKEN as string,
@@ -78,7 +78,7 @@ class AccountsServices {
     return signToken({
       payload: {
         user_id,
-        TokenType: TokenType.ForgotPasswordToken,
+        TokenType: TokenType.FORGOT_PASSWORD_TOKEN,
         verify
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_FORGOT_PASSWORD_TOKEN as string,
@@ -123,7 +123,7 @@ class AccountsServices {
     const user_id = new ObjectId()
     const email_verify_token = await this.signEmailVerifyToken({
       user_id: user_id.toString(),
-      verify: AccountVerifyStatus.Unverified
+      verify: AccountVerifyStatus.UNVERIFIED
     })
     console.log("Giả lập gửi email_verify_token cho account: ", email_verify_token)
     await databaseService.accounts.insertOne(
@@ -138,7 +138,7 @@ class AccountsServices {
     // const user_id = result.insertedId.toString()
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
       user_id: user_id.toString(),
-      verify: AccountVerifyStatus.Unverified,
+      verify: AccountVerifyStatus.UNVERIFIED,
       role: payload.role
     })
     await databaseService.refresh_tokens.insertOne(
@@ -187,7 +187,7 @@ class AccountsServices {
         {
           $set: {
             email_verify_token: "",
-            verify: AccountVerifyStatus.Verified
+            verify: AccountVerifyStatus.VERIFIED
             // updatedAt: new Date() // Khởi tạo thời gian khi code chạy (thời điểm trước)
           },
           $currentDate: {

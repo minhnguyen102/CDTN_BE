@@ -4,7 +4,6 @@ import { TableStatus } from "../constants/enums"
 import { genQRtable } from "../utils/qr"
 import { randomQrToken } from "../utils/crypto"
 import { paginationHelper } from "../utils/helpers"
-import { table } from "console"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { ObjectId } from "mongodb"
@@ -21,21 +20,12 @@ class TableServices {
           number: number + 1,
           capacity: capacity,
           qrToken: qrToken,
-          status: TableStatus.Available
+          status: TableStatus.AVAILABLE
         })
       ),
       await genQRtable({ qrToken })
     ])
-    const newTable = await databaseService.tables.findOne(
-      {
-        _id: tanleToInsert.insertedId
-      },
-      {
-        projection: {
-          qrToken: 0
-        }
-      }
-    )
+    const newTable = await databaseService.tables.findOne({ _id: tanleToInsert.insertedId })
     return {
       QRcode: qrCodeImageString,
       table: newTable
@@ -65,13 +55,10 @@ class TableServices {
 
     // FilterStatus
     if (status) {
-      if (isNaN(Number(status)) && status in TableStatus) {
-        // nếu truyền là chữ
-        // console.log(TableStatus[status as keyof typeof TableStatus]) // return 0
+      const validStatuses = Object.values(TableStatus) as string[]
+      if (validStatuses.includes(status)) {
+        console.log(TableStatus[status as keyof typeof TableStatus])
         objectFind.status = TableStatus[status as keyof typeof TableStatus]
-      } else if (!isNaN(Number(status)) && TableStatus[Number(status)]) {
-        // nếu truyền là số
-        objectFind.status = Number(status)
       } else {
         throw new ErrorWithStatus({
           message: `Trạng thái filter không hợp lệ`,
@@ -95,7 +82,7 @@ class TableServices {
         number: table.number,
         capacity: table.capacity,
         status: table.status,
-
+        qrToken: table.qrToken,
         QRcode: qrCodeImage // Thêm thuộc tính mới là ảnh QR
       }
     })
@@ -147,10 +134,9 @@ class TableServices {
       }
     )
     const qrToken = result?.qrToken as string
-    const orderUrl = `https://your-app-frontend.com/order?token=${qrToken}`
     const newQRtable = await genQRtable({ qrToken })
     return {
-      orderUrl,
+      qrToken,
       QRtable: newQRtable
     }
   }

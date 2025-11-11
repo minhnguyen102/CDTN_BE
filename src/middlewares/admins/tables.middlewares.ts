@@ -50,9 +50,8 @@ export const updateTableValidation = validate(
         optional: true,
         isIn: {
           options: [Object.values(TableStatus)],
-          errorMessage: "Status must be one of the following: Available, Occupied, Reserved, or Needs_cleaning."
-        },
-        toInt: true
+          errorMessage: "Status must be one of the following: available, occupied, reserved, or needs_cleaning."
+        }
       }
     },
     ["body", "params"]

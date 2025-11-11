@@ -76,7 +76,7 @@ export const emailVerifyController = async (
     })
   }
   // Nếu đã verify email trước đó
-  if (account.email_verify_token === "" && account.verify === AccountVerifyStatus.Verified) {
+  if (account.email_verify_token === "" && account.verify === AccountVerifyStatus.VERIFIED) {
     return res.json({
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
@@ -100,7 +100,7 @@ export const resendEmailVerifyController = async (req: Request<ParamsDictionary,
     })
   }
   // Nếu đã verify email trước đó
-  if (account.verify === AccountVerifyStatus.Verified) {
+  if (account.verify === AccountVerifyStatus.VERIFIED) {
     return res.json({
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })

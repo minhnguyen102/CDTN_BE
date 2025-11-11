@@ -99,7 +99,7 @@ const USER_MESSAGES = {
   SUPPLIER_TAX_CODE_INVALID: "Tax code must contain only letters and numbers.",
   SUPPLIER_TAX_CODE_LENGTH_INVALID: "Tax code must be between 5 and 20 characters long.",
   SUPPLIER_STATUS_REQUIRED: "Supplier status is required.",
-  SUPPLIER_STATUS_INVALID: "Supplier status must be one of: Active, Inactive",
+  SUPPLIER_STATUS_INVALID: "Supplier status must be one of: active, inactive",
   SUPPLIER_CONTACT_PERSON_REQUIRED: "Contact person name is required.",
   SUPPLIER_CONTACT_PERSON_INVALID: "Contact person name must be a string.",
   SUPPLIER_PHONE_REQUIRED: "Phone number is required.",
@@ -120,7 +120,7 @@ const USER_MESSAGES = {
   CATEGORY_DESCRIPTION_INVALID: "Category description must be a string.",
   CATEGORY_DESCRIPTION_LENGTH: "Category description cannot exceed 255 characters.",
   CATEGORY_STATUS_REQUIRED: "Category status is required.",
-  CATEGORY_STATUS_INVALID: "Category status must be either 'Active' or 'Inactive'.",
+  CATEGORY_STATUS_INVALID: "Category status must be either 'active' or 'inactive'.",
   CREATE_CATEGORY_SUCCESS: "Category created successfully.",
   UPDATE_CATEGORY_SUCCESS: "Category updated successfully.",
 

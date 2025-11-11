@@ -362,7 +362,7 @@ export const resetPasswordValidation = validate(
 export const verifiedUserValidation = (req: Request, res: Response, next: NextFunction) => {
   const { verify } = req.decoded_access_token as TokenPayload
   // Nếu chưa được verify
-  if (verify === AccountVerifyStatus.Unverified) {
+  if (verify === AccountVerifyStatus.UNVERIFIED) {
     return next(
       new ErrorWithStatus({
         message: USER_MESSAGES.USER_NOT_VERIFY,

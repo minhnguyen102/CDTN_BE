@@ -4,34 +4,34 @@ export enum RoleAccount {
 }
 
 export enum AccountVerifyStatus {
-  Unverified, // chưa xác thực (Mặc định)
-  Verified, // Đã xác thực
-  Banner // Bị khóa (Đối với nhân viên được cho thôi hoặc nghỉ việc)
+  UNVERIFIED = "unverified", // chưa xác thực (Mặc định)
+  VERIFIED = "verified", // Đã xác thực
+  BANNER = "banner" // Bị khóa (Đối với nhân viên được cho thôi hoặc nghỉ việc)
 }
 
 export enum TokenType {
-  AccessToken,
-  RefreshToken,
-  EmailVerifyToken,
-  ForgotPasswordToken
+  ACCESS_TOKEN = "access_token",
+  REFRESH_TOKEN = "refresh_token",
+  EMAIL_VERIFY_TOKEN = "email_verify_token",
+  FORGOT_PASSWORD_TOKEN = "forgot_password_token"
 }
 
 export enum TableStatus {
-  Available, // còn trống
-  Occupied, // đã có khách
-  Reserved, // đã đặt trước
-  Needs_cleaning // cần dọn dẹp
-}
+  AVAILABLE = "available", // còn trống
+  OCCUPIED = "occupied", // đã có khách
+  RESERVED = "reserved", // đã đặt trước
+  NEEDS_CLEANING = "needs_cleaning" // cần dọn dẹp
+} // done
 
 export enum SupplierStatus {
-  Active = "Active",
-  Inactive = "Inactive"
-}
+  ACTIVE = "active",
+  INACTIVE = "inactive"
+} // done
 
 export enum CategoryTypeStatus {
-  Active = "Active",
-  Inactive = "Inactive"
-}
+  ACTIVE = "active",
+  INACTIVE = "inactive"
+} // done
 
 export enum RoleStatus {
   ACTIVE = "active",

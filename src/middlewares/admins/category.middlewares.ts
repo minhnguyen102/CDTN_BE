@@ -40,7 +40,7 @@ const statusValidation: ParamSchema = {
     errorMessage: USER_MESSAGES.CATEGORY_STATUS_REQUIRED
   },
   isIn: {
-    options: [["Active", "Inactive"]],
+    options: [["active", "inactive"]],
     errorMessage: USER_MESSAGES.CATEGORY_STATUS_INVALID
   }
 }
