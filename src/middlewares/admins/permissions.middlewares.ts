@@ -9,7 +9,7 @@ import databaseService from "../../services/database.servies"
 
 // --- Định nghĩa các schema (ParamSchema) ---
 
-const permissionIdValidation: ParamSchema = {
+const permissionIdValidate: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.PERMISSION_ID_IS_REQUIRED
   },
@@ -80,7 +80,7 @@ export const updatePermissionValidation = validate(
   checkSchema(
     {
       // Validate ID từ params
-      permission_id: permissionIdValidation,
+      permission_id: permissionIdValidate,
 
       // Validate các trường optional từ body
       name: {
@@ -118,5 +118,14 @@ export const updatePermissionValidation = validate(
       module: moduleValidation
     },
     ["body", "params"]
+  )
+)
+
+export const permissionIdValidation = validate(
+  checkSchema(
+    {
+      permission_id: permissionIdValidate
+    },
+    ["params"]
   )
 )

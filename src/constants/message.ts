@@ -158,7 +158,9 @@ const USER_MESSAGES = {
   PERMISSION_DESCRIPTION_MUST_BE_STRING: "Permission description must be a string.",
   PERMISSION_MODULE_MUST_BE_STRING: "Permission module must be a string.",
   PERMISSION_NAME_ALREADY_EXISTS: "Permission name already exists.",
-  GET_ALL_PERMISSIONS_SUCCESS: "Get all permissions success"
+  GET_ALL_PERMISSIONS_SUCCESS: "Get all permissions success",
+  UPDATE_PERMISSION_SUCCESS: "Update permission successfully.",
+  PERMISSION_NOT_FOUND: "Permission not found."
 }
 
 export default USER_MESSAGES

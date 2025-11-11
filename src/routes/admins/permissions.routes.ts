@@ -1,7 +1,8 @@
 import { Router } from "express"
 import {
   createPermissionController,
-  getAllPermissionsController
+  getAllPermissionsController,
+  updatePermissionController
   // deletePermissionController,
   // getAllPermissionsController,
   // getPermissionController,
@@ -10,6 +11,7 @@ import {
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import {
   createPermissionValidation,
+  permissionIdValidation,
   updatePermissionValidation
 } from "../../middlewares/admins/permissions.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
@@ -65,14 +67,14 @@ permissionsRouter.get(
  * Headers: {Authorization: Bearer access_token}
  * Body: updatePermissionReqBody
  */
-// permissionsRouter.patch(
-//   "/:permission_id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   permissionIdValidation,
-//   updatePermissionValidation,
-//   wrapHandlerFunction(updatePermissionController)
-// )
+permissionsRouter.patch(
+  "/:permission_id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  permissionIdValidation,
+  updatePermissionValidation,
+  wrapHandlerFunction(updatePermissionController)
+)
 
 /**
  * Description: Delete a permission by ID

@@ -1,6 +1,6 @@
 import databaseService from "./database.servies"
 import { ObjectId } from "mongodb"
-import { createPermissionReqBody } from "../models/requests/Permission.request"
+import { createPermissionReqBody, updatePermissionReqBody } from "../models/requests/Permission.request"
 import Permission from "../models/schema/Permission.schema"
 
 class PermissionServices {
@@ -17,6 +17,32 @@ class PermissionServices {
 
     // Trả về mảng các permission
     return permissions as Permission[]
+  }
+
+  async updatePermission({
+    permission_id,
+    payload
+  }: {
+    permission_id: string
+    payload: updatePermissionReqBody
+  }): Promise<Permission | null> {
+    // Validation middleware đã chạy, payload chỉ chứa các trường hợp lệ
+    // $set sẽ chỉ cập nhật các trường có trong payload
+    const result = await databaseService.permissions.findOneAndUpdate(
+      { _id: new ObjectId(permission_id) }, // Điều kiện tìm
+      {
+        $set: payload, // Dữ liệu cập nhật
+        $currentDate: { updatedAt: true } // Tự động cập nhật 'updatedAt'
+      },
+      {
+        returnDocument: "after" // Trả về document *sau* khi đã cập nhật
+      }
+    )
+
+    // result.value là document đã được cập nhật,
+    // hoặc null nếu không tìm thấy document nào để cập nhật
+    // return result.value as Permission | null
+    return result
   }
 }
 
