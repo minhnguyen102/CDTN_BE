@@ -36,11 +36,6 @@ export const getAllTablesController = async (req: Request, res: Response) => {
     const parseLimit = Number(limitItemFromQuery)
     if (allowLimits.includes(parseLimit)) {
       limitItem = parseLimit
-    } else {
-      throw new ErrorWithStatus({
-        message: `Giá trị 'limitItem' không hợp lệ. Chỉ chấp nhận: ${allowLimits.join(", ")}`,
-        status: HTTP_STATUS.BAD_REQUEST
-      })
     }
   }
   // Xử lí status
