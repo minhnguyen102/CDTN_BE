@@ -4,6 +4,8 @@ import USER_MESSAGES from "../../constants/message"
 import { pick } from "lodash"
 import { createTableReqBody, updateTableReqBody } from "../../models/requests/Account.request"
 import tableServices from "../../services/tables.services"
+import { ErrorWithStatus } from "../../models/Errors"
+import HTTP_STATUS from "../../constants/httpStatus"
 
 export const createTableController = async (req: Request<ParamsDictionary, any, createTableReqBody>, res: Response) => {
   const { capacity } = req.body
@@ -25,9 +27,25 @@ export const getAllTablesController = async (req: Request, res: Response) => {
     }
   }
 
+  // Xử lí limitItem linh động
+  const defaultLimit = 5
+  let limitItem = defaultLimit
+  const allowLimits = [5, 10, 15]
+  const limitItemFromQuery = req.query?.limitItem as string
+  if (limitItemFromQuery) {
+    const parseLimit = Number(limitItemFromQuery)
+    if (allowLimits.includes(parseLimit)) {
+      limitItem = parseLimit
+    } else {
+      throw new ErrorWithStatus({
+        message: `Giá trị 'limitItem' không hợp lệ. Chỉ chấp nhận: ${allowLimits.join(", ")}`,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+  }
   // Xử lí status
   const status = (req.query.status as string) || undefined
-  const result = await tableServices.getAllTables({ page: pageQuery, status })
+  const result = await tableServices.getAllTables({ page: pageQuery, status, limitItem })
   res.json({
     message: USER_MESSAGES.GET_ALL_TABLES_SUCCESS,
     ...result

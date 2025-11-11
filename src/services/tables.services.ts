@@ -32,9 +32,8 @@ class TableServices {
     }
   }
 
-  async getAllTables({ page, status }: { page: number; status?: string }) {
+  async getAllTables({ page, status, limitItem }: { page: number; status?: string; limitItem: number }) {
     const objectFind: { status?: TableStatus } = {}
-
     // Pagination
     const objectPagination: {
       currentPage: number
@@ -43,7 +42,7 @@ class TableServices {
       totalPage?: number
     } = {
       currentPage: page,
-      limit: 4
+      limit: limitItem
     }
     const totalDocument = await databaseService.tables.countDocuments()
     paginationHelper({
