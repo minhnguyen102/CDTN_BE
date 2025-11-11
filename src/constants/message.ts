@@ -160,7 +160,8 @@ const USER_MESSAGES = {
   PERMISSION_NAME_ALREADY_EXISTS: "Permission name already exists.",
   GET_ALL_PERMISSIONS_SUCCESS: "Get all permissions success",
   UPDATE_PERMISSION_SUCCESS: "Update permission successfully.",
-  PERMISSION_NOT_FOUND: "Permission not found."
+  PERMISSION_NOT_FOUND: "Permission not found.",
+  DELETE_PERMISSION_SUCCESS: "Delete permission successfully."
 }
 
 export default USER_MESSAGES

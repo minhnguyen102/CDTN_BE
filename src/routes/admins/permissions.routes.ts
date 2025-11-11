@@ -1,6 +1,7 @@
 import { Router } from "express"
 import {
   createPermissionController,
+  deletePermissionController,
   getAllPermissionsController,
   updatePermissionController
   // deletePermissionController,
@@ -82,12 +83,12 @@ permissionsRouter.patch(
  * Method: DELETE
  * Headers: {Authorization: Bearer access_token}
  */
-// permissionsRouter.delete(
-//   "/:permission_id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   permissionIdValidation,
-//   wrapHandlerFunction(deletePermissionController)
-// )
+permissionsRouter.delete(
+  "/:permission_id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  permissionIdValidation,
+  wrapHandlerFunction(deletePermissionController)
+)
 
 export default permissionsRouter

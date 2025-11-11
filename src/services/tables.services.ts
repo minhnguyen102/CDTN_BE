@@ -83,6 +83,7 @@ class TableServices {
         capacity: table.capacity,
         status: table.status,
         qrToken: table.qrToken,
+        currentOrderId: table.currentOrderId,
         QRcode: qrCodeImage // Thêm thuộc tính mới là ảnh QR
       }
     })

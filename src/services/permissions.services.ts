@@ -38,11 +38,33 @@ class PermissionServices {
         returnDocument: "after" // Trả về document *sau* khi đã cập nhật
       }
     )
-
-    // result.value là document đã được cập nhật,
-    // hoặc null nếu không tìm thấy document nào để cập nhật
-    // return result.value as Permission | null
     return result
+  }
+
+  async deletePermission(permission_id: string): Promise<boolean> {
+    const objectIdDelete = new ObjectId(permission_id)
+    // 1. Thử xóa permission
+    const result = await databaseService.permissions.deleteOne({
+      _id: objectIdDelete
+    })
+
+    // 2. Kiểm tra xem có xóa được không
+    // Nếu result.deletedCount là 0, nghĩa là không tìm thấy
+    if (result.deletedCount === 0) {
+      return false // Trả về false để báo hiệu không tìm thấy
+    }
+
+    // 3. (Quan trọng) Nếu xóa thành công, hãy dọn dẹp nó
+    // khỏi tất cả các 'roles' đang tham chiếu đến nó.
+    await databaseService.roles.updateMany(
+      {
+        permissionIds: objectIdDelete // Tìm tất cả role có ID này
+      },
+      {
+        $pull: { permissionIds: objectIdDelete } // Xóa ID đó khỏi mảng
+      }
+    )
+    return true // Trả về true để báo hiệu xóa thành công
   }
 }
 

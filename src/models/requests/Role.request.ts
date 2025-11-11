@@ -5,5 +5,5 @@ export interface createRoleReqBody {
   name: string
   description?: string
   status: RoleStatus
-  permissionIds: ObjectId[]
+  permissionIds: string[]
 }

@@ -49,3 +49,20 @@ export const updatePermissionController = async (
     result: result
   })
 }
+
+export const deletePermissionController = async (req: Request, res: Response) => {
+  const { permission_id } = req.params
+  const result = await permissionServices.deletePermission(permission_id)
+
+  // Nếu service trả về false, nghĩa là không tìm thấy permission với ID đó
+  if (!result) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGES.PERMISSION_NOT_FOUND // Dùng lại message này
+    })
+  }
+
+  // Trả về thông báo thành công
+  return res.json({
+    message: USER_MESSAGES.DELETE_PERMISSION_SUCCESS // Thêm message này
+  })
+}
