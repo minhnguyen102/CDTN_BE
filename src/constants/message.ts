@@ -150,6 +150,10 @@ const USER_MESSAGES = {
   ROLE_PERMISSION_IDS_REQUIRED: "Permission IDs are required.",
   ROLE_PERMISSION_IDS_MUST_BE_ARRAY: "Permission IDs must be an array.",
   ROLE_NAME_ALREADY_EXISTS: "Role name already exists",
+  GET_ALL_ROLES_SUCCESS: "Get all roles successfully.",
+  CREATE_ROLE_SUCCESS: "Create role successfully.",
+  UPDATE_ROLE_SUCCESS: "Update role successfully.",
+  ROLE_NOT_FOUND: "Role not found.",
 
   // New Messages for Permissions
   PERMISSION_ID_IS_REQUIRED: "Permission ID is required.",
@@ -161,7 +165,8 @@ const USER_MESSAGES = {
   GET_ALL_PERMISSIONS_SUCCESS: "Get all permissions success",
   UPDATE_PERMISSION_SUCCESS: "Update permission successfully.",
   PERMISSION_NOT_FOUND: "Permission not found.",
-  DELETE_PERMISSION_SUCCESS: "Delete permission successfully."
+  DELETE_PERMISSION_SUCCESS: "Delete permission successfully.",
+  PERMISSION_ID_NOT_FOUND: "One or more permission IDs do not exist."
 }
 
 export default USER_MESSAGES

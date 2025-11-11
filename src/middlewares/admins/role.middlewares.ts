@@ -1,3 +1,4 @@
+import { Request } from "express"
 import { checkSchema, ParamSchema } from "express-validator"
 import { validate } from "../../utils/validation"
 import USER_MESSAGES from "../../constants/message"
@@ -6,8 +7,9 @@ import { ErrorWithStatus } from "../../models/Errors"
 import { RoleStatus } from "../../constants/enums" // Giả sử bạn có enum này
 import { isMongoId } from "validator" // Import trực tiếp để dùng trong custom validation
 import databaseService from "../../services/database.servies"
+import { ObjectId } from "mongodb"
 
-const roleIdValidation: ParamSchema = {
+const roleIdValidate: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.ROLE_ID_IS_REQUIRED // Cần thêm message này
   },
@@ -71,10 +73,12 @@ const permissionIdsValidation: ParamSchema = {
     errorMessage: USER_MESSAGES.ROLE_PERMISSION_IDS_MUST_BE_ARRAY // Cần thêm
   },
   custom: {
-    options: (value: any[]) => {
+    options: async (value: any[]) => {
       if (!Array.isArray(value)) {
-        // Dư thừa vì đã có check isArray, nhưng an toàn cho custom logic
         throw new Error(USER_MESSAGES.ROLE_PERMISSION_IDS_MUST_BE_ARRAY)
+      }
+      if (value.length === 0) {
+        return true
       }
       // Kiểm tra từng ID trong mảng
       for (const id of value) {
@@ -86,7 +90,19 @@ const permissionIdsValidation: ParamSchema = {
           })
         }
       }
-      // Nếu tất cả ID đều hợp lệ
+      // Kiểm tra tồn tại trong db permissions
+      const objectIdArray = value.map((id) => new ObjectId(String(id)))
+      const count = await databaseService.permissions.countDocuments({
+        _id: { $in: objectIdArray }
+      })
+
+      if (objectIdArray.length > count) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGES.PERMISSION_ID_NOT_FOUND,
+          status: HTTP_STATUS.NOT_FOUND
+        })
+      }
+
       return true
     }
   }
@@ -109,20 +125,50 @@ export const createRoleValidation = validate(
 export const updateRoleValidation = validate(
   checkSchema(
     {
-      // Validate ID từ params
-      role_id: roleIdValidation,
-
-      // Validate các trường optional từ body
+      role_id: roleIdValidate,
       name: {
         optional: true,
         ...nameValidation,
-        notEmpty: false // Ghi đè notEmpty để cho phép bỏ qua
+        notEmpty: false,
+        custom: {
+          // ghi đè custom bên trên
+          options: async (value: string, { req }) => {
+            const role_id = req.params?.role_id
+
+            const roleBeingUpdated = await databaseService.roles.findOne({
+              _id: new ObjectId(String(role_id))
+            })
+
+            // nếu là id ma => roleBeingUpdated = null
+            if (!roleBeingUpdated) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.ROLE_NOT_FOUND,
+                status: HTTP_STATUS.NOT_FOUND
+              })
+            }
+
+            // Kiểm tra xem có trùng tên với các role đã tồn tại rồi hay không
+            const role = await databaseService.roles.findOne({
+              name: value,
+              _id: { $ne: new ObjectId(String(role_id)) }
+            })
+            console.log(role)
+
+            if (role) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.ROLE_NAME_ALREADY_EXISTS,
+                status: HTTP_STATUS.CONFLICT
+              })
+            }
+            return true
+          }
+        }
       },
-      description: descriptionValidation, // Vốn đã optional
+      description: descriptionValidation,
       status: {
         optional: true,
         ...statusValidation,
-        notEmpty: false // Ghi đè notEmpty
+        notEmpty: false
       },
       permissionIds: {
         optional: true,
@@ -135,11 +181,11 @@ export const updateRoleValidation = validate(
 )
 
 // Dùng cho GET /:role_id và DELETE /:role_id
-// export const roleIdValidation = validate(
-//   checkSchema(
-//     {
-//       role_id: roleIdValidation
-//     },
-//     ["params"]
-//   )
-// )
+export const roleIdValidation = validate(
+  checkSchema(
+    {
+      role_id: roleIdValidate
+    },
+    ["params"]
+  )
+)

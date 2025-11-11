@@ -7,3 +7,9 @@ export interface createRoleReqBody {
   status: RoleStatus
   permissionIds: string[]
 }
+export interface updateRoleReqBody {
+  name?: string
+  description?: string
+  status?: RoleStatus
+  permissionIds?: string[]
+}

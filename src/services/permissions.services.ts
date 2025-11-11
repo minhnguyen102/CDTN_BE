@@ -41,7 +41,7 @@ class PermissionServices {
     return result
   }
 
-  async deletePermission(permission_id: string): Promise<boolean> {
+  async deletePermission({ permission_id }: { permission_id: string }): Promise<boolean> {
     const objectIdDelete = new ObjectId(permission_id)
     // 1. Thử xóa permission
     const result = await databaseService.permissions.deleteOne({

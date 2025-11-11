@@ -52,7 +52,7 @@ export const updatePermissionController = async (
 
 export const deletePermissionController = async (req: Request, res: Response) => {
   const { permission_id } = req.params
-  const result = await permissionServices.deletePermission(permission_id)
+  const result = await permissionServices.deletePermission({ permission_id })
 
   // Nếu service trả về false, nghĩa là không tìm thấy permission với ID đó
   if (!result) {

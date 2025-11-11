@@ -1,13 +1,15 @@
 import { Router } from "express"
 import {
-  createRoleController
+  createRoleController,
+  getAllRolesController,
+  updateRoleController
   // deleteRoleController,
   // getAllRolesController,
   // getRoleController,
   // updateRoleController
 } from "../../controllers/admins/roles.controllers"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
-import { createRoleValidation } from "../../middlewares/admins/role.middlewares"
+import { createRoleValidation, roleIdValidation, updateRoleValidation } from "../../middlewares/admins/role.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 
 const rolesRouter = Router()
@@ -33,7 +35,7 @@ rolesRouter.post(
  * Method: GET
  * Headers: {Authorization: Bearer access_token}
  */
-// rolesRouter.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(getAllRolesController))
+rolesRouter.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(getAllRolesController))
 
 /**
  * Description: Get a single role by ID
@@ -56,14 +58,14 @@ rolesRouter.post(
  * Headers: {Authorization: Bearer access_token}
  * Body: updateRoleReqBody
  */
-// rolesRouter.patch(
-//   "/:role_id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   roleIdValidation,
-//   updateRoleValidation,
-//   wrapHandlerFunction(updateRoleController)
-// )
+rolesRouter.patch(
+  "/:role_id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  roleIdValidation,
+  updateRoleValidation,
+  wrapHandlerFunction(updateRoleController)
+)
 
 /**
  * Description: Delete a role by ID
