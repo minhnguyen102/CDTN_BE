@@ -57,8 +57,7 @@ class TableServices {
     if (status) {
       const validStatuses = Object.values(TableStatus) as string[]
       if (validStatuses.includes(status)) {
-        console.log(TableStatus[status as keyof typeof TableStatus])
-        objectFind.status = TableStatus[status as keyof typeof TableStatus]
+        objectFind.status = status as TableStatus
       } else {
         throw new ErrorWithStatus({
           message: `Trạng thái filter không hợp lệ`,
