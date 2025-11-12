@@ -46,7 +46,7 @@ supplierRoutes.post(
  * Body: { name?: string, taxCode?: string, status?: SupplierStatus, contactPerson?: string, phone?: string, email?: string, address?: string }
  */
 supplierRoutes.patch(
-  "/:id",
+  "/:supplier_id",
   accessTokenValidation,
   verifiedUserValidation,
   updateSupplierValidation,

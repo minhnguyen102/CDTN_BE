@@ -349,7 +349,7 @@ paths:
           description: Access token is required
         '422':
           description: Validation error
-  /suppliers/{id}:
+  /suppliers/{supplier_id}:
     patch:
       tags:
         - supplier
@@ -363,6 +363,14 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateSupplierBody'
         required: true
+      parameters:
+        - name: supplier_id
+          in: path
+          description: Id của nhà cung cấp (supplier)
+          required: true
+          schema:
+            type: string
+            example: 6912ac85d509c162b40b2e77
       security:
         - BearerAuth: [] 
       responses:
@@ -380,6 +388,41 @@ paths:
                     type: object
                     description: Nhà cung cấp vừa được tạo mới
                     $ref: '#/components/schemas/Supplier'
+        '400':
+          description: The provided ID is not a valid MongoDB ObjectId format.
+        '401':
+          description: Access token is required
+        '404':
+          description: Supplier not found
+        '422':
+          description: Validation error
+    delete:
+      tags:
+        - supplier
+      summary: Xóa nhà cung cấp 
+      description: Xóa nhà cung cấp (Xóa mềm)
+      operationId: deleteSupplier
+      parameters:
+        - name: supplier_id
+          in: path
+          description: Id của nhà cung cấp (supplier)
+          required: true
+          schema:
+            type: string
+            example: 6912ac85d509c162b40b2e77
+      security:
+        - BearerAuth: [] 
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "Delete supplier successfully"
         '400':
           description: The provided ID is not a valid MongoDB ObjectId format.
         '401':

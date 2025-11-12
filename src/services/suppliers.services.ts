@@ -34,10 +34,10 @@ class SupplierServices {
     return result
   }
 
-  async updateSupplier({ payload, id }: { payload: updateSupplierReqBody; id: string }) {
+  async updateSupplier({ payload, supplier_id }: { payload: updateSupplierReqBody; supplier_id: string }) {
     const result = await databaseService.suppliers.findOneAndUpdate(
       {
-        _id: new ObjectId(id),
+        _id: new ObjectId(supplier_id),
         isDeleted: false
       },
       {

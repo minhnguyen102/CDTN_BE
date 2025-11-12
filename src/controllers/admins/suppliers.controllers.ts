@@ -30,8 +30,8 @@ export const updateSupplierController = async (
   res: Response
 ) => {
   const payload = pick(req.body, ["name", "taxCode", "status", "contactPerson", "phone", "email", "address"])
-  const { id } = req.params
-  const result = await supplierServices.updateSupplier({ payload, id })
+  const { supplier_id } = req.params
+  const result = await supplierServices.updateSupplier({ payload, supplier_id })
   res.json({
     message: USER_MESSAGES.SUPPLIER_UPDATE_SUCCESS,
     result

@@ -114,7 +114,7 @@ export const createSupplierValidation = validate(
 export const updateSupplierValidation = validate(
   checkSchema(
     {
-      id: idParamValidation,
+      supplier_id: idParamValidation,
       name: {
         optional: true,
         ...nameValidation,
