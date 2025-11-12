@@ -112,6 +112,8 @@ const USER_MESSAGES = {
   SUPPLIER_UPDATE_SUCCESS: "Supplier updated successfully.",
   GET_ALL_SUPPLIERS_SUCCESS: "Get all suppliers success",
   SUPPLIER_NOT_FOUND: "Supplier not found",
+  SUPPLIER_ID_IS_REQUIRED: "Supplier ID is required.",
+  DELETE_SUPPLIER_SUCCESS: "Delete supplier successfully.",
 
   // Category
   CATEGORY_NAME_REQUIRED: "Category name is required.",

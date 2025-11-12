@@ -4,6 +4,7 @@ import { createSupplierReqBody, updateSupplierReqBody } from "../../models/reque
 import supplierServices from "../../services/suppliers.services"
 import USER_MESSAGES from "../../constants/message"
 import { pick } from "lodash"
+import HTTP_STATUS from "../../constants/httpStatus"
 
 export const viewAllSupplierController = async (req: Request, res: Response) => {
   const result = await supplierServices.getAllSuppliers()
@@ -34,5 +35,21 @@ export const updateSupplierController = async (
   res.json({
     message: USER_MESSAGES.SUPPLIER_UPDATE_SUCCESS,
     result
+  })
+}
+
+export const deleteSupplierController = async (req: Request, res: Response) => {
+  const { supplier_id } = req.params
+  const result = await supplierServices.deleteSupplier({ supplier_id })
+
+  if (!result) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGES.SUPPLIER_NOT_FOUND
+    })
+  }
+
+  // Xóa mềm thành công
+  return res.json({
+    message: USER_MESSAGES.DELETE_SUPPLIER_SUCCESS
   })
 }

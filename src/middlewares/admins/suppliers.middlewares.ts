@@ -1,5 +1,5 @@
 import { validate } from "../../utils/validation"
-import { checkSchema, ParamSchema } from "express-validator"
+import { check, checkSchema, ParamSchema } from "express-validator"
 import USER_MESSAGES from "../../constants/message"
 import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
@@ -152,5 +152,14 @@ export const updateSupplierValidation = validate(
       }
     },
     ["body", "params"]
+  )
+)
+
+export const supplierIdValidation = validate(
+  checkSchema(
+    {
+      supplier_id: idParamValidation
+    },
+    ["params"]
   )
 )

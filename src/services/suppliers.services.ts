@@ -66,6 +66,23 @@ class SupplierServices {
     }
     return result
   }
+
+  async deleteSupplier({ supplier_id }: { supplier_id: string }): Promise<boolean> {
+    const result = await databaseService.suppliers.updateOne(
+      {
+        _id: new ObjectId(supplier_id),
+        isDeleted: false
+      },
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date()
+        }
+      }
+    )
+    // result.modifiedCount sẽ là 1 nếu tìm thấy và cập nhật thành công
+    return result.modifiedCount > 0
+  }
 }
 
 const supplierServices = new SupplierServices()

@@ -1,9 +1,14 @@
 import { Router } from "express"
-import { createSupplierValidation, updateSupplierValidation } from "../../middlewares/admins/suppliers.middlewares"
+import {
+  createSupplierValidation,
+  supplierIdValidation,
+  updateSupplierValidation
+} from "../../middlewares/admins/suppliers.middlewares"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import {
   createSupplierController,
+  deleteSupplierController,
   updateSupplierController,
   viewAllSupplierController
 } from "../../controllers/admins/suppliers.controllers"
@@ -55,11 +60,11 @@ supplierRoutes.patch(
  * Headers: {Authorization: Bearer access_token}
  */
 supplierRoutes.delete(
-  "/:id",
+  "/:supplier_id",
   accessTokenValidation,
   verifiedUserValidation,
-  updateSupplierValidation,
-  wrapHandlerFunction(updateSupplierController)
+  supplierIdValidation,
+  wrapHandlerFunction(deleteSupplierController)
 )
 
 export default supplierRoutes
