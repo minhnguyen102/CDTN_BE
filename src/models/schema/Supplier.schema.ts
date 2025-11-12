@@ -10,6 +10,8 @@ interface SupplierType {
   phone: string
   email: string
   address: string
+  isDeleted?: boolean
+  deletedAt?: Date | null
   createdAt?: Date
   updatedAt?: Date
 }
@@ -23,6 +25,8 @@ export default class Supplier {
   phone: string
   email: string
   address: string
+  isDeleted: boolean
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
 
@@ -36,6 +40,8 @@ export default class Supplier {
     this.phone = supplier.phone
     this.email = supplier.email
     this.address = supplier.address
+    this.isDeleted = supplier.isDeleted || false
+    this.deletedAt = supplier.deletedAt || null
     this.createdAt = supplier.createdAt || date
     this.updatedAt = supplier.updatedAt || date
   }

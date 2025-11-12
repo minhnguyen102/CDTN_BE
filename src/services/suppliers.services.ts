@@ -9,16 +9,18 @@ import HTTP_STATUS from "../constants/httpStatus"
 class SupplierServices {
   async getAllSuppliers() {
     // Cần thiết sẽ mở rộng phân trang
+    const objectFind = {
+      isDeleted: false
+    }
     const result = await databaseService.suppliers
-      .find(
-        {},
-        {
-          projection: {
-            createdAt: 0,
-            updatedAt: 0
-          }
+      .find(objectFind, {
+        projection: {
+          createdAt: 0,
+          updatedAt: 0,
+          isDeleted: 0,
+          deletedAt: 0
         }
-      )
+      })
       .toArray()
     return result
   }
@@ -35,7 +37,8 @@ class SupplierServices {
   async updateSupplier({ payload, id }: { payload: updateSupplierReqBody; id: string }) {
     const result = await databaseService.suppliers.findOneAndUpdate(
       {
-        _id: new ObjectId(id)
+        _id: new ObjectId(id),
+        isDeleted: false
       },
       {
         $set: {
@@ -49,7 +52,9 @@ class SupplierServices {
         returnDocument: "after",
         projection: {
           updatedAt: 0,
-          createdAt: 0
+          createdAt: 0,
+          isDeleted: 0,
+          deletedAt: 0
         }
       }
     )

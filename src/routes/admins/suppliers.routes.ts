@@ -20,7 +20,7 @@ supplierRoutes.get("/", accessTokenValidation, verifiedUserValidation, wrapHandl
 
 /**
  * Description: Create Supplier
- * PATH: admin/suppliers/create
+ * PATH: admin/suppliers
  * Method: POST
  * Headers: {Authorization: Bearer access_token}
  * Body: { name: string, taxCode: string, status: SupplierStatus, contactPerson: string, phone: string, email: string, address: string }
@@ -35,12 +35,26 @@ supplierRoutes.post(
 
 /**
  * Description: Update supplier
- * PATH: admin/suppliers/update/:id
- * Method: POST
+ * PATH: admin/suppliers/:id
+ * Method: PATCH
  * Headers: {Authorization: Bearer access_token}
  * Body: { name?: string, taxCode?: string, status?: SupplierStatus, contactPerson?: string, phone?: string, email?: string, address?: string }
  */
 supplierRoutes.patch(
+  "/:id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  updateSupplierValidation,
+  wrapHandlerFunction(updateSupplierController)
+)
+
+/**
+ * Description: Delete supplier
+ * PATH: admin/suppliers/:id
+ * Method: DELETE
+ * Headers: {Authorization: Bearer access_token}
+ */
+supplierRoutes.delete(
   "/:id",
   accessTokenValidation,
   verifiedUserValidation,
