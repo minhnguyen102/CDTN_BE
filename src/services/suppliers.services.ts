@@ -2,11 +2,24 @@ import { createSupplierReqBody, updateSupplierReqBody } from "../models/requests
 import databaseService from "./database.servies"
 import Supplier from "../models/schema/Supplier.schema"
 import { ObjectId } from "mongodb"
+import { ErrorWithStatus } from "../models/Errors"
+import USER_MESSAGES from "../constants/message"
+import HTTP_STATUS from "../constants/httpStatus"
 
 class SupplierServices {
   async getAllSuppliers() {
     // Cần thiết sẽ mở rộng phân trang
-    const result = await databaseService.suppliers.find().toArray()
+    const result = await databaseService.suppliers
+      .find(
+        {},
+        {
+          projection: {
+            createdAt: 0,
+            updatedAt: 0
+          }
+        }
+      )
+      .toArray()
     return result
   }
 
@@ -33,9 +46,19 @@ class SupplierServices {
         }
       },
       {
-        returnDocument: "after"
+        returnDocument: "after",
+        projection: {
+          updatedAt: 0,
+          createdAt: 0
+        }
       }
     )
+    if (!result) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.SUPPLIER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
     return result
   }
 }

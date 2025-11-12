@@ -47,10 +47,10 @@ paths:
               properties:
                 email:
                   type: string
-                  example: benten19@example.com
+                  example: admin@gmail.com
                 password:
                   type: string
-                  example: MinhOkela123#@
+                  example: Benten123@!
         required: true
       responses:
         '200':
@@ -203,7 +203,6 @@ paths:
           description: Access token is required
         '422':
           description: Validation error
-
   /tables/{id}:
     patch:
       tags:
@@ -244,7 +243,6 @@ paths:
           description: Lỗi xác thực (chưa đăng nhập hoặc không có quyền)
         '404':
           description: Không tìm thấy bàn với ID được cung cấp
-
   /tables/{id}/qr-token:
     patch:
       tags:
@@ -290,6 +288,107 @@ paths:
           description: Lỗi xác thực (chưa đăng nhập hoặc không có quyền)
         '404':
           description: Không tìm thấy bàn với ID được cung cấp
+  /suppliers:
+    get:
+      tags:
+        - supplier
+      summary: Lấy danh sách thông tin nhà cung cấp
+      description: Lấy danh sách thông tin nhà cung cấp
+      operationId: getAllSupplier
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "Get all supplier successfully."
+                  tables: 
+                    type: array
+                    description: Danh sách các nhà cung cấp
+                    items:
+                      $ref: '#/components/schemas/Table'
+        '401':
+          description: Access token is required
+    post:
+      tags:
+        - supplier
+      summary: Tạo mới nhà cung cấp nguyên liệu
+      description: Tạo mới nhà cung cấp nguyên liệu
+      operationId: createSupplier
+      requestBody:
+        description: Thông tin tạo mới nhà cung cấp
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupplierBody'
+        required: true
+      security:
+        - BearerAuth: [] 
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "Supplier created successfully."
+                  result: 
+                    type: object
+                    description: Nhà cung cấp vừa được tạo mới
+                    $ref: '#/components/schemas/Supplier'
+        '401':
+          description: Access token is required
+        '422':
+          description: Validation error
+  /suppliers/{id}:
+    patch:
+      tags:
+        - supplier
+      summary: Cập nhật thông tin nhà cung cấp
+      description: Cập nhật thông tin nhà cung cấp
+      operationId: updateSupplier
+      requestBody:
+        description: Thông tin cập nhật nhà cung cấp
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSupplierBody'
+        required: true
+      security:
+        - BearerAuth: [] 
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "Supplier created successfully."
+                  result: 
+                    type: object
+                    description: Nhà cung cấp vừa được tạo mới
+                    $ref: '#/components/schemas/Supplier'
+        '400':
+          description: The provided ID is not a valid MongoDB ObjectId format.
+        '401':
+          description: Access token is required
+        '404':
+          description: Supplier not found
+        '422':
+          description: Validation error
+
 
 components:
   schemas:
@@ -325,7 +424,105 @@ components:
         - capacity
         - status
         - QRcode
-    
+    Supplier:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID duy nhất của nhà cung cấp (MongoDB ObjectId)
+          example: "6912ac85d509c162b40b2e77"
+        name:
+          type: string
+          description: Tên nhà cung cấp
+          example: "Hong Hanh 2"
+        taxCode:
+          type: string
+          description: Mã số thuế của nhà cung cấp
+          example: "TX12345645"
+        status:
+          $ref: '#/components/schemas/SupplierStatus' # Giả định bạn có schema SupplierStatus
+        contactPerson:
+          type: string
+          description: Tên người liên hệ
+          example: "Hong Hanh"
+        phone:
+          type: string
+          description: Số điện thoại liên hệ
+          example: "+84901234567"
+        email:
+          type: string
+          description: Địa chỉ email liên hệ
+          example: "contact@honghanhtextile.com"
+        address:
+          type: string
+          description: Địa chỉ của nhà cung cấp
+          example: "123 Nguyen Trai Street, District 5, Ho Chi Minh City"
+    CreateSupplierBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Tên nhà cung cấp
+          example: "Hong Hanh 2"
+        taxCode:
+          type: string
+          description: Mã số thuế
+          example: "TX12345645"
+        status:
+          $ref: '#/components/schemas/SupplierStatus'
+        contactPerson:
+          type: string
+          description: Tên người liên hệ
+          example: "Hong Hanh"
+        phone:
+          type: string
+          description: Số điện thoại liên hệ
+          example: "+84901234567"
+        email:
+          type: string
+          description: Địa chỉ email liên hệ
+          example: "contact@honghanhtextile.com"
+        address:
+          type: string
+          description: Địa chỉ của nhà cung cấp
+          example: "123 Nguyen Trai Street, District 5, Ho Chi Minh City"
+      required: # Dựa trên JSON, có vẻ tất cả đều bắt buộc
+        - name
+        - taxCode
+        - status
+        - contactPerson
+        - phone
+        - email
+        - address
+    UpdateSupplierBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Tên nhà cung cấp mới
+          example: "Hong Hanh 2"
+        taxCode:
+          type: string
+          description: Mã số thuế mới
+          example: "TX12345645"
+        status:
+          $ref: '#/components/schemas/SupplierStatus'
+        contactPerson:
+          type: string
+          description: Tên người liên hệ mới
+          example: "Hong Hanh"
+        phone:
+          type: string
+          description: Số điện thoại liên hệ mới
+          example: "+84901234567"
+        email:
+          type: string
+          description: Địa chỉ email liên hệ mới
+          example: "contact@honghanhtextile.com"
+        address:
+          type: string
+          description: Địa chỉ của nhà cung cấp mới
+          example: "123 Nguyen Trai Street, District 5, Ho Chi Minh City"
     UpdateTableRequest: 
       type: object
       description: Dữ liệu để cập nhật một bàn (chỉ chứa các trường có thể cập nhật)
@@ -336,22 +533,20 @@ components:
           example: 6
         status:
           $ref: '#/components/schemas/TableStatus'
-      # Không có require đồng nghĩa các trường không bắt buộc phải gửi lên
-
     TableStatus:
-      type: integer # Vì enum của TypeScript mặc định là số
-      description: |
-        Trạng thái của bàn:
-        * `0`: Available (còn trống)
-        * `1`: Occupied (đã có khách)
-        * `2`: Reserved (đã đặt trước)
-        * `3`: Needs_cleaning (cần dọn dẹp)
+      type: string
+      description: Trạng thái của bàn ăn
       enum:
-        - 0 # Available
-        - 1 # Occupied
-        - 2 # Reserved
-        - 3 # Needs_cleaning
-      example: 0 # Đưa ra một giá trị ví dụ
+        - available
+        - occupied
+        - reserved
+        - needs_cleaning
+    SupplierStatus:
+      type: string
+      description: Trạng thái của nhà cung cấp
+      enum:
+        - active
+        - inactive
   securitySchemes:
     BearerAuth:
       type: http

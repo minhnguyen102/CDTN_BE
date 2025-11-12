@@ -110,7 +110,8 @@ const USER_MESSAGES = {
 
   CREATE_SUPPLIER_SUCCESS: "Supplier created successfully.",
   SUPPLIER_UPDATE_SUCCESS: "Supplier updated successfully.",
-  GET_ALL_SUPPLIERS_SUCCESS: "GET ALL SUPPLIERS SUCCESS",
+  GET_ALL_SUPPLIERS_SUCCESS: "Get all suppliers success",
+  SUPPLIER_NOT_FOUND: "Supplier not found",
 
   // Category
   CATEGORY_NAME_REQUIRED: "Category name is required.",
