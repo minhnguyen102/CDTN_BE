@@ -28,9 +28,19 @@ class SupplierServices {
   async createSupplier({ payload }: { payload: createSupplierReqBody }) {
     const supplier = await databaseService.suppliers.insertOne(new Supplier(payload))
     const { insertedId } = supplier
-    const result = await databaseService.suppliers.findOne({
-      _id: new ObjectId(insertedId)
-    })
+    const result = await databaseService.suppliers.findOne(
+      {
+        _id: new ObjectId(insertedId)
+      },
+      {
+        projection: {
+          updatedAt: 0,
+          createdAt: 0,
+          isDeleted: 0,
+          deletedAt: 0
+        }
+      }
+    )
     return result
   }
 
