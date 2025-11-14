@@ -13,16 +13,14 @@ export const createPermissionController = async (
   const payload = req.body
   const result = await permissionServices.createPermission({ payload })
   res.json({
-    message: "OK",
+    message: USER_MESSAGES.CREATE_PERMISSION_SUCCESS,
     result
   })
 }
 
 export const getAllPermissionsController = async (req: Request, res: Response) => {
-  // Gọi service để thực hiện logic
   const result = await permissionServices.getAllPermissions()
 
-  // Trả về kết quả
   return res.json({
     message: USER_MESSAGES.GET_ALL_PERMISSIONS_SUCCESS, // Thêm message này
     result: result
@@ -54,15 +52,13 @@ export const deletePermissionController = async (req: Request, res: Response) =>
   const { permission_id } = req.params
   const result = await permissionServices.deletePermission({ permission_id })
 
-  // Nếu service trả về false, nghĩa là không tìm thấy permission với ID đó
   if (!result) {
     return res.status(HTTP_STATUS.NOT_FOUND).json({
-      message: USER_MESSAGES.PERMISSION_NOT_FOUND // Dùng lại message này
+      message: USER_MESSAGES.PERMISSION_NOT_FOUND
     })
   }
 
-  // Trả về thông báo thành công
   return res.json({
-    message: USER_MESSAGES.DELETE_PERMISSION_SUCCESS // Thêm message này
+    message: USER_MESSAGES.DELETE_PERMISSION_SUCCESS
   })
 }

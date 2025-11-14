@@ -169,7 +169,8 @@ const USER_MESSAGES = {
   UPDATE_PERMISSION_SUCCESS: "Update permission successfully.",
   PERMISSION_NOT_FOUND: "Permission not found.",
   DELETE_PERMISSION_SUCCESS: "Delete permission successfully.",
-  PERMISSION_ID_NOT_FOUND: "One or more permission IDs do not exist."
+  PERMISSION_ID_NOT_FOUND: "One or more permission IDs do not exist.",
+  CREATE_PERMISSION_SUCCESS: "Create permission successfully."
 }
 
 export default USER_MESSAGES

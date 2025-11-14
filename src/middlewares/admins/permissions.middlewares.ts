@@ -5,6 +5,7 @@ import USER_MESSAGES from "../../constants/message"
 import HTTP_STATUS from "../../constants/httpStatus"
 import { ErrorWithStatus } from "../../models/Errors"
 import databaseService from "../../services/database.servies"
+import { string } from "node_modules/yaml/dist/schema/common/string"
 // import databaseService from "../../services/database.services"
 
 // --- Định nghĩa các schema (ParamSchema) ---
@@ -91,17 +92,10 @@ export const updatePermissionValidation = validate(
           // Check unique (only) khi cập nhật
           options: async (value: string, { req }) => {
             const permission_id = req.params?.permission_id
-            if (!permission_id || !ObjectId.isValid(permission_id)) {
-              // (Mặc dù đã có idParamValidation, check ở đây cho an toàn)
-              throw new ErrorWithStatus({
-                message: USER_MESSAGES.INVALID_MONGODB_ID_FORMAT,
-                status: HTTP_STATUS.BAD_REQUEST
-              })
-            }
             // Tìm xem có permission *khác* (not equal) đã sở hữu tên này không
             const permission = await databaseService.permissions.findOne({
               name: value,
-              _id: { $ne: new ObjectId(permission_id) }
+              _id: { $ne: new ObjectId(String(permission_id)) }
             })
 
             if (permission) {

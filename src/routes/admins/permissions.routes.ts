@@ -4,10 +4,6 @@ import {
   deletePermissionController,
   getAllPermissionsController,
   updatePermissionController
-  // deletePermissionController,
-  // getAllPermissionsController,
-  // getPermissionController,
-  // updatePermissionController
 } from "../../controllers/admins/permissions.controllers"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import {
@@ -48,20 +44,6 @@ permissionsRouter.get(
 )
 
 /**
- * Description: Get a single permission by ID
- * PATH: admin/permissions/:permission_id
- * Method: GET
- * Headers: {Authorization: Bearer access_token}
- */
-// permissionsRouter.get(
-//   "/:permission_id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   permissionIdValidation,
-//   wrapHandlerFunction(getPermissionController)
-// )
-
-/**
  * Description: Update a permission by ID
  * PATH: admin/permissions/:permission_id
  * Method: PATCH
@@ -72,7 +54,6 @@ permissionsRouter.patch(
   "/:permission_id",
   accessTokenValidation,
   verifiedUserValidation,
-  permissionIdValidation,
   updatePermissionValidation,
   wrapHandlerFunction(updatePermissionController)
 )

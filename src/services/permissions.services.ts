@@ -7,13 +7,23 @@ class PermissionServices {
   async createPermission({ payload }: { payload: createPermissionReqBody }) {
     const permission = await databaseService.permissions.insertOne(new Permission(payload))
     const { insertedId } = permission
-    const result = await databaseService.permissions.findOne({ _id: new ObjectId(insertedId) })
+    const result = await databaseService.permissions.findOne(
+      { _id: new ObjectId(insertedId) },
+      {
+        projection: {
+          createdAt: 0,
+          updatedAt: 0
+        }
+      }
+    )
     return result
   }
 
   async getAllPermissions(): Promise<Permission[]> {
-    // Lấy tất cả và sắp xếp theo 'module' rồi đến 'name' cho dễ nhìn
-    const permissions = await databaseService.permissions.find().sort({ module: 1, name: 1 }).toArray()
+    const permissions = await databaseService.permissions
+      .find({}, { projection: { createdAt: 0, updatedAt: 0 } })
+      .sort({ module: 1, name: 1 })
+      .toArray()
 
     // Trả về mảng các permission
     return permissions as Permission[]
@@ -26,16 +36,18 @@ class PermissionServices {
     permission_id: string
     payload: updatePermissionReqBody
   }): Promise<Permission | null> {
-    // Validation middleware đã chạy, payload chỉ chứa các trường hợp lệ
-    // $set sẽ chỉ cập nhật các trường có trong payload
     const result = await databaseService.permissions.findOneAndUpdate(
-      { _id: new ObjectId(permission_id) }, // Điều kiện tìm
+      { _id: new ObjectId(permission_id) },
       {
-        $set: payload, // Dữ liệu cập nhật
-        $currentDate: { updatedAt: true } // Tự động cập nhật 'updatedAt'
+        $set: payload,
+        $currentDate: { updatedAt: true }
       },
       {
-        returnDocument: "after" // Trả về document *sau* khi đã cập nhật
+        returnDocument: "after",
+        projection: {
+          createdAt: 0,
+          updatedAt: 0
+        }
       }
     )
     return result
@@ -43,18 +55,15 @@ class PermissionServices {
 
   async deletePermission({ permission_id }: { permission_id: string }): Promise<boolean> {
     const objectIdDelete = new ObjectId(permission_id)
-    // 1. Thử xóa permission
+
     const result = await databaseService.permissions.deleteOne({
       _id: objectIdDelete
     })
-
-    // 2. Kiểm tra xem có xóa được không
-    // Nếu result.deletedCount là 0, nghĩa là không tìm thấy
     if (result.deletedCount === 0) {
       return false // Trả về false để báo hiệu không tìm thấy
     }
 
-    // 3. (Quan trọng) Nếu xóa thành công, hãy dọn dẹp nó
+    // Nếu xóa thành công, hãy dọn dẹp nó
     // khỏi tất cả các 'roles' đang tham chiếu đến nó.
     await databaseService.roles.updateMany(
       {
@@ -64,7 +73,7 @@ class PermissionServices {
         $pull: { permissionIds: objectIdDelete } // Xóa ID đó khỏi mảng
       }
     )
-    return true // Trả về true để báo hiệu xóa thành công
+    return true
   }
 }
 
