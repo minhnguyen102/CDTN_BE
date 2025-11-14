@@ -34,3 +34,19 @@ export const updateRoleController = async (req: Request<ParamsDictionary, any, u
     result: result
   })
 }
+
+export const deleteRoleController = async (req: Request, res: Response) => {
+  const { role_id } = req.params
+  const result = await roleServices.deleteRole(role_id)
+
+  // Nếu service trả về false (modifiedCount = 0) -> Không tìm thấy
+  if (!result) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGES.ROLE_NOT_FOUND
+    })
+  }
+
+  return res.json({
+    message: USER_MESSAGES.DELETE_ROLE_SUCCESS
+  })
+}

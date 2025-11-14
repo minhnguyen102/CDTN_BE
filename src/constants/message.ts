@@ -157,6 +157,7 @@ const USER_MESSAGES = {
   CREATE_ROLE_SUCCESS: "Create role successfully.",
   UPDATE_ROLE_SUCCESS: "Update role successfully.",
   ROLE_NOT_FOUND: "Role not found.",
+  DELETE_ROLE_SUCCESS: "Delete role successfully.",
 
   // New Messages for Permissions
   PERMISSION_ID_IS_REQUIRED: "Permission ID is required.",

@@ -7,6 +7,8 @@ interface RoleType {
   description?: string // Mô tả vai trò (ví dụ: 'Quyền owner cao nhất')
   status: RoleStatus
   permissionIds: ObjectId[]
+  isDeleted?: boolean
+  deletedAt?: Date | null
   createdAt?: Date
   updatedAt?: Date
 }
@@ -17,6 +19,8 @@ export default class Role {
   description: string // Sẽ gán giá trị mặc định nếu không có
   status: RoleStatus
   permissionIds: ObjectId[]
+  isDeleted?: boolean
+  deletedAt?: Date | null
   createdAt: Date
   updatedAt: Date
 
@@ -27,6 +31,8 @@ export default class Role {
     this.description = role.description || "" // Gán mặc định là chuỗi rỗng
     this.status = role.status
     this.permissionIds = role.permissionIds || [] // Gán mặc định là mảng rỗng
+    this.isDeleted = role.isDeleted || false // Mặc định là false
+    this.deletedAt = role.deletedAt || null // Mặc định là null
     this.createdAt = role.createdAt || date
     this.updatedAt = role.updatedAt || date
   }

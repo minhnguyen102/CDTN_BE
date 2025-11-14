@@ -1,12 +1,9 @@
 import { Router } from "express"
 import {
   createRoleController,
+  deleteRoleController,
   getAllRolesController,
   updateRoleController
-  // deleteRoleController,
-  // getAllRolesController,
-  // getRoleController,
-  // updateRoleController
 } from "../../controllers/admins/roles.controllers"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { createRoleValidation, roleIdValidation, updateRoleValidation } from "../../middlewares/admins/role.middlewares"
@@ -73,12 +70,12 @@ rolesRouter.patch(
  * Method: DELETE
  * Headers: {Authorization: Bearer access_token}
  */
-// rolesRouter.delete(
-//   "/:role_id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   roleIdValidation,
-//   wrapHandlerFunction(deleteRoleController)
-// )
+rolesRouter.delete(
+  "/:role_id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  roleIdValidation,
+  wrapHandlerFunction(deleteRoleController)
+)
 
 export default rolesRouter

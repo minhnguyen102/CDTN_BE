@@ -1,5 +1,6 @@
 import { createRoleReqBody, updateRoleReqBody } from "../models/requests/Role.request"
 import Role from "../models/schema/Role.schema"
+import { RoleStatus } from "../constants/enums"
 import databaseService from "./database.servies"
 import { ObjectId } from "mongodb"
 
@@ -14,7 +15,17 @@ class RoleServices {
       })
     )
     const { insertedId } = role
-    const result = await databaseService.roles.findOne({ _id: new ObjectId(insertedId) })
+    const result = await databaseService.roles.findOne(
+      { _id: new ObjectId(insertedId) },
+      {
+        projection: {
+          createdAt: 0,
+          updatedAt: 0,
+          deletedAt: 0,
+          isDeleted: 0
+        }
+      }
+    )
     return result
   }
 
@@ -32,7 +43,7 @@ class RoleServices {
         },
         // Bỏ trường mảng 'permissionIds' (vì đã có 'permissions')
         {
-          $unset: "permissionIds"
+          $unset: ["permissionIds", "createdAt", "updatedAt", "deletedAt", "isDeleted"]
         },
         // Biến đổi mảng 'permissions' để chỉ giữ lại các trường cần thiết
         {
@@ -76,11 +87,36 @@ class RoleServices {
         $currentDate: { updatedAt: true }
       },
       {
-        returnDocument: "after"
+        returnDocument: "after",
+        projection: {
+          createdAt: 0,
+          updatedAt: 0,
+          deletedAt: 0,
+          isDeleted: 0
+        }
       }
     )
 
     return result
+  }
+
+  async deleteRole(role_id: string): Promise<boolean> {
+    const result = await databaseService.roles.updateOne(
+      {
+        _id: new ObjectId(role_id),
+        isDeleted: false
+      },
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date(),
+          status: RoleStatus.INACTIVE // Tự động set status sang INACTIVE khi xóa
+        }
+      }
+    )
+
+    // result.modifiedCount sẽ là 1 nếu tìm thấy và cập nhật
+    return result.modifiedCount > 0
   }
 }
 
