@@ -25,7 +25,7 @@ ingredientRoutes.post(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
-  checkPermission("create_ingredient"),
+  // checkPermission("create_ingredient"),
   createIngredientValidation,
   wrapHandlerFunction(createIngredientController)
 )
@@ -37,13 +37,13 @@ ingredientRoutes.post(
  * Query: { page?: number, limit?: number, search?: string, categoryId?: string, status?: string }
  * Headers: {Authorization: Bearer access_token}
  */
-// ingredientRoutes.get(
-//   "/",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-// checkPermission("view_ingredients"),
-//   wrapHandlerFunction(listIngredientsController)
-// )
+ingredientRoutes.get(
+  "/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("view_ingredients")
+  // wrapHandlerFunction(listIngredientsController)
+)
 
 /**
  * Description: Get detail of one ingredient

@@ -24,7 +24,6 @@ const categoryIdValidation: ParamSchema = {
     errorMessage: USER_MESSAGES.CATEGORY_ID_IS_REQUIRED
   },
   isMongoId: {
-    // Sử dụng ErrorWithStatus giống như ví dụ của bạn
     errorMessage: new ErrorWithStatus({
       message: USER_MESSAGES.CATEGORY_ID_INVALID,
       status: HTTP_STATUS.BAD_REQUEST
@@ -52,7 +51,7 @@ const unitPriceValidation: ParamSchema = {
     options: { gt: 0 }, // Phải lớn hơn 0
     errorMessage: USER_MESSAGES.UNIT_PRICE_MUST_BE_POSITIVE
   },
-  toFloat: true // Tự động chuyển đổi
+  toFloat: true
 }
 
 const minStockValidation: ParamSchema = {
