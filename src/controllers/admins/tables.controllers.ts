@@ -4,8 +4,7 @@ import USER_MESSAGES from "../../constants/message"
 import { pick } from "lodash"
 import { createTableReqBody, updateTableReqBody } from "../../models/requests/Account.request"
 import tableServices from "../../services/tables.services"
-import { ErrorWithStatus } from "../../models/Errors"
-import HTTP_STATUS from "../../constants/httpStatus"
+import { paginationQueryParser } from "../../utils/helpers"
 
 export const createTableController = async (req: Request<ParamsDictionary, any, createTableReqBody>, res: Response) => {
   const { capacity } = req.body
@@ -17,20 +16,9 @@ export const createTableController = async (req: Request<ParamsDictionary, any, 
 }
 
 export const getAllTablesController = async (req: Request, res: Response) => {
-  // Xử lí page
-  const page = parseInt(req.query.page as string) || 1
+  // Phân trang
+  const { page, limit } = paginationQueryParser(req, { defaultLimit: 5, allowLimits: [5, 10, 15] })
 
-  // Xử lí limitItem linh động
-  const defaultLimit = 5
-  let limit = defaultLimit
-  const allowLimits = [5, 10, 15]
-  const limitItemFromQuery = req.query?.limit as string
-  if (limitItemFromQuery) {
-    const parseLimit = Number(limitItemFromQuery)
-    if (allowLimits.includes(parseLimit)) {
-      limit = parseLimit
-    }
-  }
   // Xử lí status
   const status = (req.query.status as string) || undefined
 

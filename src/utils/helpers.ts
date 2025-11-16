@@ -1,27 +1,35 @@
-/**
- *  Tham số nhận vào (1 object có dạng định trả về, totalDocument)
- *
- * Mục đích của pagination helper => Trả về object {
- *  currentPage: 2
- *  limitItem: 10 // cố định
- *  skip: Sau tính toán (= (currentPage -1) * limitItem)
- *  totalPage: Sau tính toán (= Math.celi(totalDocument / limitItem)) <= totalPage : count db
- * }
- */
-interface objectPaginationType {
-  currentPage: number
-  skip?: number
+import { Request } from "express"
+interface PaginationParams {
+  page: number
   limit: number
-  totalPage?: number
 }
-export function paginationHelper({
-  totalDocument,
-  objectPagination
-}: {
-  totalDocument: number
-  objectPagination: objectPaginationType
-}) {
-  objectPagination.skip = (objectPagination.currentPage - 1) * objectPagination.limit
-  objectPagination.totalPage = Math.ceil(totalDocument / objectPagination.limit)
-  return objectPagination
+
+interface PaginationOptions {
+  defaultLimit?: number
+  allowLimits?: number[]
+}
+
+export const paginationQueryParser = (req: Request, options: PaginationOptions = {}): PaginationParams => {
+  // 1. Xử lý 'page'
+  let page = parseInt(req.query.page as string) || 1
+  if (page <= 0) {
+    page = 1
+  }
+
+  // 2. Xử lý 'limit'
+  const { defaultLimit = 10, allowLimits = [5, 10, 15] } = options
+  let limit = defaultLimit
+
+  const limitFromQuery = req.query.limit as string
+  if (limitFromQuery) {
+    const parseLimit = Number(limitFromQuery)
+    if (allowLimits.includes(parseLimit)) {
+      limit = parseLimit
+    }
+  }
+
+  return {
+    page,
+    limit
+  }
 }
