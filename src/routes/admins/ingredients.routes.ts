@@ -4,7 +4,8 @@ import { accessTokenValidation, verifiedUserValidation } from "../../middlewares
 import { createIngredientValidation } from "../../middlewares/admins/ingredients.middlewares"
 
 import {
-  createIngredientController
+  createIngredientController,
+  listIngredientsController
   // listIngredientsController,
   // getIngredientDetailController,
   // updateIngredientController,
@@ -40,9 +41,9 @@ ingredientRoutes.post(
 ingredientRoutes.get(
   "/",
   accessTokenValidation,
-  verifiedUserValidation
+  verifiedUserValidation,
   // checkPermission("view_ingredients")
-  // wrapHandlerFunction(listIngredientsController)
+  wrapHandlerFunction(listIngredientsController)
 )
 
 /**

@@ -4,6 +4,8 @@ import USER_MESSAGES from "../../constants/message"
 import { pick } from "lodash"
 import { createIngredientReqBody } from "../../models/requests/Ingredient.request"
 import ingredientServices from "../../services/ingredients.services"
+import { paginationQueryParser } from "../../utils/helpers"
+import HTTP_STATUS from "../../constants/httpStatus"
 
 export const createIngredientController = async (
   req: Request<ParamsDictionary, any, createIngredientReqBody>,
@@ -13,6 +15,35 @@ export const createIngredientController = async (
   const result = await ingredientServices.createIngredient({ payload })
   res.json({
     message: USER_MESSAGES.INGREDIENT_CREATED_SUCCESSFULLY,
+    result
+  })
+}
+
+export const listIngredientsController = async (req: Request, res: Response) => {
+  const { page, limit } = paginationQueryParser(req, {
+    defaultLimit: 10,
+    allowLimits: [10, 15, 20]
+  })
+
+  // 2. Lấy các tham số filter và search
+  const search = (req.query.search as string) || undefined // search theo name
+  const categoryId = (req.query.categoryId as string) || undefined
+
+  // 'status' là một trường ảo (In Stock, Low Stock, Out of Stock)
+  const status = (req.query.status as string) || undefined
+
+  // 3. Gọi service để lấy dữ liệu
+  const result = await ingredientServices.getList({
+    page,
+    limit,
+    search,
+    categoryId,
+    status
+  })
+
+  // 5. Trả về kết quả
+  return res.json({
+    message: USER_MESSAGES.INGREDIENTS_FETCHED_SUCCESSFULLY,
     result
   })
 }

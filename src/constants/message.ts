@@ -144,6 +144,7 @@ const USER_MESSAGES = {
   // Ingredient Success Messages
   INGREDIENT_CREATED_SUCCESSFULLY: "Ingredient created successfully",
   INGREDIENT_UPDATED_SUCCESSFULLY: "Ingredient updated successfully",
+  INGREDIENTS_FETCHED_SUCCESSFULLY: "Ingredients retrieved successfully",
 
   // New Messages for Roles
   ROLE_ID_IS_REQUIRED: "Role ID is required.",
