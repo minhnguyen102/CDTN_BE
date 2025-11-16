@@ -5,6 +5,8 @@ const USER_MESSAGES = {
   TOKEN_IS_INVALID: "Token is invalid",
   USER_NOT_FOUND: "User not found",
   ACCESS_DENIED: "Access denied", // 403 Forbidden
+  UNAUTHORIZED: "Unauthorized",
+  FORBIDDEN: "You do not have permission to access this resource.",
 
   // === Register / Login / Logout ===
   REGISTER_SUCCESS: "Register successfully",
@@ -158,6 +160,7 @@ const USER_MESSAGES = {
   UPDATE_ROLE_SUCCESS: "Update role successfully.",
   ROLE_NOT_FOUND: "Role not found.",
   DELETE_ROLE_SUCCESS: "Delete role successfully.",
+  ROLE_NOT_FOUND_OR_INACTIVE: "Role not found or inactive",
 
   // New Messages for Permissions
   PERMISSION_ID_IS_REQUIRED: "Permission ID is required.",

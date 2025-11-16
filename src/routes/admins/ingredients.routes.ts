@@ -10,12 +10,13 @@ import {
   // updateIngredientController,
   // updateIngredientStatusController
 } from "../../controllers/admins/ingredient.controllers"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 
 const ingredientRoutes = Router()
 
 /**
  * Description: Create a new ingredient
- * PATH: admin/ingredients/create
+ * PATH: admin/ingredients
  * Method: POST
  * Body: { name: string, categoryId: string, unit: string, unitPrice: number, minStock: number }
  * Headers: {Authorization: Bearer access_token}
@@ -24,8 +25,8 @@ ingredientRoutes.post(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
-  // adminRoleValidation, // Bạn nên có 1 middleware kiểm tra vai trò (ví dụ: Admin, Quản lý kho)
-  createIngredientValidation, // Middleware validate body (zod)
+  checkPermission("create_ingredient"),
+  createIngredientValidation,
   wrapHandlerFunction(createIngredientController)
 )
 
@@ -40,7 +41,7 @@ ingredientRoutes.post(
 //   "/",
 //   accessTokenValidation,
 //   verifiedUserValidation,
-//   // adminRoleValidation,
+// checkPermission("view_ingredients"),
 //   wrapHandlerFunction(listIngredientsController)
 // )
 
@@ -72,7 +73,7 @@ ingredientRoutes.post(
 //   "/update/:id",
 //   accessTokenValidation,
 //   verifiedUserValidation,
-//   // adminRoleValidation,
+//   checkPermission("update_ingredient"),
 //   isObjectIdValidation("id"), // Kiểm tra params.id
 //   updateIngredientValidation, // Kiểm tra body
 //   wrapHandlerFunction(updateIngredientController)
@@ -90,7 +91,7 @@ ingredientRoutes.post(
 //   "/status/:id",
 //   accessTokenValidation,
 //   verifiedUserValidation,
-//   // adminRoleValidation,
+//   checkPermission("delete_ingredient"),
 //   isObjectIdValidation("id"), // Kiểm tra params.id
 //   updateIngredientStatusValidation, // Kiểm tra body.status
 //   wrapHandlerFunction(updateIngredientStatusController)

@@ -12,6 +12,7 @@ import {
   updateSupplierController,
   viewAllSupplierController
 } from "../../controllers/admins/suppliers.controllers"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 
 const supplierRoutes = Router()
 
@@ -21,7 +22,13 @@ const supplierRoutes = Router()
  * Method: GET
  * Headers: {Authorization: Bearer access_token}
  */
-supplierRoutes.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(viewAllSupplierController))
+supplierRoutes.get(
+  "/",
+  accessTokenValidation,
+  checkPermission("view_suppliers"),
+  verifiedUserValidation,
+  wrapHandlerFunction(viewAllSupplierController)
+)
 
 /**
  * Description: Create Supplier
@@ -34,6 +41,7 @@ supplierRoutes.post(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("create_supplier"),
   createSupplierValidation,
   wrapHandlerFunction(createSupplierController)
 )
@@ -48,6 +56,7 @@ supplierRoutes.post(
 supplierRoutes.patch(
   "/:supplier_id",
   accessTokenValidation,
+  checkPermission("update_supplier"),
   verifiedUserValidation,
   updateSupplierValidation,
   wrapHandlerFunction(updateSupplierController)
@@ -62,6 +71,7 @@ supplierRoutes.patch(
 supplierRoutes.delete(
   "/:supplier_id",
   accessTokenValidation,
+  checkPermission("delete_supplier"),
   verifiedUserValidation,
   supplierIdValidation,
   wrapHandlerFunction(deleteSupplierController)

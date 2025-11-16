@@ -3,7 +3,7 @@ import databaseService from "./database.servies"
 import Account from "../models/schema/Account.schema"
 import { hashPassword } from "../utils/crypto"
 import { signToken } from "../utils/jwt"
-import { AccountVerifyStatus, RoleAccount, TokenType } from "../constants/enums"
+import { AccountVerifyStatus, RoleAccount, RoleStatus, TokenType } from "../constants/enums"
 import { config } from "dotenv"
 config()
 import ms from "ms"
@@ -17,18 +17,21 @@ class AccountsServices {
   private signAccessToken({
     user_id,
     verify,
-    role
+    role_name,
+    permissions
   }: {
     user_id: string
     verify: AccountVerifyStatus
-    role: RoleAccount
+    role_name: string
+    permissions: string[]
   }) {
     return signToken({
       payload: {
         user_id,
         token_type: TokenType.ACCESS_TOKEN,
         verify,
-        role
+        role_name,
+        permissions
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string,
       optionals: {
@@ -39,19 +42,19 @@ class AccountsServices {
 
   private signRefreshToken({
     user_id,
-    verify,
-    role
+    verify
+    // role
   }: {
     user_id: string
     verify: AccountVerifyStatus
-    role: RoleAccount
+    // role: RoleAccount
   }) {
     return signToken({
       payload: {
         user_id,
         token_type: TokenType.REFRESH_TOKEN,
-        verify,
-        role
+        verify
+        // role
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_REFRESH_TOKEN as string,
       optionals: {
@@ -91,20 +94,75 @@ class AccountsServices {
   private signAccessAndRefreshToken({
     user_id,
     verify,
-    role
+    role_name,
+    permissions
   }: {
     user_id: string
     verify: AccountVerifyStatus
-    role: RoleAccount
+    role_name: string
+    permissions: string[]
   }) {
     return Promise.all([
-      this.signAccessToken({ user_id, verify, role }),
-      this.signRefreshToken({ user_id, verify, role })
+      this.signAccessToken({ user_id, verify, role_name, permissions }),
+      this.signRefreshToken({ user_id, verify })
     ])
   }
 
-  async login({ user_id, verify, role }: { user_id: string; verify: AccountVerifyStatus; role: RoleAccount }) {
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify, role })
+  private async getRoleData({ role_id }: { role_id: ObjectId }) {
+    // Dùng aggregate để lookup role và permissions
+    const roleData = await databaseService.roles
+      .aggregate([
+        // 1. Tìm role_id
+        {
+          $match: {
+            _id: role_id,
+            isDeleted: false, // (Đảm bảo role không bị xóa
+            status: RoleStatus.ACTIVE // và đang active)
+          }
+        },
+        // 2. Lookup sang collection 'permissions'
+        {
+          $lookup: {
+            from: "permissions",
+            localField: "permissionIds",
+            foreignField: "_id",
+            as: "permissions"
+          }
+        },
+        // 3. Chỉ lấy ra trường name và mảng tên permission
+        {
+          $project: {
+            _id: 0,
+            role_name: "$name",
+            permissions: "$permissions.name" // Chỉ lấy mảng TÊN
+          }
+        }
+      ])
+      .toArray()
+
+    // console.log("roleData: ", roleData)
+
+    if (roleData.length === 0) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.ROLE_NOT_FOUND_OR_INACTIVE,
+        status: HTTP_STATUS.FORBIDDEN
+      })
+    }
+
+    // Trả về { role_name: "Employee", permissions: ["view_tables", ...] }
+    return roleData[0]
+  }
+
+  async login({ account }: { account: Account }) {
+    const { _id, verify, role_id } = account
+    const user_id = (_id as ObjectId).toString()
+    const { role_name, permissions } = await this.getRoleData({ role_id })
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
+      user_id,
+      verify,
+      role_name,
+      permissions
+    })
     await databaseService.refresh_tokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
     )
@@ -126,20 +184,24 @@ class AccountsServices {
       verify: AccountVerifyStatus.UNVERIFIED
     })
     console.log("Giả lập gửi email_verify_token cho account: ", email_verify_token)
+    const { role_id, ...restPayload } = payload
+    const role_id_object = new ObjectId(role_id)
     await databaseService.accounts.insertOne(
       new Account({
         _id: user_id,
-        ...payload,
+        ...restPayload,
+        role_id: role_id_object,
         email_verify_token,
         password: hashPassword(payload.password),
         date_of_birth: new Date(payload.date_of_birth)
       })
     )
-    // const user_id = result.insertedId.toString()
+    const { role_name, permissions } = await this.getRoleData({ role_id: role_id_object })
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
       user_id: user_id.toString(),
       verify: AccountVerifyStatus.UNVERIFIED,
-      role: payload.role
+      role_name,
+      permissions
     })
     await databaseService.refresh_tokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
@@ -153,17 +215,23 @@ class AccountsServices {
   async refreshToken({
     refresh_token,
     user_id,
-    verify,
-    role
+    verify
   }: {
     refresh_token: string
     user_id: string
     verify: AccountVerifyStatus
-    role: RoleAccount
   }) {
+    const account = await databaseService.accounts.findOne({ _id: new ObjectId(user_id) })
+    if (!account) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    const { role_name, permissions } = await this.getRoleData({ role_id: account.role_id })
     const [new_access_token, new_refresh_token] = await Promise.all([
-      this.signAccessToken({ user_id, verify, role }),
-      this.signRefreshToken({ user_id, verify, role }),
+      this.signAccessToken({ user_id, verify, role_name, permissions }),
+      this.signRefreshToken({ user_id, verify }),
       databaseService.refresh_tokens.deleteOne({ token: refresh_token })
     ])
     await databaseService.refresh_tokens.insertOne(
@@ -178,10 +246,13 @@ class AccountsServices {
     }
   }
 
-  async verifyEmail({ user_id, verify, role }: { user_id: string; verify: AccountVerifyStatus; role: RoleAccount }) {
+  async verifyEmail({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
+    const account = await databaseService.accounts.findOne({ _id: new ObjectId(user_id) })
+    const { role_id } = account as Account
+    const { role_name, permissions } = await this.getRoleData({ role_id })
     const [access_token, refresh_token] = await Promise.all([
-      this.signAccessToken({ user_id, verify, role }),
-      this.signRefreshToken({ user_id, verify, role }),
+      this.signAccessToken({ user_id, verify, role_name, permissions }),
+      this.signRefreshToken({ user_id, verify }),
       databaseService.accounts.updateOne(
         { _id: new ObjectId(user_id) },
         {
@@ -254,18 +325,46 @@ class AccountsServices {
   }
 
   async getMe({ user_id }: { user_id: string }) {
-    const account = await databaseService.accounts.findOne(
-      { _id: new ObjectId(user_id) },
-      {
-        projection: {
-          email_verify_token: 0,
-          forgot_password_token: 0,
-          password: 0,
-          verify: 0
+    const account = await databaseService.accounts
+      .aggregate([
+        {
+          $match: { _id: new ObjectId(user_id) }
+        },
+        {
+          $lookup: {
+            from: "roles",
+            localField: "role_id",
+            foreignField: "_id",
+            as: "role"
+          }
+        },
+        {
+          // $unwind để biến mảng "role" (chỉ có 1 phần tử) thành object
+          $unwind: {
+            path: "$role",
+            preserveNullAndEmptyArrays: true // Giữ lại account nếu role không tìm thấy
+          }
+        },
+        {
+          $project: {
+            email_verify_token: 0,
+            forgot_password_token: 0,
+            password: 0,
+            verify: 0,
+            role_id: 0, // Ẩn role_id (vì đã có object 'role'),
+            createdAt: 0,
+            updatedAt: 0,
+            "role.permissionIds": 0, // Ẩn mảng ID quyền
+            "role.isDeleted": 0,
+            "role.deletedAt": 0,
+            "role.createdAt": 0,
+            "role.updatedAt": 0
+          }
         }
-      }
-    )
-    return account
+      ])
+      .toArray()
+
+    return account[0]
   }
 
   async updateMe({ user_id, payload }: { user_id: string; payload: updateMeReqBody }) {

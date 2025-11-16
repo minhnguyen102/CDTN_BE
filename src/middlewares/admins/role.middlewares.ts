@@ -152,7 +152,7 @@ export const updateRoleValidation = validate(
               name: value,
               _id: { $ne: new ObjectId(String(role_id)) }
             })
-            console.log(role)
+            // console.log("role", role)
 
             if (role) {
               throw new ErrorWithStatus({

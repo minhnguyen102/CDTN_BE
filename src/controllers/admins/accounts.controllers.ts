@@ -23,9 +23,9 @@ import { pick } from "lodash"
 
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
-  const user_id = req.account?._id as ObjectId
-  const { verify, role } = req.account as Account
-  const result = await accountsServices.login({ user_id: user_id?.toString(), verify, role })
+  // const user_id = req.account?._id as ObjectId
+  // const { verify, role } = req.account as Account
+  const result = await accountsServices.login({ account: req.account as Account })
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
@@ -53,8 +53,8 @@ export const refreshTokenController = async (
   res: Response
 ) => {
   const { refresh_token } = req.body
-  const { user_id, verify, role } = req.decoded_refresh_token as TokenPayload
-  const result = await accountsServices.refreshToken({ refresh_token, user_id, verify, role })
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayload
+  const result = await accountsServices.refreshToken({ refresh_token, user_id, verify })
   res.json({
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
     result
@@ -65,7 +65,7 @@ export const emailVerifyController = async (
   req: Request<ParamsDictionary, any, EmailVerifyTokenReqBody>,
   res: Response
 ) => {
-  const { user_id, verify, role } = req.decoded_email_verify_token as TokenPayload
+  const { user_id, verify } = req.decoded_email_verify_token as TokenPayload
   const account = await databaseService.accounts.findOne({
     _id: new ObjectId(user_id)
   })
@@ -81,7 +81,7 @@ export const emailVerifyController = async (
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
   }
-  const result = await accountsServices.verifyEmail({ user_id, verify, role })
+  const result = await accountsServices.verifyEmail({ user_id, verify })
   res.json({
     message: USER_MESSAGES.VERIFY_EMAIL_SUCCESS,
     result

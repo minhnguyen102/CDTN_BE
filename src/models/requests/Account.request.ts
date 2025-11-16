@@ -9,7 +9,7 @@ export interface RegisterReqBody {
   confirm_password: string
   date_of_birth: Date
   role: RoleAccount
-  ownerId: ObjectId
+  role_id: string
 }
 export interface LogoutReqBody {
   refresh_token: string

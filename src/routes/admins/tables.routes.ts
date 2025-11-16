@@ -12,6 +12,7 @@ import {
   updateTableValidation
 } from "../../middlewares/admins/tables.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 
 const tableRoutes = Router()
 
@@ -21,7 +22,13 @@ const tableRoutes = Router()
  * Method: GET
  * Headers: {Authorization: Bearer access_token}
  */
-tableRoutes.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(getAllTablesController))
+tableRoutes.get(
+  "/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("view_tables"),
+  wrapHandlerFunction(getAllTablesController)
+)
 
 /**
  * Description: Create table
@@ -34,6 +41,7 @@ tableRoutes.post(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("create_table"),
   createTableValidation,
   wrapHandlerFunction(createTableController)
 )
@@ -49,6 +57,7 @@ tableRoutes.patch(
   "/:id",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("update_table"),
   updateTableValidation,
   wrapHandlerFunction(updateTableController)
 )
@@ -63,6 +72,7 @@ tableRoutes.patch(
   "/:id/qr-token",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("regenerate_table_qr"),
   regenerateQrTokenValidation,
   wrapHandlerFunction(regenerateQrTokenController)
 )
