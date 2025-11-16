@@ -175,7 +175,30 @@ const USER_MESSAGES = {
   PERMISSION_NOT_FOUND: "Permission not found.",
   DELETE_PERMISSION_SUCCESS: "Delete permission successfully.",
   PERMISSION_ID_NOT_FOUND: "One or more permission IDs do not exist.",
-  CREATE_PERMISSION_SUCCESS: "Create permission successfully."
+  CREATE_PERMISSION_SUCCESS: "Create permission successfully.",
+
+  // --- Import Order Messages ---
+  SUPPLIER_ID_INVALID: "Invalid Supplier ID (must be a MongoID)",
+
+  IMPORT_DATE_IS_REQUIRED: "Import date is required",
+  IMPORT_DATE_INVALID: "Import date must be a valid ISO 8601 date string",
+
+  STATUS_IS_REQUIRED: "Status is required",
+  STATUS_INVALID: "Status must be either 'Draft' or 'Confirmed'",
+
+  ITEMS_ARE_REQUIRED: "Items array is required and cannot be empty",
+  ITEMS_MUST_BE_ARRAY: "Items must be an array",
+
+  ITEM_INGREDIENT_ID_IS_REQUIRED: "Each item must have an ingredientId",
+  ITEM_INGREDIENT_ID_INVALID: "Invalid ingredientId (must be a MongoID)",
+
+  ITEM_QUANTITY_IS_REQUIRED: "Each item must have a quantity",
+  ITEM_QUANTITY_MUST_BE_POSITIVE: "Item quantity must be a number greater than 0",
+
+  ITEM_IMPORT_PRICE_IS_REQUIRED: "Each item must have an importPrice",
+  ITEM_IMPORT_PRICE_MUST_BE_POSITIVE: "Item import price must be a number greater than or equal to 0",
+
+  TAX_RATE_MUST_BE_POSITIVE: "Tax rate must be a number greater than or equal to 0"
 }
 
 export default USER_MESSAGES
