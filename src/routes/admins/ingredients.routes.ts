@@ -40,26 +40,10 @@ ingredientRoutes.post(
 ingredientRoutes.get(
   "/",
   accessTokenValidation,
-  verifiedUserValidation,
-  checkPermission("view_ingredients")
+  verifiedUserValidation
+  // checkPermission("view_ingredients")
   // wrapHandlerFunction(listIngredientsController)
 )
-
-/**
- * Description: Get detail of one ingredient
- * PATH: admin/ingredients/:id
- * Method: GET
- * Params: { id: string }
- * Headers: {Authorization: Bearj access_token}
- */
-// ingredientRoutes.get(
-//   "/:id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   // adminRoleValidation,
-//   isObjectIdValidation("id"), // Kiểm tra params.id có phải ObjectId hợp lệ
-//   wrapHandlerFunction(getIngredientDetailController)
-// )
 
 /**
  * Description: Update an ingredient

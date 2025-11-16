@@ -7,7 +7,15 @@ class IngredientServices {
   async createIngredient({ payload }: { payload: createIngredientReqBody }) {
     const result = await databaseService.ingredients.insertOne(new Ingredient(payload))
     const { insertedId } = result
-    const ingredient = await databaseService.ingredients.findOne({ _id: new ObjectId(insertedId) })
+    const ingredient = await databaseService.ingredients.findOne(
+      { _id: new ObjectId(insertedId) },
+      {
+        projection: {
+          createdAt: 0,
+          updatedAt: 0
+        }
+      }
+    )
     return ingredient
   }
 }

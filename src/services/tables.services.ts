@@ -32,26 +32,21 @@ class TableServices {
     }
   }
 
-  async getAllTables({ page, status, limitItem }: { page: number; status?: string; limitItem: number }) {
-    const objectFind: { status?: TableStatus } = {}
-    // Pagination
-    const objectPagination: {
-      currentPage: number
-      skip?: number
-      limit: number
-      totalPage?: number
-    } = {
-      currentPage: page,
-      limit: limitItem
-    }
-    const totalDocument = await databaseService.tables.countDocuments()
-    paginationHelper({
-      totalDocument,
-      objectPagination
-    })
-    // console.log("newObjectPagination: ", newObjectPagination)
-    // console.log("objectPagination: ", objectPagination)
-
+  async getAllTables({
+    page,
+    status,
+    limit,
+    search,
+    capacity
+  }: {
+    page: number
+    status?: string
+    limit: number
+    search?: number
+    capacity?: number
+  }) {
+    const objectFind: { status?: TableStatus; number?: number; capacity?: number | { $gte: number } } = {}
+    // Lọc trước rồi mới tìm kiếm và phân trang trên kết quả lọc trả về
     // FilterStatus
     if (status) {
       const validStatuses = Object.values(TableStatus) as string[]
@@ -64,12 +59,24 @@ class TableServices {
         })
       }
     }
+    // Search
+    if (search) {
+      objectFind.number = search
+    }
+    // Capacity
+    if (capacity) {
+      objectFind.capacity = { $gte: capacity }
+    }
+    // Tính toán skip
+    const skip = (page - 1) * limit
 
-    const tables = await databaseService.tables
-      .find(objectFind)
-      .limit(objectPagination.limit)
-      .skip(objectPagination.skip as number)
-      .toArray()
+    const [tables, totalFilteredDocuments] = await Promise.all([
+      databaseService.tables.find(objectFind).limit(limit).skip(skip).toArray(),
+      databaseService.tables.countDocuments(objectFind)
+    ])
+
+    // Tính toán totalPage (dựa trên tổng đã lọc)
+    const totalPage = Math.ceil(totalFilteredDocuments / limit)
 
     // Xử lí trả về QRcode cho trang quản lí
     const qrGenerationPromises = tables.map(async (table) => {
@@ -90,7 +97,12 @@ class TableServices {
 
     return {
       tables: tablesWithQR,
-      ...objectPagination
+      pagination: {
+        currentPage: page,
+        limit: limit,
+        total: totalFilteredDocuments, // Tổng số item (đã lọc)
+        totalPage: totalPage // Tổng số trang (đã lọc)
+      }
     }
   }
 
