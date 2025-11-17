@@ -3,6 +3,7 @@ import {
   changePasswordController,
   emailVerifyController,
   forgotPasswordController,
+  getAccountsController,
   getMeController,
   loginController,
   logoutController,
@@ -142,6 +143,21 @@ accountRoutes.patch(
   verifiedUserValidation, // chỉ email verify mới được change
   changePasswordValidation,
   wrapHandlerFunction(changePasswordController)
+)
+
+/**
+ * Description: Get list of accounts (users/employees)
+ * Path: /admin/accounts
+ * Method: GET
+ * Query: ?page=1&limit=10&search=Hieu&roleId=...&status=Active
+ * Headers: { Authorization: Bearer <access_token> }
+ */
+accountRoutes.get(
+  "/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  // permissionValidation('view_employees'), // <-- Gợi ý: Nên có middleware check quyền này
+  wrapHandlerFunction(getAccountsController)
 )
 
 export default accountRoutes

@@ -35,15 +35,6 @@ class SupplierServices {
       }
     }
     if (search) {
-      // const searchRegex = { $regex: search, $options: "i" } // 'i' = không phân biệt hoa thường
-      // console.log(searchRegex)
-      // objectFind.$or = [
-      //   { name: searchRegex },
-      //   { phone: searchRegex },
-      //   { email: searchRegex },
-      //   { contactPerson: searchRegex }
-      // ]
-      // console.log(search)
       objectFind.$text = { $search: search }
     }
 

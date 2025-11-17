@@ -35,20 +35,6 @@ rolesRouter.post(
 rolesRouter.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(getAllRolesController))
 
 /**
- * Description: Get a single role by ID
- * PATH: admin/roles/:role_id
- * Method: GET
- * Headers: {Authorization: Bearer access_token}
- */
-// rolesRouter.get(
-//   "/:role_id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   roleIdValidation,
-//   wrapHandlerFunction(getRoleController)
-// )
-
-/**
  * Description: Update a role by ID
  * PATH: admin/roles/:role_id
  * Method: PATCH

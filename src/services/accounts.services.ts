@@ -428,6 +428,96 @@ class AccountsServices {
     )
     return true
   }
+
+  async getList({
+    page,
+    limit,
+    search,
+    roleId,
+    status
+  }: {
+    page: number
+    limit: number
+    search?: string
+    roleId?: string
+    status?: string
+  }) {
+    const objectFind: any = {}
+    //Filter theo RoleId
+    if (roleId) {
+      objectFind.roleId = new ObjectId(roleId)
+    }
+
+    //Filter theo Search (Tìm theo Tên, Email)
+    if (search) {
+      objectFind.$text = { $search: search }
+    }
+
+    const pipeline: any[] = [
+      //Lọc dữ liệu
+      { $match: objectFind },
+
+      //Sắp xếp (Mới nhất lên đầu)
+      { $sort: { createdAt: -1 } },
+
+      //Phân trang
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+
+      //Join với bảng Roles để lấy tên vai trò
+      {
+        $lookup: {
+          from: "roles",
+          localField: "role_id",
+          foreignField: "_id",
+          as: "roleDetails"
+        }
+      },
+
+      //Unwind mảng roleDetails (vì lookup trả về mảng)
+      {
+        $unwind: {
+          path: "$roleDetails",
+          preserveNullAndEmptyArrays: true // Giữ lại User ngay cả khi không tìm thấy Role (để không bị mất dữ liệu)
+        }
+      },
+      {
+        $addFields: {
+          roleName: "$roleDetails.name"
+        }
+      },
+
+      //Project - Chọn trường hiển thị và ẨN MẬT KHẨU
+      {
+        $project: {
+          password: 0,
+          forgotPasswordToken: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0,
+          verify: 0,
+          role_id: 0,
+          createdAt: 0,
+          updatedAt: 0,
+          roleDetails: 0
+        }
+      }
+    ]
+
+    const [accounts, totalFilteredDocuments] = await Promise.all([
+      databaseService.accounts.aggregate(pipeline).toArray(),
+      databaseService.accounts.countDocuments(objectFind)
+    ])
+    const totalPages = Math.ceil(totalFilteredDocuments / limit)
+    return {
+      accounts,
+      pagination: {
+        currentPage: page,
+        limit: limit,
+        total: totalFilteredDocuments,
+        totalPages: totalPages
+      }
+    }
+  }
 }
 
 const accountsServices = new AccountsServices()

@@ -20,6 +20,7 @@ import Account from "../../models/schema/Account.schema"
 import { JwtPayload } from "jsonwebtoken"
 import { ErrorWithStatus } from "../../models/Errors"
 import { pick } from "lodash"
+import { paginationQueryParser } from "../../utils/helpers"
 
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
@@ -165,5 +166,35 @@ export const changePasswordController = async (
   await accountsServices.changePassword({ user_id, old_password, new_password: password })
   res.json({
     message: USER_MESSAGES.CHANGE_PASSWORD_SUCCESS
+  })
+}
+
+export const getAccountsController = async (req: Request, res: Response) => {
+  // 1. Lấy page và limit từ helper
+  const { page, limit } = paginationQueryParser(req, {
+    defaultLimit: 10,
+    allowLimits: [10, 20, 50]
+  })
+
+  // 2. Lấy các tham số filter/search
+  const search = (req.query.search as string) || undefined
+  const roleId = (req.query.roleId as string) || undefined
+  const status = (req.query.status as string) || undefined // 'Active', 'Inactive'
+
+  // 3. Gọi Service
+  const result = await accountsServices.getList({
+    page,
+    limit,
+    search,
+    roleId,
+    status
+  })
+
+  // 4. Tính tổng số trang
+
+  // 5. Trả về response
+  return res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.ACCOUNTS_FETCHED_SUCCESSFULLY,
+    result
   })
 }

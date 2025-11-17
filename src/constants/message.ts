@@ -24,6 +24,7 @@ const USER_MESSAGES = {
   PASSWORDS_DO_NOT_MATCH: "Passwords do not match",
   PASSWORD_MUST_BE_STRONG:
     "Password must be at least 8 characters long, containing at least 1 uppercase letter, 1 lowercase letter, and 1 special symbol.",
+  ACCOUNTS_FETCHED_SUCCESSFULLY: "Get list of accounts successfully",
 
   // === User Fields ===
   NAME_IS_REQUIRED: "Name is required",
