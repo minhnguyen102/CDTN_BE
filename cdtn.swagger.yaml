@@ -750,6 +750,205 @@ paths:
                     example: Delete role successfully.
               example:
                 message: Delete role successfully.
+  /import-orders:
+    post:
+      tags:
+        - Import Orders
+      summary: Create a new import order
+      operationId: createImportOrder
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplierId:
+                  type: string
+                importDate:
+                  type: string
+                  format: date
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      ingredientId:
+                        type: string
+                      quantity:
+                        type: number
+                      importPrice:
+                        type: number
+
+                taxRate:
+                  type: number
+                  description: Optional tax rate (%)
+                  example: 5
+
+                notes:
+                  type: string
+                  description: Optional notes for the import order
+                  example: "Hàng giao buổi sáng"
+
+              required:
+                - supplierId
+                - importDate
+                - items
+
+            example:
+              supplierId: "690dad4474beb3c7ee4df922"
+              importDate: "2025-11-17"
+              items:
+                - ingredientId: "691ae1a9885a522575e5a0ad"
+                  quantity: 10
+                  importPrice: 5.5
+                - ingredientId: "690dad4474beb3c7ee4df922"
+                  quantity: 100
+                  importPrice: 2.5
+              taxRate: 5
+              notes: "Hàng giao buổi sáng"
+
+              
+
+      responses:
+        201:
+          description: Import order created
+          content:
+            application/json:
+              example:
+                message: "Import order created successfully"
+
+    get:
+      tags:
+        - Import Orders
+      summary: Get list of import orders
+      operationId: getImportOrders
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            example: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            example: 10
+        - in: query
+          name: search
+          schema:
+            type: string
+            example: "B1WG"
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/ImportOrderStatus"
+          example: confirmed
+        - in: query
+          name: supplierId
+          schema:
+            type: string
+            example: "690dad4474beb3c7ee4df922"
+        - in: query
+          name: dateFrom
+          schema:
+            type: string
+            format: date
+            example: "2025-11-16"
+        - in: query
+          name: dateTo
+          schema:
+            type: string
+            format: date
+            example: "2025-11-20"
+
+      responses:
+        200:
+          description: List of import orders
+          content:
+            application/json:
+              example:
+                message: "Import orders retrieved successfully"
+                data:
+                  importOrders:
+                    - _id: "691b2f06c8ffd89b56cfa46e"
+                      orderNumber: "PO-20251117-RCMN"
+                      importDate: "2025-11-16T17:00:00.000Z"
+                      status: "confirmed"
+                      items:
+                        - ingredientId: "691ae1a9885a522575e5a0ad"
+                          ingredientName: "Thit bo"
+                          quantity: 10
+                          importPrice: 5.5
+                          total: 55
+                      subtotal: 55
+                      taxRate: 5
+                      taxAmount: 2.75
+                      totalAmount: 57.75
+                      supplierName: "Hieu Bui 234"
+                      importedByName: "Gao red"
+                  pagination:
+                    currentPage: 1
+                    limit: 10
+                    total: 1
+                    totalPages: 1
+
+  /import-orders/{id}:
+    get:
+      tags:
+        - Import Orders
+      summary: Get import order detail
+      operationId: getImportOrderDetail
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "691b2ed8c8ffd89b56cfa46d"
+
+      responses:
+        200:
+          description: Import order detail
+          content:
+            application/json:
+              example:
+                message: "Import order detail retrieved successfully"
+                data:
+                  _id: "691b2ed8c8ffd89b56cfa46d"
+                  orderNumber: "PO-20251117-1I97"
+                  importDate: "2025-11-16T17:00:00.000Z"
+                  status: "confirmed"
+                  items:
+                    - ingredientId: "690dad4474beb3c7ee4df922"
+                      ingredientName: "Gạo ST25"
+                      quantity: 100
+                      importPrice: 2.5
+                      total: 250
+                      unit: "kg"
+                    - ingredientId: "691ae1a9885a522575e5a0ad"
+                      ingredientName: "Thit bo"
+                      quantity: 10
+                      importPrice: 4.5
+                      total: 45
+                      unit: "kg"
+                  subtotal: 295
+                  taxRate: 5
+                  taxAmount: 14.75
+                  totalAmount: 309.75
+                  notes: "Hàng giao buổi sáng"
+                  importedByName: "Gao red"
+                  supplierName: "Hieu Bui 234"
+
+
 components:
   schemas:
     Table:
@@ -1043,6 +1242,142 @@ components:
             "6915917c7d31b24b66fd0c15"
           ]
     
+    ImportOrderStatus:
+      type: string
+      enum:
+        - draft
+        - confirmed
+
+    ImportOrderItem:
+      type: object
+      properties:
+        ingredientId:
+          type: string
+        ingredientName:
+          type: string
+        quantity:
+          type: number
+        importPrice:
+          type: number
+        total:
+          type: number
+
+    ImportOrder:
+      type: object
+      properties:
+        _id:
+          type: string
+        orderNumber:
+          type: string
+        supplierId:
+          type: string
+        importedById:
+          type: string
+        importDate:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/ImportOrderStatus"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportOrderItem"
+        subtotal:
+          type: number
+        taxRate:
+          type: number
+        taxAmount:
+          type: number
+        totalAmount:
+          type: number
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ImportOrderListItem:
+      type: object
+      properties:
+        orderNumber:
+          type: string
+        importDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+        totalAmount:
+          type: number
+        supplierName:
+          type: string
+        importedByName:
+          type: string
+
+    ImportOrderDetail:
+      allOf:
+        - $ref: "#/components/schemas/ImportOrder"
+        - type: object
+          properties:
+            supplierName:
+              type: string
+            importedByName:
+              type: string
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  ingredientId:
+                    type: string
+                  ingredientName:
+                    type: string
+                  unit:
+                    type: string
+                  quantity:
+                    type: number
+                  importPrice:
+                    type: number
+                  total:
+                    type: number
+
+    CreateImportOrderReqBody:
+      type: object
+      required:
+        - supplierId
+        - importDate
+        - status
+        - items
+      properties:
+        supplierId:
+          type: string
+        importDate:
+          type: string
+          format: date
+        taxRate:
+          type: number
+          default: 0
+        notes:
+          type: string
+        status:
+          $ref: "#/components/schemas/ImportOrderStatus"
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - ingredientId
+              - quantity
+              - importPrice
+            properties:
+              ingredientId:
+                type: string
+              quantity:
+                type: number
+              importPrice:
+                type: number
   securitySchemes:
     BearerAuth:
       type: http
