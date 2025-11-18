@@ -5,7 +5,9 @@ import { ObjectId } from "mongodb"
 
 class IngredientServices {
   async createIngredient({ payload }: { payload: createIngredientReqBody }) {
-    const result = await databaseService.ingredients.insertOne(new Ingredient(payload))
+    const { categoryId, ...rest } = payload
+    const mongoIdCategory = new ObjectId(categoryId)
+    const result = await databaseService.ingredients.insertOne(new Ingredient({ ...rest, categoryId: mongoIdCategory }))
     const { insertedId } = result
     const ingredient = await databaseService.ingredients.findOne(
       { _id: new ObjectId(insertedId) },
@@ -121,7 +123,6 @@ class IngredientServices {
       databaseService.ingredients.countDocuments(objectFind)
     ])
     const totalPages = Math.ceil(totalFilteredDocuments / limit)
-
     return {
       ingredients,
       pagination: {

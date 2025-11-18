@@ -185,7 +185,7 @@ const USER_MESSAGES = {
   IMPORT_DATE_INVALID: "Import date must be a valid ISO 8601 date string",
 
   STATUS_IS_REQUIRED: "Status is required",
-  STATUS_INVALID: "Status must be either 'Draft' or 'Confirmed'",
+  STATUS_INVALID: "Status must be either 'draft' or 'confirmed'",
 
   ITEMS_ARE_REQUIRED: "Items array is required and cannot be empty",
   ITEMS_MUST_BE_ARRAY: "Items must be an array",
@@ -199,7 +199,9 @@ const USER_MESSAGES = {
   ITEM_IMPORT_PRICE_IS_REQUIRED: "Each item must have an importPrice",
   ITEM_IMPORT_PRICE_MUST_BE_POSITIVE: "Item import price must be a number greater than or equal to 0",
 
-  TAX_RATE_MUST_BE_POSITIVE: "Tax rate must be a number greater than or equal to 0"
+  TAX_RATE_MUST_BE_POSITIVE: "Tax rate must be a number greater than or equal to 0",
+  IMPORT_ORDER_CREATED_SUCCESSFULLY: "Import order created successfully",
+  IMPORT_ORDERS_FETCHED_SUCCESSFULLY: "Import orders retrieved successfully"
 }
 
 export default USER_MESSAGES

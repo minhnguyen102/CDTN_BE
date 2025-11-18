@@ -17,5 +17,5 @@ export const routesAdmin = (app: Express) => {
   app.use(PATH_ADMIN + "/ingredients", ingredientsRouter)
   app.use(PATH_ADMIN + "/roles", rolesRouter)
   app.use(PATH_ADMIN + "/permissions", permissionsRouter)
-  app.use(PATH_ADMIN + "/import_orders", importOrderRoutes)
+  app.use(PATH_ADMIN + "/import-orders", importOrderRoutes)
 }

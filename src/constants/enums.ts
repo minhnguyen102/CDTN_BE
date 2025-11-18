@@ -37,3 +37,8 @@ export enum RoleStatus {
   ACTIVE = "active",
   INACTIVE = "inactive"
 }
+
+export enum ImportOrderStatus {
+  CONFIRMED = "confirmed",
+  DRAFT = "draft"
+}

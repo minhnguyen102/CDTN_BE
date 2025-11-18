@@ -4,12 +4,7 @@ import { validate } from "../../utils/validation"
 import USER_MESSAGES from "../../constants/message"
 import HTTP_STATUS from "../../constants/httpStatus"
 import { ErrorWithStatus } from "../../models/Errors"
-
-// Định nghĩa Enum cho status (như bạn gợi ý)
-export enum ImportOrderStatus {
-  Draft = "Draft",
-  Confirmed = "Confirmed"
-}
+import { ImportOrderStatus } from "../../constants/enums"
 
 // Validation cho ID (dùng chung)
 const mongoIdSchema = (errorMessage: string): ParamSchema => ({

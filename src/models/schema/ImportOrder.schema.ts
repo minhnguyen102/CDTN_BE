@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb"
+import { ImportOrderStatus } from "../../constants/enums"
 
 interface ImportOrderItem {
   ingredientId: ObjectId // -> ingredient
@@ -10,19 +11,19 @@ interface ImportOrderItem {
 
 interface ImportOrderType {
   _id?: ObjectId
-  orderNumber: string // auto gen
+  orderNumber: string
   supplierId: ObjectId // -> supplier
   importedById: ObjectId // -> account
   importDate: Date
-  status: string // nên cải thiện thành enum
+  status: ImportOrderStatus
   items: ImportOrderItem[]
   subtotal: number
   taxRate: number
   taxAmount: number
   totalAmount: number
-  notes: string
-  createdAt: Date
-  updatedAt: Date
+  notes?: string
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export default class ImportOrder {
@@ -31,7 +32,7 @@ export default class ImportOrder {
   supplierId: ObjectId // -> supplier
   importedById: ObjectId // -> account
   importDate: Date
-  status: string // nên cải thiện thành enum
+  status: ImportOrderStatus
   items: ImportOrderItem[]
   subtotal: number
   taxRate: number

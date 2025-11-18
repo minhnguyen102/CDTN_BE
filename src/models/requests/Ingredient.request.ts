@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb"
 
 export interface createIngredientReqBody {
   name: string
-  categoryId: ObjectId
+  categoryId: string
   unit: string
   unitPrice: number
   currentStock: number

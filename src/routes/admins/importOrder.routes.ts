@@ -2,6 +2,10 @@ import { Router } from "express"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { createImportOrderValidation } from "../../middlewares/admins/importOrder.middlewares"
+import {
+  createImportOrderController,
+  getImportOrdersController
+} from "../../controllers/admins/importOrders.controllers"
 
 const importOrderRoutes = Router()
 
@@ -24,10 +28,21 @@ importOrderRoutes.post(
   accessTokenValidation,
   verifiedUserValidation,
   createImportOrderValidation,
-  (req, res) => {
-    res.json("OK")
-  }
-  // wrapHandlerFunction(createImportOrderController)
+  wrapHandlerFunction(createImportOrderController)
+)
+
+/**
+ * Description: Get list of import orders
+ * PATH: admin/import-orders
+ * Method: GET
+ * Query: ?page=1&limit=10&search=PO-2025&status=Confirmed&dateFrom=...&dateTo=...
+ * Headers: {Authorization: Bearer access_token}
+ */
+importOrderRoutes.get(
+  "/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  wrapHandlerFunction(getImportOrdersController)
 )
 
 // ... (Các routes khác: get list, get detail, ...)
