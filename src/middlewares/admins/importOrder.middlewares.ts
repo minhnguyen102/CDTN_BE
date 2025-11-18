@@ -5,6 +5,7 @@ import USER_MESSAGES from "../../constants/message"
 import HTTP_STATUS from "../../constants/httpStatus"
 import { ErrorWithStatus } from "../../models/Errors"
 import { ImportOrderStatus } from "../../constants/enums"
+import { ObjectId } from "mongodb"
 
 // Validation cho ID (dùng chung)
 const mongoIdSchema = (errorMessage: string): ParamSchema => ({
@@ -93,5 +94,28 @@ export const createImportOrderValidation = validate(
       }
     },
     ["body"]
+  )
+)
+
+export const importOrderIdValidator = validate(
+  checkSchema(
+    {
+      id: {
+        in: ["params"],
+        trim: true,
+        custom: {
+          options: async (value: string) => {
+            if (!ObjectId.isValid(value)) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.INVALID_MONGODB_ID_FORMAT,
+                status: HTTP_STATUS.BAD_REQUEST
+              })
+            }
+            return true
+          }
+        }
+      }
+    },
+    ["params"]
   )
 )

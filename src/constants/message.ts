@@ -201,7 +201,9 @@ const USER_MESSAGES = {
 
   TAX_RATE_MUST_BE_POSITIVE: "Tax rate must be a number greater than or equal to 0",
   IMPORT_ORDER_CREATED_SUCCESSFULLY: "Import order created successfully",
-  IMPORT_ORDERS_FETCHED_SUCCESSFULLY: "Import orders retrieved successfully"
+  IMPORT_ORDERS_FETCHED_SUCCESSFULLY: "Import orders retrieved successfully",
+  IMPORT_ORDER_DETAIL_FETCHED_SUCCESSFULLY: "Import order detail retrieved successfully",
+  IMPORT_ORDER_NOT_FOUND: "Import order not found"
 }
 
 export default USER_MESSAGES

@@ -152,7 +152,7 @@ class ImportOrderService {
       }
     }
 
-    console.log(objectFind)
+    // console.log(objectFind)
 
     const pipeline = [
       { $match: objectFind },
@@ -206,6 +206,88 @@ class ImportOrderService {
         totalPages
       }
     }
+  }
+
+  async getDetail({ id }: { id: string }) {
+    const pipeline = [
+      { $match: { _id: new ObjectId(id) } },
+      {
+        $lookup: {
+          from: "suppliers",
+          localField: "supplierId",
+          foreignField: "_id",
+          as: "supplierDetail"
+        }
+      },
+      { $unwind: { path: "$supplierDetail", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "accounts",
+          localField: "importedById",
+          foreignField: "_id",
+          as: "staffDetail"
+        }
+      },
+      { $unwind: { path: "$staffDetail", preserveNullAndEmptyArrays: true } },
+      { $unwind: "$items" },
+      {
+        $lookup: {
+          from: "ingredients",
+          localField: "items.ingredientId",
+          foreignField: "_id",
+          as: "ingredientInfo"
+        }
+      },
+      { $unwind: { path: "$ingredientInfo", preserveNullAndEmptyArrays: true } },
+      {
+        $addFields: {
+          "items.unit": "$ingredientInfo.unit"
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          root: { $first: "$$ROOT" },
+          items: { $push: "$items" }
+        }
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ["$root", { items: "$items" }]
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          importedByName: "$staffDetail.name",
+          supplierName: "$supplierDetail.name",
+
+          orderNumber: 1,
+          importDate: 1,
+          status: 1,
+          notes: 1,
+
+          subtotal: 1,
+          taxRate: 1,
+          taxAmount: 1,
+          totalAmount: 1,
+          items: 1
+        }
+      }
+    ]
+
+    const [importOrder] = await databaseService.import_orders.aggregate(pipeline).toArray()
+
+    if (!importOrder) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.IMPORT_ORDER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    return importOrder
   }
 }
 

@@ -50,3 +50,14 @@ export const getImportOrdersController = async (req: Request, res: Response) => 
     data: result
   })
 }
+
+export const getImportOrderDetailController = async (req: Request, res: Response) => {
+  const { id } = req.params
+
+  const importOrder = await importOderService.getDetail({ id })
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.IMPORT_ORDER_DETAIL_FETCHED_SUCCESSFULLY,
+    data: importOrder
+  })
+}

@@ -1,9 +1,10 @@
 import { Router } from "express"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
-import { createImportOrderValidation } from "../../middlewares/admins/importOrder.middlewares"
+import { createImportOrderValidation, importOrderIdValidator } from "../../middlewares/admins/importOrder.middlewares"
 import {
   createImportOrderController,
+  getImportOrderDetailController,
   getImportOrdersController
 } from "../../controllers/admins/importOrders.controllers"
 
@@ -45,6 +46,18 @@ importOrderRoutes.get(
   wrapHandlerFunction(getImportOrdersController)
 )
 
-// ... (Các routes khác: get list, get detail, ...)
+/**
+ * Description: Get import order detail by ID
+ * PATH: admin/import-orders/:id
+ * Method: GET
+ * Params: { id: string }
+ */
+importOrderRoutes.get(
+  "/:id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  importOrderIdValidator, // Middleware kiểm tra ID hợp lệ
+  wrapHandlerFunction(getImportOrderDetailController)
+)
 
 export default importOrderRoutes
