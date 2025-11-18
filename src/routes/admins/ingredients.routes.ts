@@ -26,7 +26,7 @@ ingredientRoutes.post(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
-  // checkPermission("create_ingredient"),
+  checkPermission("create_ingredient"),
   createIngredientValidation,
   wrapHandlerFunction(createIngredientController)
 )
@@ -42,7 +42,7 @@ ingredientRoutes.get(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
-  // checkPermission("view_ingredients")
+  checkPermission("view_ingredients"),
   wrapHandlerFunction(listIngredientsController)
 )
 

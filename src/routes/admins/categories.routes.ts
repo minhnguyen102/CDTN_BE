@@ -7,6 +7,7 @@ import {
   getAllCategoryController,
   updateCategoryController
 } from "../../controllers/admins/categories.controllers"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 const categoriesRouter = Router()
 
 /**
@@ -15,7 +16,13 @@ const categoriesRouter = Router()
  * Headers: {Authorization: Bearer access_token}
  * Method: GET
  */
-categoriesRouter.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(getAllCategoryController))
+categoriesRouter.get(
+  "/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("view_ingredient_category_list"),
+  wrapHandlerFunction(getAllCategoryController)
+)
 
 /**
  * Description: Create category
@@ -28,6 +35,7 @@ categoriesRouter.post(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("create_ingredient_category"),
   createCategoryValidation,
   wrapHandlerFunction(createCategoryController)
 )
@@ -43,6 +51,7 @@ categoriesRouter.patch(
   "/:id",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("update_ingredient_category"),
   updateCategoryValidation,
   wrapHandlerFunction(updateCategoryController)
 )

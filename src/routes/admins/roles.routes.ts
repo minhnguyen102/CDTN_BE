@@ -8,6 +8,7 @@ import {
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { createRoleValidation, roleIdValidation, updateRoleValidation } from "../../middlewares/admins/role.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 
 const rolesRouter = Router()
 
@@ -22,6 +23,7 @@ rolesRouter.post(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("create_role"),
   createRoleValidation,
   wrapHandlerFunction(createRoleController)
 )
@@ -32,7 +34,13 @@ rolesRouter.post(
  * Method: GET
  * Headers: {Authorization: Bearer access_token}
  */
-rolesRouter.get("/", accessTokenValidation, verifiedUserValidation, wrapHandlerFunction(getAllRolesController))
+rolesRouter.get(
+  "/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("view_roles"),
+  wrapHandlerFunction(getAllRolesController)
+)
 
 /**
  * Description: Update a role by ID
@@ -45,6 +53,7 @@ rolesRouter.patch(
   "/:role_id",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("update_role"),
   roleIdValidation,
   updateRoleValidation,
   wrapHandlerFunction(updateRoleController)
@@ -60,6 +69,7 @@ rolesRouter.delete(
   "/:role_id",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("delete_role"),
   roleIdValidation,
   wrapHandlerFunction(deleteRoleController)
 )

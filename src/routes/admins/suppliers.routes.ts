@@ -25,8 +25,8 @@ const supplierRoutes = Router()
 supplierRoutes.get(
   "/",
   accessTokenValidation,
-  checkPermission("view_suppliers"),
   verifiedUserValidation,
+  checkPermission("view_suppliers"),
   wrapHandlerFunction(viewAllSupplierController)
 )
 
@@ -56,8 +56,8 @@ supplierRoutes.post(
 supplierRoutes.patch(
   "/:supplier_id",
   accessTokenValidation,
-  checkPermission("update_supplier"),
   verifiedUserValidation,
+  checkPermission("update_supplier"),
   updateSupplierValidation,
   wrapHandlerFunction(updateSupplierController)
 )
@@ -71,8 +71,8 @@ supplierRoutes.patch(
 supplierRoutes.delete(
   "/:supplier_id",
   accessTokenValidation,
-  checkPermission("delete_supplier"),
   verifiedUserValidation,
+  checkPermission("delete_supplier"),
   supplierIdValidation,
   wrapHandlerFunction(deleteSupplierController)
 )

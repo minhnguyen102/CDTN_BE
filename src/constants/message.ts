@@ -203,7 +203,21 @@ const USER_MESSAGES = {
   IMPORT_ORDER_CREATED_SUCCESSFULLY: "Import order created successfully",
   IMPORT_ORDERS_FETCHED_SUCCESSFULLY: "Import orders retrieved successfully",
   IMPORT_ORDER_DETAIL_FETCHED_SUCCESSFULLY: "Import order detail retrieved successfully",
-  IMPORT_ORDER_NOT_FOUND: "Import order not found"
+  IMPORT_ORDER_NOT_FOUND: "Import order not found",
+
+  // --- Dish Categories ---
+  CATEGORY_NAME_IS_REQUIRED: "Category name is required",
+  CATEGORY_NAME_MUST_BE_STRING: "Category name must be a string",
+  // CATEGORY_ID_INVALID: "Invalid Category ID",
+
+  CATEGORY_CREATED_SUCCESSFULLY: "Dish category created successfully",
+  CATEGORIES_FETCHED_SUCCESSFULLY: "Dish categories retrieved successfully",
+  CATEGORY_DETAIL_FETCHED_SUCCESSFULLY: "Dish category detail retrieved successfully",
+  CATEGORY_UPDATED_SUCCESSFULLY: "Dish category updated successfully",
+  CATEGORY_DELETED_SUCCESSFULLY: "Dish category deleted successfully",
+
+  CATEGORY_NOT_FOUND: "Dish category not found",
+  CATEGORY_HAS_DISHES: "Cannot delete this category because it contains dishes"
 }
 
 export default USER_MESSAGES

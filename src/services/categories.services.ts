@@ -1,6 +1,6 @@
 import { createCategoryReqBody, updateCategoryReqBody } from "../models/requests/Category.request"
-import databaseService from "./database.servies"
 import Category from "../models/schema/Category.schema"
+import databaseService from "./database.servies"
 import { ObjectId } from "mongodb"
 
 class CategoryServices {

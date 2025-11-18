@@ -7,6 +7,7 @@ import {
   getImportOrderDetailController,
   getImportOrdersController
 } from "../../controllers/admins/importOrders.controllers"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 
 const importOrderRoutes = Router()
 
@@ -28,6 +29,7 @@ importOrderRoutes.post(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("create_import_order"),
   createImportOrderValidation,
   wrapHandlerFunction(createImportOrderController)
 )
@@ -43,6 +45,7 @@ importOrderRoutes.get(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("view_import_order_list"),
   wrapHandlerFunction(getImportOrdersController)
 )
 
@@ -56,7 +59,8 @@ importOrderRoutes.get(
   "/:id",
   accessTokenValidation,
   verifiedUserValidation,
-  importOrderIdValidator, // Middleware kiểm tra ID hợp lệ
+  checkPermission("view_import_order_detail"),
+  importOrderIdValidator,
   wrapHandlerFunction(getImportOrderDetailController)
 )
 

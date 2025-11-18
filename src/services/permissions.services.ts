@@ -2,6 +2,7 @@ import databaseService from "./database.servies"
 import { ObjectId } from "mongodb"
 import { createPermissionReqBody, updatePermissionReqBody } from "../models/requests/Permission.request"
 import Permission from "../models/schema/Permission.schema"
+import { permission } from "process"
 
 class PermissionServices {
   async createPermission({ payload }: { payload: createPermissionReqBody }) {
@@ -25,6 +26,9 @@ class PermissionServices {
       .sort({ module: 1, name: 1 })
       .toArray()
 
+    // console.log(permissions)
+    const permission_ids = permissions.map((permission) => permission._id.toString())
+    console.log(permission_ids)
     // Trả về mảng các permission
     return permissions as Permission[]
   }
