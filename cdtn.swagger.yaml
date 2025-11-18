@@ -767,6 +767,8 @@ paths:
               properties:
                 supplierId:
                   type: string
+                status:
+                  $ref: "#/components/schemas/ImportOrderStatus"
                 importDate:
                   type: string
                   format: date
@@ -800,6 +802,7 @@ paths:
             example:
               supplierId: "690dad4474beb3c7ee4df922"
               importDate: "2025-11-17"
+              status: "confirmed"
               items:
                 - ingredientId: "691ae1a9885a522575e5a0ad"
                   quantity: 10

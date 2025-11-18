@@ -42,3 +42,14 @@ export enum ImportOrderStatus {
   CONFIRMED = "confirmed",
   DRAFT = "draft"
 }
+
+export enum DishStatus {
+  AVAILABLE = "available",
+  UNAVAILABLE = "unavailable",
+  HIDDEN = "hidden"
+}
+
+export enum DishCategoryStatus {
+  ACTIVE = "active",
+  INACTIVE = "inactive"
+}
