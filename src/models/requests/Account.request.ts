@@ -38,7 +38,6 @@ export interface resetPasswordReqBody {
 export interface updateMeReqBody {
   name?: string
   date_of_birth?: string
-  avatar?: string
   phone?: string
 }
 

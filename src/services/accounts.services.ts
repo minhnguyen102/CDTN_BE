@@ -417,7 +417,7 @@ class AccountsServices {
 
   async updateMe({ user_id, payload }: { user_id: string; payload: updateMeReqBody }) {
     const _payload = payload.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload
-    await databaseService.accounts.updateOne(
+    const account = await databaseService.accounts.findOneAndUpdate(
       { _id: new ObjectId(user_id) },
       {
         $set: {
@@ -426,48 +426,59 @@ class AccountsServices {
         $currentDate: {
           updatedAt: true
         }
+      },
+      {
+        projection: {
+          date_of_birth: 1,
+          name: 1,
+          phone: 1
+        },
+        returnDocument: "after"
       }
     )
-    const account = await databaseService.accounts
-      .aggregate([
-        {
-          $match: { _id: new ObjectId(user_id) }
-        },
-        {
-          $lookup: {
-            from: "roles",
-            localField: "role_id",
-            foreignField: "_id",
-            as: "role"
-          }
-        },
-        {
-          $unwind: {
-            path: "$role",
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $addFields: {
-            role_name: "$role.name"
-          }
-        },
-        {
-          $project: {
-            password: 0,
-            email_verify_token: 0,
-            forgot_password_token: 0,
-            verify: 0,
-            role_id: 0,
-            role: 0, // Ẩn object role gốc
-            createdAt: 0,
-            updatedAt: 0
-          }
-        }
-      ])
-      .toArray()
+    // const account = await databaseService.accounts
+    //   .aggregate([
+    //     {
+    //       $match: { _id: new ObjectId(user_id) }
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: "roles",
+    //         localField: "role_id",
+    //         foreignField: "_id",
+    //         as: "role"
+    //       }
+    //     },
+    //     {
+    //       $unwind: {
+    //         path: "$role",
+    //         preserveNullAndEmptyArrays: true
+    //       }
+    //     },
+    //     {
+    //       $addFields: {
+    //         role_name: "$role.name"
+    //       }
+    //     },
+    //     {
+    //       $project: {
+    //         // password: 0,
+    //         // email_verify_token: 0,
+    //         // forgot_password_token: 0,
+    //         // verify: 0,
+    //         // role_id: 0,
+    //         // role: 0, // Ẩn object role gốc
+    //         // createdAt: 0,
+    //         // updatedAt: 0
+    //         date_of_birth: 1,
+    //         name: 1,
+    //         phone: 1
+    //       }
+    //     }
+    //   ])
+    //   .toArray()
 
-    return account[0]
+    return account
   }
 
   async changePassword({

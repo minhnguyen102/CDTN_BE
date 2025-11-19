@@ -394,6 +394,51 @@ paths:
             application/json:
               example:
                 message: "Access token is required"
+    patch:
+      operationId: accountsUpdateMe
+      tags:
+        - account
+      summary: Update my profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                date_of_birth:
+                  type: string
+                  format: date-time
+                phone:
+                  type: string
+              example:
+                name: "Ben Hiu"
+                date_of_birth: "1994-10-20T00:00:00Z"
+                phone: "0357371955"
+      responses:
+        200:
+          description: Update infor success
+          content:
+            application/json:
+              example:
+                message: "Update infor success"
+                result:
+                  _id: "6916e25098d9c5bb95d26e0b"
+                  name: "Ben Hiu"
+                  date_of_birth: "1994-10-20T00:00:00.000Z"
+                  phone: "0357371955"
+        401:
+          description: Invalid signature
+          content:
+            application/json:
+              example:
+                message: "Invalid signature"
+        422:
+          description: Validation error
   /accounts/change-password:
     post:
       operationId: accountsChangePassword
@@ -529,7 +574,118 @@ paths:
             application/json:
               example:
                 message: "Invalid signature"
+  /accounts/me/avatar:
+    patch:
+      operationId: updateAvatar
+      tags:
+        - account
+      summary: Upload avatar
+      description: Update avatar using multipart/form-data
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+              required:
+                - image
+            example:
+              image: (binary)
+      responses:
+        200:
+          description: Avatar updated successfully
+          content:
+            application/json:
+              example:
+                message: "Avatar updated successfully"
+                result:
+                  avatar: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1763567455/restaurant-app/img_1763567454472.jpg"
+        400:
+          description: No image uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No image uploaded
+        401:
+          description: Invalid signature
+          content:
+            application/json:
+              example:
+                message: "Invalid signature"
+  /accounts/{id}:
+    patch:
+      tags:
+        - account 
+      summary: Update an account (Admin only)
+      description: Admin can update account's status or role.
+      operationId: updateAccount
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Account ID (MongoDB ObjectId)
 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: Account status
+                  example: active
+                role_id:
+                  type: string
+                  description: New role ID
+                  example: "6912ad761ef6eba42b035370"
+
+      responses:
+        200:
+          description: Account updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Account updated successfully
+        403:
+          description: Forbidden – User does not have permission
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Forbidden
+        404:
+          description: Role not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Role not found
 
   /tables:
     post:

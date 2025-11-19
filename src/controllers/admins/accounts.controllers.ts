@@ -207,7 +207,7 @@ export const updateAvatarController = async (req: Request, res: Response) => {
   // console.log("file: ", file)
   if (!file) {
     return res.status(400).json({
-      message: "Không có file ảnh nào được gửi lên"
+      message: USER_MESSAGES.NO_IMAGE_UPLOADED
     })
   }
   const result = await accountsServices.updateAvatar({ user_id, file })

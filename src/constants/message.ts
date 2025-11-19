@@ -229,7 +229,8 @@ const USER_MESSAGES = {
   UPDATE_AVATAR_SUCCESS: "Avatar updated successfully",
   UPDATE_ACCOUNT_SUCCESS: "Account updated successfully",
   ACCOUNT_ID_IS_INVALID: "Account ID is invalid",
-  ROLE_ID_IS_INVALID: "Role ID is invalid"
+  ROLE_ID_IS_INVALID: "Role ID is invalid",
+  NO_IMAGE_UPLOADED: "No image uploaded"
 }
 
 export default USER_MESSAGES
