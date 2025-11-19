@@ -217,7 +217,15 @@ const USER_MESSAGES = {
   CATEGORY_DELETED_SUCCESSFULLY: "Dish category deleted successfully",
 
   CATEGORY_NOT_FOUND: "Dish category not found",
-  CATEGORY_HAS_DISHES: "Cannot delete this category because it contains dishes"
+  CATEGORY_HAS_DISHES: "Cannot delete this category because it contains dishes",
+  PHONE_REQUIRED: "Phone number is required",
+  PHONE_MUST_BE_STRING: "Phone number must be a string",
+  PHONE_LENGTH_MUST_BE_FROM_10_TO_11: "Phone number length must be from 10 to 11 characters",
+  PHONE_IS_INVALID: "Invalid phone number format",
+
+  // STATUS
+  STATUS_MUST_BE_STRING: "Status must be a string",
+  STATUS_IS_INVALID: "Invalid status"
 }
 
 export default USER_MESSAGES

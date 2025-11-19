@@ -1,11 +1,13 @@
 import { ObjectId } from "mongodb"
-import { AccountVerifyStatus, RoleAccount } from "../../constants/enums"
+import { AccountStatus, AccountVerifyStatus } from "../../constants/enums"
 
 interface AccountType {
   _id?: ObjectId
   name: string
   email: string // (Tạo unique index)
   password: string // (Lưu dạng hash)
+  phone: string
+  status?: AccountStatus
   date_of_birth: Date
   role_id: ObjectId
   avatar?: string
@@ -21,6 +23,8 @@ export default class Account {
   name: string
   email: string // (Tạo unique index)
   password: string // (Lưu dạng hash)
+  phone: string
+  status: AccountStatus
   date_of_birth: Date
   role_id: ObjectId
   avatar: string // optional
@@ -36,6 +40,8 @@ export default class Account {
     this.name = account.name
     this.email = account.email
     this.password = account.password
+    this.phone = account.phone
+    this.status = account.status || AccountStatus.ACTIVE
     this.date_of_birth = account.date_of_birth
     this.role_id = account.role_id
     this.avatar = account.avatar || ""

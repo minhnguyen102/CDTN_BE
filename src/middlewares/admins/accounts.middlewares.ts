@@ -11,7 +11,7 @@ import { JsonWebTokenError } from "jsonwebtoken"
 import _ from "lodash"
 import { ObjectId } from "mongodb"
 import { TokenPayload } from "../../models/requests/Account.request"
-import { AccountVerifyStatus, RoleAccount } from "../../constants/enums"
+import { AccountStatus, AccountVerifyStatus, RoleAccount } from "../../constants/enums"
 
 const nameValidation: ParamSchema = {
   notEmpty: {
@@ -45,6 +45,35 @@ const passwordValidation: ParamSchema = {
       minSymbols: 1
     },
     errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRONG
+  }
+}
+export const phoneValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.PHONE_REQUIRED
+  },
+  isString: {
+    errorMessage: USER_MESSAGES.PHONE_MUST_BE_STRING
+  },
+  trim: true,
+  isLength: {
+    options: { min: 10, max: 11 },
+    errorMessage: USER_MESSAGES.PHONE_LENGTH_MUST_BE_FROM_10_TO_11
+  },
+  isMobilePhone: {
+    options: ["vi-VN"],
+    errorMessage: USER_MESSAGES.PHONE_IS_INVALID
+  }
+}
+
+export const statusValidation: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: USER_MESSAGES.STATUS_MUST_BE_STRING
+  },
+  trim: true,
+  isIn: {
+    options: [Object.values(AccountStatus)],
+    errorMessage: `${USER_MESSAGES.STATUS_IS_INVALID}. Allowed values: ${Object.values(AccountStatus).join(", ")}`
   }
 }
 
@@ -101,6 +130,8 @@ export const registerValidation = validate(
         }
       },
       password: passwordValidation,
+      phone: phoneValidation,
+      status: statusValidation,
       confirm_password: confirmPasswordValidation,
       date_of_birth: dateOfBirthValidation
     },
@@ -385,6 +416,12 @@ export const updateMeValidation = validate(
         ...dateOfBirthValidation,
         notEmpty: false
       },
+      phone: {
+        optional: true,
+        ...phoneValidation,
+        notEmpty: false
+      },
+      status: statusValidation,
       avatar: {
         optional: true,
         isString: {

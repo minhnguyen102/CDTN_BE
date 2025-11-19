@@ -6,6 +6,7 @@ export interface RegisterReqBody {
   name: string
   email: string
   password: string
+  phone: string
   confirm_password: string
   date_of_birth: Date
   role: RoleAccount
@@ -38,6 +39,7 @@ export interface updateMeReqBody {
   name?: string
   date_of_birth?: string
   avatar?: string
+  phone?: string
 }
 
 export interface changePasswordReqBody {
