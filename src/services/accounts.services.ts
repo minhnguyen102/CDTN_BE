@@ -410,14 +410,13 @@ class AccountsServices {
         }
       ])
       .toArray()
-    console.log(account)
 
     return account[0]
   }
 
   async updateMe({ user_id, payload }: { user_id: string; payload: updateMeReqBody }) {
     const _payload = payload.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload
-    const result = await databaseService.accounts.findOneAndUpdate(
+    await databaseService.accounts.updateOne(
       { _id: new ObjectId(user_id) },
       {
         $set: {
@@ -426,18 +425,48 @@ class AccountsServices {
         $currentDate: {
           updatedAt: true
         }
-      },
-      {
-        projection: {
-          email_verify_token: 0,
-          forgot_password_token: 0,
-          password: 0,
-          verify: 0
-        },
-        returnDocument: "after"
       }
     )
-    return result
+    const account = await databaseService.accounts
+      .aggregate([
+        {
+          $match: { _id: new ObjectId(user_id) }
+        },
+        {
+          $lookup: {
+            from: "roles",
+            localField: "role_id",
+            foreignField: "_id",
+            as: "role"
+          }
+        },
+        {
+          $unwind: {
+            path: "$role",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $addFields: {
+            role_name: "$role.name"
+          }
+        },
+        {
+          $project: {
+            password: 0,
+            email_verify_token: 0,
+            forgot_password_token: 0,
+            verify: 0,
+            role_id: 0,
+            role: 0, // Ẩn object role gốc
+            createdAt: 0,
+            updatedAt: 0
+          }
+        }
+      ])
+      .toArray()
+
+    return account[0]
   }
 
   async changePassword({
@@ -531,7 +560,7 @@ class AccountsServices {
       },
       {
         $addFields: {
-          roleName: "$roleDetails.name"
+          role_name: "$roleDetails.name"
         }
       },
 
