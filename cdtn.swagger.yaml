@@ -24,17 +24,20 @@ servers:
   - url: https://cdtn-be-one.vercel.app/admin
   - url: http://localhost:3000/admin
 tags:
-  - name: accounts
-    description: Các logic liên quan đến accounts
-  - name: tables
-    description: Các logic liên quan đến tables
+  - name: account
+    description: Các logic liên quan đến account
+  - name: table
+    description: Các logic liên quan đến table
+  - name: supplier
+    description: Các logic liên quan đến supplier
+  
     
 
 paths:
   /accounts/login:
     post:
       tags:
-        - accounts
+        - account
       summary: Đăng nhập
       description: Đăng nhập
       operationId: login
@@ -76,10 +79,462 @@ paths:
           description: Email or password is incorrect
         '422':
           description: Validation error
+  /accounts/register:
+    post:
+      tags:
+        - account
+      summary: Register a new user
+      operationId: accountsRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                confirm_password:
+                  type: string
+                date_of_birth:
+                  type: string
+                  format: date-time
+                role_id:
+                  type: string
+              required:
+                - name
+                - email
+                - password
+                - confirm_password
+                - date_of_birth
+                - role_id
+            example:
+              name: "Gao red 2"
+              email: "nhanvien2+2@gmail.com"
+              password: "Benten123@!"
+              confirm_password: "Benten123@!"
+              date_of_birth: "1999-01-20T00:00:00Z"
+              role_id: "691a9a6f7800bd3806be258e"
+      responses:
+        200:
+          description: Registration successful
+          content:
+            application/json:
+              example:
+                message: "Registration successful. Please check your email to verify your account."
+                result:
+                  access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwidG9rZW5fdHlwZSI6ImFjY2Vzc190b2tlbiIsInZlcmlmeSI6InVudmVyaWZpZWQiLCJyb2xlX25hbWUiOiJFbXBsb3llZSIsInBlcm1pc3Npb25zIjpbInZpZXdfaW1wb3J0X29yZGVyX2RldGFpbCIsImRlbGV0ZV9kaXNoIiwidmlld19pbXBvcnRfb3JkZXJfbGlzdCIsImNyZWF0ZV9kaXNoIiwiY3JlYXRlX2ltcG9ydF9vcmRlciIsInZpZXdfZGlzaGVzIiwidXBkYXRlX2Rpc2giLCJ2aWV3X2Rhc2hib2FyZCJdLCJpYXQiOjE3NjM1Mjg0MTEsImV4cCI6MTc2MzUyOTMxMX0.bwfoQx9EH-1q3tRiZyz1Ku3szXOL9LLkB0yYJTyh68c"
+                  refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwidG9rZW5fdHlwZSI6InJlZnJlc2hfdG9rZW4iLCJ2ZXJpZnkiOiJ1bnZlcmlmaWVkIiwiaWF0IjoxNzYzNTI4NDExLCJleHAiOjE3NzIxNjg0MTF9.jtMZT-UP-4hsmAFIGe7wq0QqXX1ZoDOqeatxRk9aLMw"
+        409:
+          description: Email already exists
+          content:
+            application/json:
+              example:
+                message: "This email already exists"
+        422:
+          description: Validation error
+  /accounts/logout:
+    post:
+      tags:
+        - account
+      summary: Logout user
+      operationId: accountsLogout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+              required:
+                - refresh_token
+            example:
+              refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        200:
+          description: Logout successfully
+          content:
+            application/json:
+              example:
+                message: "Logout successfully"
+        401:
+          description: Used refresh token or not exist
+          content:
+            application/json:
+              example:
+                message: "Used refresh token or not exist"
+  /accounts/refresh-token:
+    post:
+      tags:
+        - account
+      summary: Refresh access token
+      operationId: accountsRefreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+              required:
+                - refresh_token
+            example:
+              refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        200:
+          description: Refresh token success
+          content:
+            application/json:
+              example:
+                message: "Refresh token success"
+                result:
+                  access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxNmUyNTA5OGQ5YzViYjk1ZDI2ZTBiIiwidG9rZW5fdHlwZSI6ImFjY2Vzc190b2tlbiIsInZlcmlmeSI6InZlcmlmaWVkIiwicm9sZV9uYW1lIjoiQWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ2aWV3X29yZGVycyIsInVwZGF0ZV9pbmdyZWRpZW50IiwiZGVsZXRlX2luZ3JlZGllbnQiLCJ2aWV3X2Rhc2hib2FyZCIsInZpZXdfc3VwcGxpZXJzIiwiZGVsZXRlX2Rpc2giLCJ1cGRhdGVfcm9sZSIsInZpZXdfaW5ncmVkaWVudHMiLCJjcmVhdGVfdGFibGUiLCJjcmVhdGVfaW5ncmVkaWVudCIsInZpZXdfdGFibGVzIiwiZGVsZXRlX3JvbGUiLCJ2aWV3X2Rpc2hfY2F0ZWdvcnlfbGlzdCIsInZpZXdfaW1wb3J0X29yZGVyX2xpc3QiLCJkZWxldGVfZGlzaF9jYXRlZ29yeSIsImNyZWF0ZV9pbmdyZWRpZW50X2NhdGVnb3J5IiwidXBkYXRlX2Rpc2hfY2F0ZWdvcnkiLCJ2aWV3X2luZ3JlZGllbnRfY2F0ZWdvcnlfbGlzdCIsInVwZGF0ZV9kaXNoIiwiY3JlYXRlX3JvbGUiLCJ1cGRhdGVfaW5ncmVkaWVudF9jYXRlZ29yeSIsImNyZWF0ZV9kaXNoIiwiZGVsZXRlX2luZ3JlZGllbnRfY2F0ZWdvcnkiLCJ2aWV3X2Rpc2hlcyIsInZpZXdfaW1wb3J0X29yZGVyX2RldGFpbCIsImRlbGV0ZV9hY2NvdW50Iiwidmlld19yb2xlcyIsInJlZ2VuZXJhdGVfdGFibGVfcXIiLCJ2aWV3X2FjY291bnRzIiwiY3JlYXRlX2Rpc2hfY2F0ZWdvcnkiLCJjcmVhdGVfYWNjb3VudCIsImRlbGV0ZV90YWJsZSIsInVwZGF0ZV9hY2NvdW50IiwiY3JlYXRlX2ltcG9ydF9vcmRlciIsInVwZGF0ZV90YWJsZSIsImNhbmNlbF9vcmRlciIsImNyZWF0ZV9zdXBwbGllciIsInVwZGF0ZV9vcmRlcl9zdGF0dXMiLCJ1cGRhdGVfc3VwcGxpZXIiLCJkZWxldGVfc3VwcGxpZXIiXSwiaWF0IjoxNzYzNTI4OTA2LCJleHAiOjE3NjM1Mjk4MDZ9.wwMR3IXblT0CBobLb3uZXdZn_uObX1On4QpXuMRgO1Y"
+                  refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxNmUyNTA5OGQ5YzViYjk1ZDI2ZTBiIiwidG9rZW5fdHlwZSI6InJlZnJlc2hfdG9rZW4iLCJ2ZXJpZnkiOiJ2ZXJpZmllZCIsImlhdCI6MTc2MzUyODkwNiwiZXhwIjoxNzcyMTY4OTA2fQ.ZMsNR8ZEBRgSlFypHWxh2RaPx5KyaoK5n6MnPoUSYPw"
+        401:
+          description: Invalid token
+          content:
+            application/json:
+              example:
+                message: "Invalid token"
+  /accounts/verify-email:
+    post:
+      tags:
+        - account
+      summary: Verify email
+      operationId: accountsVerifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_verify_token:
+                  type: string
+              required:
+                - email_verify_token
+            example:
+              email_verify_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwiVG9rZW5UeXBlIjoiZW1haWxfdmVyaWZ5X3Rva2VuIiwidmVyaWZ5IjoidW52ZXJpZmllZCIsImlhdCI6MTc2MzUyODQwNywiZXhwIjoxNzY0MTMzMjA3fQ.nAO5y3Mi5gpnJbx9ELjV9Zyp_PmNZ64G5ZPgY2hY3NQ"
+      responses:
+        200:
+          description: Verify email success
+          content:
+            application/json:
+              example:
+                message: "Verify email success"
+                result:
+                  access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwidG9rZW5fdHlwZSI6ImFjY2Vzc190b2tlbiIsInZlcmlmeSI6InVudmVyaWZpZWQiLCJyb2xlX25hbWUiOiJFbXBsb3llZSIsInBlcm1pc3Npb25zIjpbInZpZXdfZGFzaGJvYXJkIiwidXBkYXRlX2Rpc2giLCJjcmVhdGVfaW1wb3J0X29yZGVyIiwidmlld19kaXNoZXMiLCJ2aWV3X2ltcG9ydF9vcmRlcl9saXN0IiwiY3JlYXRlX2Rpc2giLCJ2aWV3X2ltcG9ydF9vcmRlcl9kZXRhaWwiLCJkZWxldGVfZGlzaCJdLCJpYXQiOjE3NjM1MjkyMTcsImV4cCI6MTc2MzUzMDExN30.BjhQd7E845shZIdWVh2eOlU7dvEnqKKPxpADJsVkiyY"
+                  refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwidG9rZW5fdHlwZSI6InJlZnJlc2hfdG9rZW4iLCJ2ZXJpZnkiOiJ1bnZlcmlmaWVkIiwiaWF0IjoxNzYzNTI5MjE3LCJleHAiOjE3NzIxNjkyMTd9.fuuuNlvtJNDaWui6cUEnHwn1bJqk532HK8JLf6PabnQ"
+  /accounts/resend-verify-email:
+    post:
+      operationId: accountsResendVerifyEmail
+      tags:
+        - account
+      summary: Resend email verification
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Verification email resent successfully
+          content:
+            application/json:
+              example:
+                message: "A new verification email has been sent. Please check your inbox."
+  /accounts/forgot-password:
+    post:
+      operationId: accountsForgotPassword
+      tags:
+        - account
+      summary: Send password reset instructions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+            example:
+              email: "nhanvien2+2@gmail.com"
+      responses:
+        200:
+          description: Password reset instructions sent
+          content:
+            application/json:
+              example:
+                message: "We have sent instructions to reset your password. Please check your inbox (and spam folder) to complete the process."
+        422:
+          description: Validation error
+  /accounts/verify-forgot-password:
+    post:
+      operationId: accountsVerifyForgotPassword
+      tags:
+        - account
+      summary: Verify forgot password token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                forgot_password_token:
+                  type: string
+              required:
+                - forgot_password_token
+            example:
+              forgot_password_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxNmUyNTA5OGQ5YzViYjk1ZDI2ZTBiIiwiVG9rZW5UeXBlIjoiZm9yZ290X3Bhc3N3b3JkX3Rva2VuIiwidmVyaWZ5IjoidmVyaWZpZWQiLCJpYXQiOjE3NjM1MzAwMzksImV4cCI6MTc2NDEzNDgzOX0.f9Jx38ee-Y7KlnT3a9fC0fqye_rOVktMy1QRBskwvTE"
+      responses:
+        200:
+          description: Verify forgot password token success
+          content:
+            application/json:
+              example:
+                message: "Verify forgot password token success"
+        400:
+          description: Forgot password token is required
+          content:
+            application/json:
+              example:
+                message: "Forgot password token is required."
+        401:
+          description: Invalid token
+          content:
+            application/json:
+              example:
+                message: "Invalid token"
+  /accounts/reset-password:
+    post:
+      operationId: accountsResetPassword
+      tags:
+        - account
+      summary: Reset user password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                forgot_password_token:
+                  type: string
+                password:
+                  type: string
+                confirm_password:
+                  type: string
+              required:
+                - forgot_password_token
+                - password
+                - confirm_password
+            example:
+              forgot_password_token: "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxMmFmMmU5YjJmYjFiYWIxM2QxODU4IiwiVG9rZW5UeXBlIjoiZm9yZ290X3Bhc3N3b3JkX3Rva2VuIiwidmVyaWZ5IjoidmVyaWZpZWQiLCJpYXQiOjE3NjI4MzMxMTAsImV4cCI6MTc2MzQzNzkxMH0.38A8s9fITIRbYUgk5we18NY75T4STZ6e84PBW6azsW0"
+              password: "Minhnguyen123@"
+              confirm_password: "Minhnguyen123@"
+      responses:
+        200:
+          description: Password reset successfully
+          content:
+            application/json:
+              example:
+                message: "Your password has been reset successfully. You can now login with your new password."
+        400:
+          description: Forgot password token is required
+          content:
+            application/json:
+              example:
+                message: "Forgot password token is required."
+        401:
+          description: Invalid token
+          content:
+            application/json:
+              example:
+                message: "Invalid token"
+        422:
+          description: Validation error
+          content:
+            application/json:
+              example:
+                message: "Validation error"
+  /accounts/me:
+    get:
+      operationId: accountsGetMe
+      tags:
+        - account
+      summary: Get current user profile
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Get my profile success
+          content:
+            application/json:
+              example:
+                message: "Get my profile success"
+                result:
+                  _id: "6916e25098d9c5bb95d26e0b"
+                  name: "AKA Bui Hieu"
+                  email: "admin1@gmail.com"
+                  date_of_birth: "2025-11-16T14:26:24.000Z"
+                  avatar: ""
+                  roleName: "Admin"
+        401:
+          description: Access token is required
+          content:
+            application/json:
+              example:
+                message: "Access token is required"
+  /accounts/change-password:
+    post:
+      operationId: accountsChangePassword
+      tags:
+        - account
+      summary: Change user password
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old_password:
+                  type: string
+                password:
+                  type: string
+                confirm_password:
+                  type: string
+              required:
+                - old_password
+                - password
+                - confirm_password
+            example:
+              old_password: "MinhNguyen123@"
+              password: "MinhOkela123#@1"
+              confirm_password: "MinhOkela123#@1"
+      responses:
+        200:
+          description: Password changed successfully
+          content:
+            application/json:
+              example:
+                message: "Your password has been changed successfully."
+        401:
+          description: Old password is not correct
+          content:
+            application/json:
+              example:
+                message: "Your old password is not correct."
+        422:
+          description: Validation error
+          content:
+            application/json:
+              example:
+                message: "Validation error"
+  /accounts:
+    get:
+      operationId: accountsGetList
+      tags:
+        - account
+      summary: Get list of accounts with pagination and filters
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search by name or email
+        - in: query
+          name: roleId
+          schema:
+            type: string
+          description: Filter by role ID
+      responses:
+        200:
+          description: Get list of accounts successfully
+          content:
+            application/json:
+              example:
+                message: "Get list of accounts successfully"
+                result:
+                  accounts:
+                    - _id: "691d4ed71b4f49cdadc0dc06"
+                      name: "Gao red 2"
+                      email: "nhanvien2+3@gmail.com"
+                      date_of_birth: "1999-01-20T00:00:00.000Z"
+                      avatar: ""
+                      roleName: "Employee"
+                    - _id: "691c91d732db64f4a94babf9"
+                      name: "Gao red 2"
+                      email: "nhanvien2+2@gmail.com"
+                      date_of_birth: "1999-01-20T00:00:00.000Z"
+                      avatar: ""
+                      roleName: "Employee"
+                    - _id: "691c8fa12d5a0b22275915d1"
+                      name: "Gao red 2"
+                      email: "nhanvien2+1@gmail.com"
+                      date_of_birth: "1999-01-20T00:00:00.000Z"
+                      avatar: ""
+                      roleName: "Employee"
+                    - _id: "691c89dff02889e3344bb0ea"
+                      name: "Gao red 2"
+                      email: "nhanvien2@gmail.com"
+                      date_of_birth: "1999-01-20T00:00:00.000Z"
+                      avatar: ""
+                      roleName: "Employee"
+                    - _id: "691a9abf7800bd3806be258f"
+                      name: "Gao red"
+                      email: "nhanvien1@gmail.com"
+                      date_of_birth: "1999-01-20T00:00:00.000Z"
+                      avatar: ""
+                      roleName: "Employee"
+                    - _id: "6916e25098d9c5bb95d26e0b"
+                      name: "AKA Bui Hieu"
+                      email: "admin1@gmail.com"
+                      date_of_birth: "2025-11-16T14:26:24.000Z"
+                      avatar: ""
+                      roleName: "Admin"
+                  pagination:
+                    currentPage: 1
+                    limit: 10
+                    total: 6
+                    totalPages: 1
+        401:
+          description: Invalid signature
+          content:
+            application/json:
+              example:
+                message: "Invalid signature"
+
+
   /tables:
     post:
         tags:
-          - tables
+          - table
         summary: Tạo mới tables
         description: Tạo mới tables
         operationId: createTable
@@ -147,7 +602,7 @@ paths:
             description: Validation error
     get:
       tags:
-        - tables
+        - table
       summary: Lấy danh sách bàn
       description: Lấy danh sách bàn bao gồm phân trang và lọc theo trạng thái (Sử dụng 0, 1, 2, 3 tương ứng với Available, Occupied, Reserved, Needs_cleaning)
       operationId: getAllTable
@@ -206,7 +661,7 @@ paths:
   /tables/{id}:
     patch:
       tags:
-        - tables
+        - table
       summary: Cập nhật thông tin bàn
       description: Cập nhật thông tin bàn (Hiện tại là Số ghế và trạng thái)
       operationId: updateTable
@@ -246,7 +701,7 @@ paths:
   /tables/{id}/qr-token:
     patch:
       tags:
-        - tables
+        - table
       summary: Thay đổi mã QRCode
       description: Thay đổi qrToken -> thay đổi QRCode
       operationId: regenerateQrToken
@@ -288,6 +743,7 @@ paths:
           description: Lỗi xác thực (chưa đăng nhập hoặc không có quyền)
         '404':
           description: Không tìm thấy bàn với ID được cung cấp
+  
   /suppliers:
     get:
       tags:
@@ -750,6 +1206,7 @@ paths:
                     example: Delete role successfully.
               example:
                 message: Delete role successfully.
+  
   /import-orders:
     post:
       tags:
@@ -901,7 +1358,6 @@ paths:
                     limit: 10
                     total: 1
                     totalPages: 1
-
   /import-orders/{id}:
     get:
       tags:
@@ -1250,7 +1706,6 @@ components:
       enum:
         - draft
         - confirmed
-
     ImportOrderItem:
       type: object
       properties:
@@ -1264,7 +1719,6 @@ components:
           type: number
         total:
           type: number
-
     ImportOrder:
       type: object
       properties:
@@ -1301,7 +1755,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-
     ImportOrderListItem:
       type: object
       properties:
@@ -1318,7 +1771,6 @@ components:
           type: string
         importedByName:
           type: string
-
     ImportOrderDetail:
       allOf:
         - $ref: "#/components/schemas/ImportOrder"
@@ -1345,7 +1797,6 @@ components:
                     type: number
                   total:
                     type: number
-
     CreateImportOrderReqBody:
       type: object
       required:

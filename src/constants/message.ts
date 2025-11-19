@@ -62,7 +62,7 @@ const USER_MESSAGES = {
 
   // === Forgot/Reset Password ===
   FORGOT_PASSWORD_INSTRUCTIONS_SENT:
-    "If an account with that email exists, we have sent instructions to reset your password. Please check your inbox (and spam folder) to complete the process.",
+    "We have sent instructions to reset your password. Please check your inbox (and spam folder) to complete the process.",
   EMAIL_NOT_FOUND: "This email is not registered in our system.",
   FORGOT_PASSWORD_TOKEN_IS_REQUIRED: "Forgot password token is required.",
   FORFOT_PASSWORD_TOKEN_INVALID: "Forgot password token is invalid or has expired.",

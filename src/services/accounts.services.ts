@@ -386,10 +386,14 @@ class AccountsServices {
           }
         },
         {
-          // $unwind để biến mảng "role" (chỉ có 1 phần tử) thành object
           $unwind: {
             path: "$role",
-            preserveNullAndEmptyArrays: true // Giữ lại account nếu role không tìm thấy
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $addFields: {
+            roleName: "$role.name"
           }
         },
         {
@@ -398,18 +402,15 @@ class AccountsServices {
             forgot_password_token: 0,
             password: 0,
             verify: 0,
-            role_id: 0, // Ẩn role_id (vì đã có object 'role'),
+            role_id: 0,
             createdAt: 0,
             updatedAt: 0,
-            "role.permissionIds": 0, // Ẩn mảng ID quyền
-            "role.isDeleted": 0,
-            "role.deletedAt": 0,
-            "role.createdAt": 0,
-            "role.updatedAt": 0
+            role: 0
           }
         }
       ])
       .toArray()
+    console.log(account)
 
     return account[0]
   }

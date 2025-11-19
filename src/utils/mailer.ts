@@ -30,7 +30,7 @@ export const sendVerificationEmail = async ({
 
   const mailOptions = {
     from: '"Nhà hàng QR" <no-reply@restaurant.com>',
-    to: process.env.SMTP_USER,
+    to: toEmail,
     subject,
     html
   }
