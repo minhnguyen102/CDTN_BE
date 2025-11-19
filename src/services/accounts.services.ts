@@ -13,6 +13,7 @@ import USER_MESSAGES from "../constants/message"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { sendVerificationEmail } from "../utils/mailer"
+import { deleteImage } from "../utils/cloudinary"
 
 class AccountsServices {
   private signAccessToken({
@@ -593,6 +594,40 @@ class AccountsServices {
         total: totalFilteredDocuments,
         totalPages: totalPages
       }
+    }
+  }
+
+  async updateAvatar({ user_id, file }: { user_id: string; file: Express.Multer.File }) {
+    try {
+      const user = await databaseService.accounts.findOne({ _id: new ObjectId(user_id) })
+
+      if (user?.avatar_id) {
+        await deleteImage(user.avatar_id)
+      }
+
+      const updatedUser = await databaseService.accounts.findOneAndUpdate(
+        { _id: new ObjectId(user_id) },
+        {
+          $set: {
+            avatar: file.path, // Lưu link ảnh
+            avatar_id: file.filename, // Lưu ID ảnh để sau này xóa
+            updatedAt: new Date()
+          }
+        },
+        {
+          returnDocument: "after", // Trả về user mới sau khi update
+          projection: {
+            avatar: 1,
+            _id: 0
+          }
+        }
+      )
+
+      return updatedUser
+    } catch (error) {
+      // Nếu lỗi DB, có thể cân nhắc xóa ảnh vừa upload lên Cloudinary để tránh rác
+      if (file.filename) await deleteImage(file.filename)
+      throw error
     }
   }
 }

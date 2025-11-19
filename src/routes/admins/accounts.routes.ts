@@ -11,6 +11,7 @@ import {
   registerController,
   resendEmailVerifyController,
   resetPasswordTokenController,
+  updateAvatarController,
   updateMeController,
   verifyForgotPasswordTokenController
 } from "../../controllers/admins/accounts.controllers"
@@ -28,6 +29,7 @@ import {
   changePasswordValidation
 } from "../../middlewares/admins/accounts.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
+import { uploadCloud } from "../../utils/cloudinary"
 const accountRoutes = Router()
 
 /**
@@ -160,4 +162,18 @@ accountRoutes.get(
   wrapHandlerFunction(getAccountsController)
 )
 
+/**
+ * Description: Update User Avatar
+ * Path: /me/avatar
+ * Method: PATCH
+ * Header: { Authorization: Bearer <access_token> }
+ * Body: form-data { image: File }
+ */
+accountRoutes.patch(
+  "/me/avatar",
+  accessTokenValidation, // 1. Phải đăng nhập mới được sửa
+  verifiedUserValidation,
+  uploadCloud.single("image"), // 2. Middleware upload ảnh lên Cloudinary
+  wrapHandlerFunction(updateAvatarController) // 3. Controller lưu link vào DB
+)
 export default accountRoutes

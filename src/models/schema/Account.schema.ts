@@ -11,6 +11,7 @@ interface AccountType {
   date_of_birth: Date
   role_id: ObjectId
   avatar?: string
+  avatar_id?: string
   createdAt?: Date
   updatedAt?: Date
   email_verify_token?: string // jwt hoặc '' nếu đã được xác thực email
@@ -28,6 +29,7 @@ export default class Account {
   date_of_birth: Date
   role_id: ObjectId
   avatar: string // optional
+  avatar_id: string
   createdAt: Date
   updatedAt: Date
   email_verify_token: string // jwt hoặc '' nếu đã được xác thực email
@@ -45,6 +47,7 @@ export default class Account {
     this.date_of_birth = account.date_of_birth
     this.role_id = account.role_id
     this.avatar = account.avatar || ""
+    this.avatar_id = account.avatar_id || ""
     this.createdAt = account.createdAt || date
     this.updatedAt = account.updatedAt || date
     this.email_verify_token = account.email_verify_token || ""

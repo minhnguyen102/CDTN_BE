@@ -21,6 +21,8 @@ import { JwtPayload } from "jsonwebtoken"
 import { ErrorWithStatus } from "../../models/Errors"
 import { pick } from "lodash"
 import { paginationQueryParser } from "../../utils/helpers"
+import { deleteImage } from "../../utils/cloudinary"
+import { Result } from "express-validator"
 
 export const loginController = async (req: Request, res: Response) => {
   // throw new Error("Loi o day")
@@ -196,6 +198,24 @@ export const getAccountsController = async (req: Request, res: Response) => {
   // 5. Trả về response
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.ACCOUNTS_FETCHED_SUCCESSFULLY,
+    result
+  })
+}
+
+export const updateAvatarController = async (req: Request, res: Response) => {
+  const { user_id } = req.decoded_access_token as TokenPayload
+  const file = req.file
+  // console.log("file: ", file)
+  if (!file) {
+    return res.status(400).json({
+      message: "Không có file ảnh nào được gửi lên"
+    })
+  }
+  const result = await accountsServices.updateAvatar({ user_id, file })
+
+  // console.log(result)
+  res.json({
+    message: USER_MESSAGES.UPDATE_AVATAR_SUCCESS,
     result
   })
 }

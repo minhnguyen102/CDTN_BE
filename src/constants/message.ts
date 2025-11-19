@@ -225,7 +225,8 @@ const USER_MESSAGES = {
 
   // STATUS
   STATUS_MUST_BE_STRING: "Status must be a string",
-  STATUS_IS_INVALID: "Invalid status"
+  STATUS_IS_INVALID: "Invalid status",
+  UPDATE_AVATAR_SUCCESS: "Avatar updated successfully"
 }
 
 export default USER_MESSAGES
