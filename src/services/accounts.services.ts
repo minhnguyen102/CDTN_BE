@@ -393,7 +393,7 @@ class AccountsServices {
         },
         {
           $addFields: {
-            roleName: "$role.name"
+            role_name: "$role.name"
           }
         },
         {
