@@ -11,6 +11,7 @@ import {
   registerController,
   resendEmailVerifyController,
   resetPasswordTokenController,
+  updateAccountController,
   updateAvatarController,
   updateMeController,
   verifyForgotPasswordTokenController
@@ -26,10 +27,12 @@ import {
   resetPasswordValidation,
   verifiedUserValidation,
   updateMeValidation,
-  changePasswordValidation
+  changePasswordValidation,
+  updateAccountValidation
 } from "../../middlewares/admins/accounts.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { uploadCloud } from "../../utils/cloudinary"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 const accountRoutes = Router()
 
 /**
@@ -158,7 +161,7 @@ accountRoutes.get(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
-  // permissionValidation('view_employees'), // <-- Gợi ý: Nên có middleware check quyền này
+  checkPermission("view_accounts"),
   wrapHandlerFunction(getAccountsController)
 )
 
@@ -176,4 +179,21 @@ accountRoutes.patch(
   uploadCloud.single("image"), // 2. Middleware upload ảnh lên Cloudinary
   wrapHandlerFunction(updateAvatarController) // 3. Controller lưu link vào DB
 )
+
+/**
+ * Description: Update info account (by admin)
+ * Path: /account/:account_id
+ * Method: PATCH
+ * Header: { Authorization: Bearer <access_token> }
+ * Body: {status?: AccountStatus, role_id?: ObjectId}
+ */
+accountRoutes.patch(
+  "/:id",
+  accessTokenValidation, // 1. Phải đăng nhập mới được sửa
+  verifiedUserValidation,
+  checkPermission("update_account"),
+  updateAccountValidation,
+  wrapHandlerFunction(updateAccountController)
+)
+
 export default accountRoutes

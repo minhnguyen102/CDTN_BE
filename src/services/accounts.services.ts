@@ -1,9 +1,9 @@
-import { RegisterReqBody, updateMeReqBody } from "../models/requests/Account.request"
+import { RegisterReqBody, updateAccountReqBody, updateMeReqBody } from "../models/requests/Account.request"
 import databaseService from "./database.servies"
 import Account from "../models/schema/Account.schema"
 import { hashPassword } from "../utils/crypto"
 import { signToken } from "../utils/jwt"
-import { AccountVerifyStatus, RoleAccount, RoleStatus, TokenType } from "../constants/enums"
+import { AccountVerifyStatus, RoleStatus, TokenType } from "../constants/enums"
 import { config } from "dotenv"
 config()
 import ms from "ms"
@@ -14,7 +14,6 @@ import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { sendVerificationEmail } from "../utils/mailer"
 import { deleteImage } from "../utils/cloudinary"
-import { stat } from "fs"
 
 class AccountsServices {
   private signAccessToken({
@@ -635,6 +634,33 @@ class AccountsServices {
       if (file.filename) await deleteImage(file.filename)
       throw error
     }
+  }
+
+  async updateAccount({ accountId, payload }: { accountId: string; payload: updateAccountReqBody }) {
+    const _payload: any = { ...payload }
+    if (payload.role_id) {
+      _payload.role_id = new ObjectId(payload.role_id)
+    }
+
+    const result = await databaseService.accounts.updateOne(
+      { _id: new ObjectId(accountId) },
+      {
+        $set: {
+          ..._payload
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      }
+    )
+
+    if (!result.modifiedCount) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    return true
   }
 }
 

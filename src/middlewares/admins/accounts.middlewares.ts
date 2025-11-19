@@ -453,3 +453,45 @@ export const changePasswordValidation = validate(
     ["body"]
   )
 )
+
+export const updateAccountValidation = validate(
+  checkSchema({
+    id: {
+      in: ["params"],
+      custom: {
+        options: (value) => ObjectId.isValid(value),
+        errorMessage: USER_MESSAGES.ACCOUNT_ID_IS_INVALID
+      }
+    },
+    status: {
+      in: ["body"],
+      optional: true,
+      isIn: {
+        options: [Object.values(AccountStatus)],
+        errorMessage: `${USER_MESSAGES.STATUS_IS_INVALID}. Allowed values: ${Object.values(AccountStatus).join(", ")}`
+      }
+    },
+    role_id: {
+      in: ["body"],
+      optional: true,
+      custom: {
+        options: async (value) => {
+          if (!ObjectId.isValid(value)) {
+            throw new ErrorWithStatus({
+              message: USER_MESSAGES.ROLE_ID_IS_INVALID,
+              status: HTTP_STATUS.BAD_REQUEST
+            })
+          }
+          // Tùy chọn: Kiểm tra xem Role ID này có tồn tại trong DB không
+          const role = await databaseService.roles.findOne({ _id: new ObjectId(String(value)) })
+          if (!role)
+            throw new ErrorWithStatus({
+              message: USER_MESSAGES.ROLE_NOT_FOUND,
+              status: HTTP_STATUS.NOT_FOUND
+            })
+          return true
+        }
+      }
+    }
+  })
+)

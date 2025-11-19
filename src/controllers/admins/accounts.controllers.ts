@@ -7,6 +7,7 @@ import {
   RegisterReqBody,
   resetPasswordReqBody,
   TokenPayload,
+  updateAccountReqBody,
   updateMeReqBody
 } from "../../models/requests/Account.request"
 import accountsServices from "../../services/accounts.services"
@@ -215,5 +216,18 @@ export const updateAvatarController = async (req: Request, res: Response) => {
   res.json({
     message: USER_MESSAGES.UPDATE_AVATAR_SUCCESS,
     result
+  })
+}
+
+export const updateAccountController = async (
+  req: Request<ParamsDictionary, any, updateAccountReqBody>,
+  res: Response
+) => {
+  const { id } = req.params
+  const payload = req.body
+  await accountsServices.updateAccount({ accountId: id, payload })
+
+  return res.json({
+    message: USER_MESSAGES.UPDATE_ACCOUNT_SUCCESS
   })
 }
