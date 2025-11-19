@@ -420,20 +420,6 @@ export const updateMeValidation = validate(
         optional: true,
         ...phoneValidation,
         notEmpty: false
-      },
-      status: statusValidation,
-      avatar: {
-        optional: true,
-        isString: {
-          errorMessage: USER_MESSAGES.AVATAR_URL_MUST_BE_STRING
-        },
-        isLength: {
-          options: {
-            min: 1,
-            max: 500
-          },
-          errorMessage: USER_MESSAGES.AVATAR_URL_LENGTH
-        }
       }
     },
     ["body"]
