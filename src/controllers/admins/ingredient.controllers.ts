@@ -11,7 +11,7 @@ export const createIngredientController = async (
   req: Request<ParamsDictionary, any, createIngredientReqBody>,
   res: Response
 ) => {
-  const payload = req.body
+  const payload = pick(req.body, ["name", "categoryId", "unit", "minStock"])
   const result = await ingredientServices.createIngredient({ payload })
   res.json({
     message: USER_MESSAGES.INGREDIENT_CREATED_SUCCESSFULLY,

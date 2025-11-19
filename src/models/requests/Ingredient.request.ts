@@ -4,8 +4,6 @@ export interface createIngredientReqBody {
   name: string
   categoryId: string
   unit: string
-  unitPrice: number
-  currentStock: number
   minStock: number
 }
 

@@ -193,8 +193,6 @@ export const getAccountsController = async (req: Request, res: Response) => {
     status
   })
 
-  // 4. Tính tổng số trang
-
   // 5. Trả về response
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.ACCOUNTS_FETCHED_SUCCESSFULLY,

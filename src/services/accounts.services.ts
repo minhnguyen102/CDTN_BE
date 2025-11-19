@@ -523,12 +523,13 @@ class AccountsServices {
     const objectFind: any = {}
     //Filter theo RoleId
     if (roleId) {
-      objectFind.roleId = new ObjectId(roleId)
+      objectFind.role_id = new ObjectId(roleId)
     }
 
     //Filter theo Search (Tìm theo Tên, Email)
     if (search) {
-      objectFind.$text = { $search: search }
+      // objectFind.$text = { $search: search }
+      objectFind.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }]
     }
 
     const pipeline: any[] = [

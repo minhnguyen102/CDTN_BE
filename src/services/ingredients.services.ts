@@ -37,15 +37,15 @@ class IngredientServices {
     const objectFind: any = {}
 
     //Filter theo 'status' (Logic phái sinh)
-    if (status === "Low Stock") {
+    if (status === "low_stock") {
       // Tồn kho thấp: 0 < currentStock <= minStock
       objectFind.$expr = {
         $and: [{ $lte: ["$currentStock", "$minStock"] }, { $gt: ["$currentStock", 0] }]
       }
-    } else if (status === "Out of Stock") {
+    } else if (status === "out_of_stock") {
       // Hết hàng: currentStock == 0
       objectFind.currentStock = 0
-    } else if (status === "In Stock") {
+    } else if (status === "in_stock") {
       // Còn hàng (nhiều): currentStock > minStock
       objectFind.$expr = { $gt: ["$currentStock", "$minStock"] }
     }
