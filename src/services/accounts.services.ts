@@ -14,6 +14,7 @@ import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { sendVerificationEmail } from "../utils/mailer"
 import { deleteImage } from "../utils/cloudinary"
+import { stat } from "fs"
 
 class AccountsServices {
   private signAccessToken({
@@ -530,6 +531,10 @@ class AccountsServices {
     if (search) {
       // objectFind.$text = { $search: search }
       objectFind.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }]
+    }
+
+    if (status) {
+      objectFind.status = status
     }
 
     const pipeline: any[] = [

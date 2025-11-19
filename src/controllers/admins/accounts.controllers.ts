@@ -176,7 +176,7 @@ export const getAccountsController = async (req: Request, res: Response) => {
   // 1. Lấy page và limit từ helper
   const { page, limit } = paginationQueryParser(req, {
     defaultLimit: 10,
-    allowLimits: [10, 20, 50]
+    allowLimits: [10, 15, 20]
   })
 
   // 2. Lấy các tham số filter/search
