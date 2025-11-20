@@ -2,7 +2,8 @@ import { Router } from "express"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import {
-  createDishCategoryController
+  createDishCategoryController,
+  getDishCategoriesController
   // getDishCategoriesController,
   // getDishCategoryDetailController,
   // updateDishCategoryController,
@@ -42,13 +43,13 @@ dishCategoriesRoutes.post(
  * Query: ?page=1&limit=10&search=abc&status=Active
  * Headers: { Authorization: Bearer <access_token> }
  */
-// dishCategoriesRoutes.get(
-//   "/",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   checkPermission("view_dish_category_list"),
-//   wrapHandlerFunction(getDishCategoriesController)
-// )
+dishCategoriesRoutes.get(
+  "/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("view_dish_category_list"),
+  wrapHandlerFunction(getDishCategoriesController)
+)
 
 /**
  * Description: Update a dish category

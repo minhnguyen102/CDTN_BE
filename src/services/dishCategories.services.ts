@@ -19,6 +19,54 @@ class DishCategoryService {
     )
     return result
   }
+
+  async getList({ page, limit, search, status }: { page: number; limit: number; search?: string; status?: string }) {
+    const matchFilter: any = {}
+
+    if (status) {
+      // active or inactive
+      matchFilter.status = status
+    }
+
+    if (search) {
+      // search theo name
+      matchFilter.$text = { $search: search }
+    }
+
+    const pipeline: any[] = [
+      { $match: matchFilter },
+      {
+        $sort: {
+          displayOrder: 1 // theo thứ tự ưu tiên
+        }
+      },
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+      {
+        $project: {
+          createdAt: 0,
+          updatedAt: 0
+        }
+      }
+    ]
+
+    const [dishCategories, totalFilteredDocuments] = await Promise.all([
+      databaseService.dish_categories.aggregate(pipeline).toArray(),
+      databaseService.dish_categories.countDocuments(matchFilter)
+    ])
+
+    const totalPages = Math.ceil(totalFilteredDocuments / limit)
+
+    return {
+      dishCategories,
+      pagination: {
+        currentPage: page,
+        limit: limit,
+        total: totalFilteredDocuments,
+        totalPages: totalPages
+      }
+    }
+  }
 }
 
 const dishCategoryService = new DishCategoryService()
