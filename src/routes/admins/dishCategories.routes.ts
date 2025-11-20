@@ -14,6 +14,7 @@ import {
   dishCategoryIdValidator
 } from "../../middlewares/admins/dishCategories.middlewares"
 import { checkPermission } from "../../middlewares/admins/auth.middlewares"
+import { uploadCloud } from "../../utils/cloudinary"
 
 const dishCategoriesRoutes = Router()
 
@@ -29,6 +30,7 @@ dishCategoriesRoutes.post(
   accessTokenValidation,
   verifiedUserValidation,
   checkPermission("create_dish_category"),
+  uploadCloud.single("image"),
   createDishCategoryValidator,
   wrapHandlerFunction(createDishCategoryController)
 )

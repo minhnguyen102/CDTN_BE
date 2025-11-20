@@ -1,4 +1,9 @@
 const USER_MESSAGES = {
+  DISPAY_ORDER_STATUS_INVALID: "Status must be a string",
+  DISPAY_ORDER_STATUS: "Status must be either 'active' or 'inactive'",
+  IMAGE_URL_MUST_BE_STRING: "Image URL must be a string",
+  IMAGE_MUST_BE_VALID_URL: "Image must be a valid URL",
+  IMAGE_REQUIRED: "Image is required",
   // === General ===
   VALIDATION_ERROR: "Validation error",
   TOKEN_IS_REQUIRED: "Token is required",
@@ -230,7 +235,12 @@ const USER_MESSAGES = {
   UPDATE_ACCOUNT_SUCCESS: "Account updated successfully",
   ACCOUNT_ID_IS_INVALID: "Account ID is invalid",
   ROLE_ID_IS_INVALID: "Role ID is invalid",
-  NO_IMAGE_UPLOADED: "No image uploaded"
+  NO_IMAGE_UPLOADED: "No image uploaded",
+
+  // Thêm mới
+  DISPLAY_ORDER_REQUIRED: "Display order is required",
+  DISPLAY_ORDER_INTEGER: "Display order must be an integer",
+  FILE_TYPE_NOT_SUPPORTED: "File type is not supported"
 }
 
 export default USER_MESSAGES

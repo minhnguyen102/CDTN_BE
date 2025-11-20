@@ -1,20 +1,23 @@
 import databaseService from "./database.servies"
 import { ObjectId } from "mongodb"
 import { CreateDishCategoryReqBody } from "../models/requests/DishCategory.requests"
+import DishCategory from "../models/schema/DishCategory.schema"
 
 class DishCategoryService {
-  async create(payload: CreateDishCategoryReqBody) {
-    const newCategory = {
-      _id: new ObjectId(),
-      name: payload.name,
-      description: payload.description || "",
-      status: payload.status || "active", // Mặc định là active
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-
-    // await databaseService.dish_categories.insertOne(newCategory)
-    return newCategory
+  async create({ payload }: { payload: CreateDishCategoryReqBody & { image: string } }) {
+    const newCategory = await databaseService.dish_categories.insertOne(new DishCategory(payload))
+    const result = await databaseService.dish_categories.findOne(
+      {
+        _id: newCategory.insertedId
+      },
+      {
+        projection: {
+          createdAt: 0,
+          updatedAt: 0
+        }
+      }
+    )
+    return result
   }
 }
 

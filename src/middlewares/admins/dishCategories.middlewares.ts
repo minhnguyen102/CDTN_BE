@@ -1,5 +1,3 @@
-// src/modules/dish-categories/dishCategory.validations.ts
-
 import { validate } from "../../utils/validation"
 import { checkSchema, ParamSchema } from "express-validator"
 import USER_MESSAGES from "../../constants/message"
@@ -37,31 +35,49 @@ const descriptionValidation: ParamSchema = {
 
 // Validate cho image
 const imageValidation: ParamSchema = {
-  optional: true,
-  isString: {
-    errorMessage: "Image URL must be a string"
-  },
-  trim: true
+  custom: {
+    options: (value, { req }) => {
+      if (req.file) {
+        const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
+        if (!validTypes.includes(req.file.mimetype)) {
+          throw new ErrorWithStatus({
+            message: USER_MESSAGES.FILE_TYPE_NOT_SUPPORTED,
+            status: HTTP_STATUS.BAD_REQUEST
+          })
+        }
+      } else {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGES.IMAGE_REQUIRED,
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+      return true
+    }
+  }
 }
 
 // Validate cho displayOrder
 const displayOrderValidation: ParamSchema = {
-  optional: true,
+  notEmpty: {
+    errorMessage: USER_MESSAGES.DISPLAY_ORDER_REQUIRED
+  },
   isInt: {
-    errorMessage: "Display order must be an integer"
+    errorMessage: USER_MESSAGES.DISPLAY_ORDER_INTEGER
   },
   toInt: true
 }
 
 // Validate cho status
 const statusValidation: ParamSchema = {
-  optional: true,
+  notEmpty: {
+    errorMessage: USER_MESSAGES.STATUS_IS_REQUIRED
+  },
   isString: {
-    errorMessage: "Status must be a string"
+    errorMessage: USER_MESSAGES.DISPAY_ORDER_STATUS_INVALID
   },
   isIn: {
     options: [Object.values(DishCategoryStatus)],
-    errorMessage: "Status must be either 'Active' or 'Inactive'"
+    errorMessage: USER_MESSAGES.DISPAY_ORDER_STATUS
   },
   trim: true
 }
