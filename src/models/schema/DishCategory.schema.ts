@@ -8,6 +8,8 @@ interface DishCategoryType {
   status: DishCategoryStatus
   image: string
   description?: string
+  deleted?: boolean
+  deletedAt?: Date
   createdAt?: Date
   updatedAt?: Date
 }
@@ -19,8 +21,10 @@ export default class DishCategory {
   status: DishCategoryStatus
   image: string
   description: string
-  createdAt?: Date
-  updatedAt?: Date
+  deleted: boolean
+  deletedAt: Date | null
+  createdAt: Date
+  updatedAt: Date
 
   constructor(dishCategory: DishCategoryType) {
     const date = new Date()
@@ -30,6 +34,8 @@ export default class DishCategory {
     this.status = dishCategory.status
     this.image = dishCategory.image
     this.description = dishCategory.description || ""
+    this.deleted = dishCategory.deleted || false
+    this.deletedAt = dishCategory.deletedAt || null
     this.createdAt = dishCategory.createdAt || date
     this.updatedAt = dishCategory.updatedAt || date
   }

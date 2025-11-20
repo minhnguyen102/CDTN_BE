@@ -21,7 +21,9 @@ class DishCategoryService {
   }
 
   async getList({ page, limit, search, status }: { page: number; limit: number; search?: string; status?: string }) {
-    const matchFilter: any = {}
+    const matchFilter: any = {
+      deleted: false
+    }
 
     if (status) {
       // active or inactive
@@ -45,7 +47,9 @@ class DishCategoryService {
       {
         $project: {
           createdAt: 0,
-          updatedAt: 0
+          updatedAt: 0,
+          deletedAt: 0,
+          deleted: false
         }
       }
     ]
