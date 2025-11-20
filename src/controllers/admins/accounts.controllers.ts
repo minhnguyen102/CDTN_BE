@@ -31,10 +31,9 @@ export const loginController = async (req: Request, res: Response) => {
 
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {
   const payload = pick(req.body, ["name", "email", "phone", "confirm_password", "date_of_birth", "role_id"])
-  const result = await accountsServices.register({ payload })
+  await accountsServices.register({ payload })
   res.json({
-    message: USER_MESSAGES.REGISTER_SUCCESS_PENDING_VERIFICATION,
-    result
+    message: USER_MESSAGES.REGISTER_SUCCESS_PENDING_VERIFICATION
   })
 }
 
@@ -63,7 +62,7 @@ export const emailVerifyController = async (
   req: Request<ParamsDictionary, any, EmailVerifyTokenReqBody>,
   res: Response
 ) => {
-  const { user_id, verify } = req.decoded_email_verify_token as TokenPayload
+  const { user_id } = req.decoded_email_verify_token as TokenPayload
   const account = await databaseService.accounts.findOne({
     _id: new ObjectId(user_id)
   })
@@ -80,10 +79,9 @@ export const emailVerifyController = async (
     })
   }
   const { email } = account
-  const result = await accountsServices.verifyEmail({ user_id, verify, email })
+  await accountsServices.verifyEmail({ user_id, email })
   res.json({
-    message: USER_MESSAGES.VERIFY_EMAIL_SUCCESS,
-    result
+    message: USER_MESSAGES.VERIFY_EMAIL_SUCCESS
   })
 }
 

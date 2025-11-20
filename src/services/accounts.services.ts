@@ -261,16 +261,13 @@ class AccountsServices {
     }
   }
 
-  async verifyEmail({ user_id, verify, email }: { user_id: string; verify: AccountVerifyStatus; email: string }) {
-    const account = await databaseService.accounts.findOne({ _id: new ObjectId(user_id) })
-    const { role_id } = account as Account
-    const { role_name, permissions } = await this.getRoleData({ role_id })
+  async verifyEmail({ user_id, email }: { user_id: string; email: string }) {
     const password = generatePassword()
-    const html = `Your password: ${password}`
+    const html = `
+    Email: ${email}
+    Your password: ${password}`
 
-    const [access_token, refresh_token] = await Promise.all([
-      this.signAccessToken({ user_id, verify, role_name, permissions }),
-      this.signRefreshToken({ user_id, verify }),
+    await Promise.all([
       databaseService.accounts.updateOne(
         { _id: new ObjectId(user_id) },
         {
@@ -287,10 +284,7 @@ class AccountsServices {
       ),
       sendVerificationEmail({ toEmail: email, subject: "Gửi mật khẩu", html })
     ])
-    return {
-      access_token,
-      refresh_token
-    }
+    return true
   }
 
   async resendEmailVerify({ user_id, verify, email }: { user_id: string; verify: AccountVerifyStatus; email: string }) {
