@@ -18,17 +18,10 @@ import databaseService from "../../services/database.servies"
 import HTTP_STATUS from "../../constants/httpStatus"
 import { AccountVerifyStatus } from "../../constants/enums"
 import Account from "../../models/schema/Account.schema"
-import { JwtPayload } from "jsonwebtoken"
-import { ErrorWithStatus } from "../../models/Errors"
 import { pick } from "lodash"
 import { paginationQueryParser } from "../../utils/helpers"
-import { deleteImage } from "../../utils/cloudinary"
-import { Result } from "express-validator"
 
 export const loginController = async (req: Request, res: Response) => {
-  // throw new Error("Loi o day")
-  // const user_id = req.account?._id as ObjectId
-  // const { verify, role } = req.account as Account
   const result = await accountsServices.login({ account: req.account as Account })
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
@@ -93,7 +86,8 @@ export const emailVerifyController = async (
 }
 
 export const resendEmailVerifyController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
-  const { user_id, verify } = req.decoded_access_token as TokenPayload
+  const { user_id, verify } = req.decoded_email_verify_token as TokenPayload
+  // const { user_id, verify } = req.decoded_access_token as TokenPayload
   const account = await databaseService.accounts.findOne({
     _id: new ObjectId(user_id)
   })
@@ -177,7 +171,7 @@ export const getAccountsController = async (req: Request, res: Response) => {
   // 1. Lấy page và limit từ helper
   const { page, limit } = paginationQueryParser(req, {
     defaultLimit: 10,
-    allowLimits: [10, 15, 20]
+    allowLimits: [5, 10, 15, 20]
   })
 
   // 2. Lấy các tham số filter/search

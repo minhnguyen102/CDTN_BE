@@ -43,7 +43,7 @@ export default class Account {
     this.email = account.email
     this.password = account.password
     this.phone = account.phone
-    this.status = account.status || AccountStatus.ACTIVE
+    this.status = account.status || AccountStatus.INACTIVE
     this.date_of_birth = account.date_of_birth
     this.role_id = account.role_id
     this.avatar = account.avatar || ""

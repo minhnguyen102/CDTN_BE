@@ -77,10 +77,9 @@ accountRoutes.post("/verify-email", emailVerifyTokenValidation, wrapHandlerFunct
  * Description: resend-verify-email
  * Yêu cầu phải đăng nhập mới được resend
  * PATH: admin/accounts/resend-verify-email
- * Body: {}
- * Headers: {Authorization: Bearer access_token}
+ * Body: {email_verify_token: string}
  */
-accountRoutes.post("/resend-verify-email", accessTokenValidation, wrapHandlerFunction(resendEmailVerifyController))
+accountRoutes.post("/resend-verify-email", emailVerifyTokenValidation, wrapHandlerFunction(resendEmailVerifyController))
 
 /**
  * Description: forgot-password

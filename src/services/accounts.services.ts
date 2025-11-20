@@ -3,7 +3,7 @@ import databaseService from "./database.servies"
 import Account from "../models/schema/Account.schema"
 import { hashPassword } from "../utils/crypto"
 import { signToken } from "../utils/jwt"
-import { AccountVerifyStatus, RoleStatus, TokenType } from "../constants/enums"
+import { AccountStatus, AccountVerifyStatus, RoleStatus, TokenType } from "../constants/enums"
 import { config } from "dotenv"
 config()
 import ms from "ms"
@@ -272,8 +272,8 @@ class AccountsServices {
         {
           $set: {
             email_verify_token: "",
-            verify: AccountVerifyStatus.VERIFIED
-            // updatedAt: new Date() // Khởi tạo thời gian khi code chạy (thời điểm trước)
+            verify: AccountVerifyStatus.VERIFIED,
+            status: AccountStatus.ACTIVE
           },
           $currentDate: {
             updatedAt: true // Cập nhật thời gian khi lưu vào bản ghi (thời điểm sau)
