@@ -7,6 +7,7 @@ import YAML from "yaml"
 import fs from "fs"
 import path from "path"
 import swaggerUi from "swagger-ui-express"
+import { generatePassword } from "./utils/crypto"
 const app = express()
 const port = 3000
 
@@ -38,3 +39,4 @@ app.listen(port, () => {
 
 // Deploy
 // export default app
+// console.log(generatePassword())

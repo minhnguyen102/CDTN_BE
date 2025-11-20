@@ -1,7 +1,7 @@
 import { RegisterReqBody, updateAccountReqBody, updateMeReqBody } from "../models/requests/Account.request"
 import databaseService from "./database.servies"
 import Account from "../models/schema/Account.schema"
-import { hashPassword } from "../utils/crypto"
+import { generatePassword, hashPassword } from "../utils/crypto"
 import { signToken } from "../utils/jwt"
 import { AccountStatus, AccountVerifyStatus, RoleStatus, TokenType } from "../constants/enums"
 import { config } from "dotenv"
@@ -179,7 +179,7 @@ class AccountsServices {
     return true
   }
 
-  async register(payload: RegisterReqBody) {
+  async register({ payload }: { payload: RegisterReqBody }) {
     const user_id = new ObjectId()
     const email_verify_token = await this.signEmailVerifyToken({
       user_id: user_id.toString(),
@@ -206,24 +206,25 @@ class AccountsServices {
         ...restPayload,
         role_id: role_id_object,
         email_verify_token,
-        password: hashPassword(payload.password),
+        // password: hashPassword(payload.password),
         date_of_birth: new Date(payload.date_of_birth)
       })
     )
-    const { role_name, permissions } = await this.getRoleData({ role_id: role_id_object })
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
-      user_id: user_id.toString(),
-      verify: AccountVerifyStatus.UNVERIFIED,
-      role_name,
-      permissions
-    })
-    await databaseService.refresh_tokens.insertOne(
-      new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
-    )
-    return {
-      access_token,
-      refresh_token
-    }
+    // const { role_name, permissions } = await this.getRoleData({ role_id: role_id_object })
+    // const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
+    //   user_id: user_id.toString(),
+    //   verify: AccountVerifyStatus.UNVERIFIED,
+    //   role_name,
+    //   permissions
+    // })
+    // await databaseService.refresh_tokens.insertOne(
+    //   new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
+    // )
+    // return {
+    //   access_token,
+    //   refresh_token
+    // }
+    return true
   }
 
   async refreshToken({
@@ -260,10 +261,13 @@ class AccountsServices {
     }
   }
 
-  async verifyEmail({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
+  async verifyEmail({ user_id, verify, email }: { user_id: string; verify: AccountVerifyStatus; email: string }) {
     const account = await databaseService.accounts.findOne({ _id: new ObjectId(user_id) })
     const { role_id } = account as Account
     const { role_name, permissions } = await this.getRoleData({ role_id })
+    const password = generatePassword()
+    const html = `Your password: ${password}`
+
     const [access_token, refresh_token] = await Promise.all([
       this.signAccessToken({ user_id, verify, role_name, permissions }),
       this.signRefreshToken({ user_id, verify }),
@@ -273,13 +277,15 @@ class AccountsServices {
           $set: {
             email_verify_token: "",
             verify: AccountVerifyStatus.VERIFIED,
-            status: AccountStatus.ACTIVE
+            status: AccountStatus.ACTIVE,
+            password: hashPassword(password)
           },
           $currentDate: {
             updatedAt: true // Cập nhật thời gian khi lưu vào bản ghi (thời điểm sau)
           }
         }
-      )
+      ),
+      sendVerificationEmail({ toEmail: email, subject: "Gửi mật khẩu", html })
     ])
     return {
       access_token,

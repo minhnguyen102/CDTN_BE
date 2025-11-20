@@ -5,11 +5,10 @@ import { AccountStatus, AccountVerifyStatus, RoleAccount, TableStatus, TokenType
 export interface RegisterReqBody {
   name: string
   email: string
-  password: string
+  // password: string
   phone: string
   confirm_password: string
   date_of_birth: Date
-  role: RoleAccount
   role_id: string
 }
 export interface LogoutReqBody {

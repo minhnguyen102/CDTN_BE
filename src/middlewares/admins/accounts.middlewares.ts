@@ -129,7 +129,7 @@ export const registerValidation = validate(
           }
         }
       },
-      password: passwordValidation,
+      // password: passwordValidation,
       phone: phoneValidation,
       status: statusValidation,
       confirm_password: confirmPasswordValidation,

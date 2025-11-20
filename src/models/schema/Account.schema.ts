@@ -5,7 +5,7 @@ interface AccountType {
   _id?: ObjectId
   name: string
   email: string // (Tạo unique index)
-  password: string // (Lưu dạng hash)
+  password?: string // (Lưu dạng hash)
   phone: string
   status?: AccountStatus
   date_of_birth: Date
@@ -41,7 +41,7 @@ export default class Account {
     this._id = account._id
     this.name = account.name
     this.email = account.email
-    this.password = account.password
+    this.password = account.password || ""
     this.phone = account.phone
     this.status = account.status || AccountStatus.INACTIVE
     this.date_of_birth = account.date_of_birth
