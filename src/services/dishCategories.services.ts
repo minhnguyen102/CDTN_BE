@@ -1,10 +1,11 @@
 import databaseService from "./database.servies"
 import { ObjectId } from "mongodb"
-import { CreateDishCategoryReqBody } from "../models/requests/DishCategory.requests"
+import { CreateDishCategoryReqBody, UpdateDishCategoryReqBody } from "../models/requests/DishCategory.requests"
 import DishCategory from "../models/schema/DishCategory.schema"
+import { deleteImage } from "../utils/cloudinary"
 
 class DishCategoryService {
-  async create({ payload }: { payload: CreateDishCategoryReqBody & { image: string } }) {
+  async create({ payload }: { payload: CreateDishCategoryReqBody & { image: string; image_id: string } }) {
     const newCategory = await databaseService.dish_categories.insertOne(new DishCategory(payload))
     const result = await databaseService.dish_categories.findOne(
       {
@@ -70,6 +71,18 @@ class DishCategoryService {
         totalPages: totalPages
       }
     }
+  }
+
+  async update({ id, payload }: { id: string; payload: UpdateDishCategoryReqBody }) {
+    // update image (xóa cũ, thêm mới)
+    // const dish_catefory = await databaseService.dish_categories.findOne({
+    //   _id: new ObjectId(id)
+    // })
+    // const publicId =
+    // if (payload.image) {
+    //   deleteImage()
+    // }
+    // update các trường (-image)
   }
 }
 

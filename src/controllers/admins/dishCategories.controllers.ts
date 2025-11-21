@@ -4,16 +4,17 @@ import USER_MESSAGES from "../../constants/message"
 import { pick } from "lodash"
 import HTTP_STATUS from "../../constants/httpStatus"
 import dishCategoryService from "../../services/dishCategories.services"
-import { CreateDishCategoryReqBody } from "../../models/requests/DishCategory.requests"
+import { CreateDishCategoryReqBody, UpdateDishCategoryReqBody } from "../../models/requests/DishCategory.requests"
 import { paginationQueryParser } from "../../utils/helpers"
 
 export const createDishCategoryController = async (
   req: Request<ParamsDictionary, any, CreateDishCategoryReqBody>,
   res: Response
 ) => {
-  const _payload = pick(req.body, ["name", "displayOrder", "status", "description"])
+  const _payload = pick(req.body, ["name", "display_order", "status", "description"])
   const image = req.file?.path as string
-  const payload = { ..._payload, image }
+  const image_id = req.file?.filename as string
+  const payload = { ..._payload, image, image_id }
   const result = await dishCategoryService.create({ payload })
 
   return res.status(HTTP_STATUS.CREATED).json({
@@ -35,7 +36,24 @@ export const getDishCategoriesController = async (req: Request, res: Response) =
   })
 
   return res.json({
-    message: "Lấy danh sách danh mục thành công", // Có thể đưa vào USER_MESSAGES
+    message: USER_MESSAGES.CATEGORY_LIST_SUCCESS,
     result
+  })
+}
+
+export const updateDishCategoryController = async (
+  req: Request<ParamsDictionary, any, UpdateDishCategoryReqBody>,
+  res: Response
+) => {
+  const { id } = req.params
+  const payload = pick(req.body, ["name", "display_order", "status", "description", "image"])
+  if (req.file) {
+    payload.image = req.file.path as string
+  }
+  const result = await dishCategoryService.update({ id, payload })
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.CATEGORY_UPDATED_SUCCESSFULLY,
+    data: result
   })
 }

@@ -3,7 +3,8 @@ import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import {
   createDishCategoryController,
-  getDishCategoriesController
+  getDishCategoriesController,
+  updateDishCategoryController
   // getDishCategoriesController,
   // getDishCategoryDetailController,
   // updateDishCategoryController,
@@ -59,15 +60,15 @@ dishCategoriesRoutes.get(
  * Body: { name?: string, description?: string, image?: string, displayOrder?: number, status?: string }
  * Headers: { Authorization: Bearer <access_token> }
  */
-// dishCategoriesRoutes.put(
-//   "/:id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   checkPermission("update_dish_category"),
-//   dishCategoryIdValidator, // Validate param ID
-//   updateDishCategoryValidator, // Validate body
-//   wrapHandlerFunction(updateDishCategoryController)
-// )
+dishCategoriesRoutes.patch(
+  "/:id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("update_dish_category"),
+  uploadCloud.single("image"),
+  updateDishCategoryValidator, // Validate body
+  wrapHandlerFunction(updateDishCategoryController)
+)
 
 /**
  * Description: Delete (or Soft Delete) a dish category

@@ -1,4 +1,5 @@
 const USER_MESSAGES = {
+  CATEGORY_LIST_SUCCESS: "Category list retrieved successfully",
   DISPAY_ORDER_STATUS_INVALID: "Status must be a string",
   DISPAY_ORDER_STATUS: "Status must be either 'active' or 'inactive'",
   IMAGE_URL_MUST_BE_STRING: "Image URL must be a string",

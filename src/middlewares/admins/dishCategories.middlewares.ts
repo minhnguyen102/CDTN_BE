@@ -107,7 +107,7 @@ export const createDishCategoryValidator = validate(
       name: nameValidation,
       description: descriptionValidation,
       image: imageValidation,
-      displayOrder: displayOrderValidation,
+      display_order: displayOrderValidation,
       status: statusValidation
     },
     ["body"]
@@ -125,20 +125,19 @@ export const updateDishCategoryValidator = validate(
         ...nameValidation,
         notEmpty: false
       },
-      description: {
-        ...descriptionValidation,
-        optional: true
-      },
+      description: descriptionValidation,
       image: {
-        ...imageValidation,
-        optional: true
+        optional: true,
+        ...imageValidation
       },
-      displayOrder: {
+      display_order: {
         ...displayOrderValidation,
+        notEmpty: false,
         optional: true
       },
       status: {
         ...statusValidation,
+        notEmpty: false,
         optional: true
       }
     },
