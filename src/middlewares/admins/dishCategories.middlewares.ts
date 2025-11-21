@@ -80,6 +80,7 @@ const displayOrderValidation: ParamSchema = {
     errorMessage: USER_MESSAGES.DISPLAY_ORDER_REQUIRED
   },
   isInt: {
+    options: { min: 1 },
     errorMessage: USER_MESSAGES.DISPLAY_ORDER_INTEGER
   },
   toInt: true
@@ -124,9 +125,9 @@ export const createDishCategoryValidator = validate(
     {
       name: nameValidation,
       description: descriptionValidation,
-      image: imageRequiredValidation,
       display_order: displayOrderValidation,
-      status: statusValidation
+      status: statusValidation,
+      image: imageRequiredValidation
     },
     ["body"]
   )

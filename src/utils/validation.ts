@@ -3,6 +3,7 @@ import { ValidationChain, validationResult } from "express-validator"
 import { RunnableValidationChains } from "express-validator/lib/middlewares/schema"
 import HTTP_STATUS from "../constants/httpStatus"
 import { EntityError, ErrorWithStatus } from "../models/Errors"
+import { deleteFileFromCloudinary } from "./cloudinary"
 
 // can be reused by many routes
 export const validate = (validation: RunnableValidationChains<ValidationChain>) => {
@@ -14,6 +15,10 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
     // Nếu không có lỗi
     if (errors.isEmpty()) {
       return next()
+    }
+    if (req.file) {
+      // Với multer-storage-cloudinary, req.file.filename thường là public_id
+      await deleteFileFromCloudinary(req.file.filename)
     }
     console.log("Loi ", errors.mapped())
 

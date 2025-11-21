@@ -38,3 +38,13 @@ export const deleteImage = async (publicId: string) => {
     throw error
   }
 }
+
+export const deleteFileFromCloudinary = async (filename: string) => {
+  try {
+    // filename trong multer-storage-cloudinary chính là public_id
+    await cloudinary.uploader.destroy(filename)
+    console.log(`Deleted file from Cloudinary: ${filename}`)
+  } catch (error) {
+    console.error(`Error deleting file from Cloudinary: ${error}`)
+  }
+}
