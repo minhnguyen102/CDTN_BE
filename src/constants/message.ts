@@ -243,7 +243,33 @@ const USER_MESSAGES = {
   DISPLAY_ORDER_INTEGER: "Display order must be an integer and great than 0",
   FILE_TYPE_NOT_SUPPORTED: "File type is not supported",
   DELETE_DISH_CATEGORY_SUCCESS: "Delete dish category success",
-  DISH_CATEFORY_ID_NOT_FOUND: "Dish caregory ID not found"
+  DISH_CATEFORY_ID_NOT_FOUND: "Dish caregory ID not found",
+  // --- Dish Validation ---
+  DISH_NAME_REQUIRED: "Dish name is required",
+  DISH_NAME_MUST_BE_STRING: "Dish name must be a string",
+  DISH_NAME_LENGTH: "Dish name must be between 1 and 200 characters",
+
+  DISH_PRICE_REQUIRED: "Dish price is required",
+  DISH_PRICE_MUST_BE_NUMBER: "Dish price must be a number",
+  DISH_PRICE_MUST_BE_POSITIVE: "Dish price must be greater than or equal to 0",
+
+  DISH_DESCRIPTION_MUST_BE_STRING: "Description must be a string",
+
+  DISH_STATUS_REQUIRED: "Dish status is required",
+  DISH_STATUS_INVALID: "Dish status is invalid",
+
+  DISH_CATEGORY_REQUIRED: "Category ID is required",
+  DISH_CATEGORY_INVALID: "Invalid Category ID",
+
+  DISH_RECIPE_REQUIRED: "Dish recipe is required",
+  DISH_RECIPE_MUST_BE_ARRAY: "Dish recipe must be an array",
+
+  RECIPE_INGREDIENT_ID_REQUIRED: "Recipe ingredient ID is required",
+  RECIPE_INGREDIENT_ID_INVALID: "Invalid Ingredient ID in recipe",
+  RECIPE_QUANTITY_REQUIRED: "Recipe quantity is required",
+  RECIPE_QUANTITY_MUST_BE_POSITIVE: "Recipe quantity must be greater than 0",
+
+  DISH_IMAGE_REQUIRED: "Dish image is required"
 }
 
 export default USER_MESSAGES
