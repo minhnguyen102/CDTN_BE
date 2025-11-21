@@ -67,7 +67,7 @@ dishCategoriesRoutes.patch(
   verifiedUserValidation,
   checkPermission("update_dish_category"),
   uploadCloud.single("image"),
-  updateDishCategoryValidator, // Validate body
+  updateDishCategoryValidator,
   wrapHandlerFunction(updateDishCategoryController)
 )
 

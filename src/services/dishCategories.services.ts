@@ -17,7 +17,10 @@ class DishCategoryService {
       {
         projection: {
           createdAt: 0,
-          updatedAt: 0
+          updatedAt: 0,
+          deleted: 0,
+          deletedAt: 0,
+          image_id: 0
         }
       }
     )
@@ -43,7 +46,8 @@ class DishCategoryService {
       { $match: matchFilter },
       {
         $sort: {
-          displayOrder: 1 // theo thứ tự ưu tiên
+          displayOrder: 1, // theo thứ tự ưu tiên,
+          name: 1
         }
       },
       { $skip: (page - 1) * limit },
@@ -53,7 +57,8 @@ class DishCategoryService {
           createdAt: 0,
           updatedAt: 0,
           deletedAt: 0,
-          deleted: false
+          deleted: 0,
+          image_id: 0
         }
       }
     ]
@@ -76,34 +81,45 @@ class DishCategoryService {
     }
   }
 
-  async update({ id, payload }: { id: string; payload: UpdateDishCategoryReqBody & { image_id: string } }) {
+  async update({ id, payload }: { id: string; payload: UpdateDishCategoryReqBody & { image_id?: string } }) {
     // update image (xóa cũ, thêm mới)
     const dish_category = await databaseService.dish_categories.findOne({
       _id: new ObjectId(id)
     })
-    // Xóa image_id cũ
-    // console.log("payload: ", payload)
-    const old_image_id = dish_category?.image_id as string
-    if (payload.image) {
-      await deleteImage(old_image_id)
-    } else {
-      payload.image_id = old_image_id
+    if (!dish_category) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.CATEGORY_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
     }
-    await databaseService.dish_categories.updateOne(
+    if (payload.image) {
+      const old_image_id = dish_category?.image_id as string
+      await deleteImage(old_image_id)
+    }
+    const updateDishCategory = await databaseService.dish_categories.findOneAndUpdate(
       {
         _id: new ObjectId(id)
       },
       {
         $set: {
-          ...payload,
-          image_id: payload.image_id
+          ...payload
         },
         $currentDate: {
           updatedAt: true
         }
+      },
+      {
+        returnDocument: "after",
+        projection: {
+          createdAt: 0,
+          updatedAt: 0,
+          deletedAt: 0,
+          deleted: 0,
+          image_id: 0
+        }
       }
     )
-    return true
+    return updateDishCategory
   }
 
   async delete({ id }: { id: string }) {
