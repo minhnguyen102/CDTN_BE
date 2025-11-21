@@ -241,7 +241,9 @@ const USER_MESSAGES = {
   // Thêm mới
   DISPLAY_ORDER_REQUIRED: "Display order is required",
   DISPLAY_ORDER_INTEGER: "Display order must be an integer",
-  FILE_TYPE_NOT_SUPPORTED: "File type is not supported"
+  FILE_TYPE_NOT_SUPPORTED: "File type is not supported",
+  DELETE_DISH_CATEGORY_SUCCESS: "Delete dish category success",
+  DISH_CATEFORY_ID_NOT_FOUND: "Dish caregory ID not found"
 }
 
 export default USER_MESSAGES

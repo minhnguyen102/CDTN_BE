@@ -3,6 +3,7 @@ import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import {
   createDishCategoryController,
+  deleteDishCategoryController,
   getDishCategoriesController,
   updateDishCategoryController
   // getDishCategoriesController,
@@ -77,13 +78,13 @@ dishCategoriesRoutes.patch(
  * Params: { id: string }
  * Headers: { Authorization: Bearer <access_token> }
  */
-// dishCategoriesRoutes.delete(
-//   "/:id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   checkPermission("delete_dish_category"),
-//   dishCategoryIdValidator, // Validate param ID
-//   wrapHandlerFunction(deleteDishCategoryController)
-// )
+dishCategoriesRoutes.delete(
+  "/:id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("delete_dish_category"),
+  dishCategoryIdValidator, // Validate param ID
+  wrapHandlerFunction(deleteDishCategoryController)
+)
 
 export default dishCategoriesRoutes

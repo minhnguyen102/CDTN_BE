@@ -3,6 +3,9 @@ import { ObjectId } from "mongodb"
 import { CreateDishCategoryReqBody, UpdateDishCategoryReqBody } from "../models/requests/DishCategory.requests"
 import DishCategory from "../models/schema/DishCategory.schema"
 import { deleteImage } from "../utils/cloudinary"
+import { ErrorWithStatus } from "../models/Errors"
+import HTTP_STATUS from "../constants/httpStatus"
+import USER_MESSAGES from "../constants/message"
 
 class DishCategoryService {
   async create({ payload }: { payload: CreateDishCategoryReqBody & { image: string; image_id: string } }) {
@@ -73,16 +76,55 @@ class DishCategoryService {
     }
   }
 
-  async update({ id, payload }: { id: string; payload: UpdateDishCategoryReqBody }) {
+  async update({ id, payload }: { id: string; payload: UpdateDishCategoryReqBody & { image_id: string } }) {
     // update image (xóa cũ, thêm mới)
-    // const dish_catefory = await databaseService.dish_categories.findOne({
-    //   _id: new ObjectId(id)
-    // })
-    // const publicId =
-    // if (payload.image) {
-    //   deleteImage()
-    // }
-    // update các trường (-image)
+    const dish_category = await databaseService.dish_categories.findOne({
+      _id: new ObjectId(id)
+    })
+    // Xóa image_id cũ
+    // console.log("payload: ", payload)
+    const old_image_id = dish_category?.image_id as string
+    if (payload.image) {
+      await deleteImage(old_image_id)
+    } else {
+      payload.image_id = old_image_id
+    }
+    await databaseService.dish_categories.updateOne(
+      {
+        _id: new ObjectId(id)
+      },
+      {
+        $set: {
+          ...payload,
+          image_id: payload.image_id
+        },
+        $currentDate: {
+          updatedAt: true
+        }
+      }
+    )
+    return true
+  }
+
+  async delete({ id }: { id: string }) {
+    const result = await databaseService.dish_categories.updateOne(
+      { _id: new ObjectId(id), deleted: false },
+      {
+        $set: {
+          deleted: true
+        },
+        $currentDate: {
+          deletedAt: true
+        }
+      }
+    )
+    if (!result.modifiedCount) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.DISH_CATEFORY_ID_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    return true
   }
 }
 

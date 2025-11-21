@@ -31,6 +31,7 @@ export const uploadCloud = multer({ storage })
 export const deleteImage = async (publicId: string) => {
   try {
     const result = await cloudinary.uploader.destroy(publicId)
+    console.log(result)
     return result
   } catch (error) {
     console.log("Delete image error:", error)

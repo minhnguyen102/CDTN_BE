@@ -33,25 +33,43 @@ const descriptionValidation: ParamSchema = {
   }
 }
 
-// Validate cho image
-const imageValidation: ParamSchema = {
+// Logic kiểm tra định dạng file (Dùng chung)
+const checkImageFormat = (file: Express.Multer.File) => {
+  const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
+  if (!validTypes.includes(file.mimetype)) {
+    throw new ErrorWithStatus({
+      message: USER_MESSAGES.FILE_TYPE_NOT_SUPPORTED,
+      status: HTTP_STATUS.BAD_REQUEST
+    })
+  }
+  return true
+}
+
+// Validate cho CREATE (Bắt buộc phải có ảnh)
+const imageRequiredValidation: ParamSchema = {
   custom: {
     options: (value, { req }) => {
-      if (req.file) {
-        const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
-        if (!validTypes.includes(req.file.mimetype)) {
-          throw new ErrorWithStatus({
-            message: USER_MESSAGES.FILE_TYPE_NOT_SUPPORTED,
-            status: HTTP_STATUS.BAD_REQUEST
-          })
-        }
-      } else {
+      if (!req.file) {
         throw new ErrorWithStatus({
           message: USER_MESSAGES.IMAGE_REQUIRED,
           status: HTTP_STATUS.BAD_REQUEST
         })
       }
-      return true
+      return checkImageFormat(req.file)
+    }
+  }
+}
+
+// Validate cho UPDATE (Không bắt buộc, chỉ check nếu có file)
+const imageOptionalValidation: ParamSchema = {
+  custom: {
+    options: (value, { req }) => {
+      // Nếu không có file -> Cho qua (return true) để giữ ảnh cũ
+      if (!req.file) {
+        return true
+      }
+      // Nếu có file -> Check định dạng
+      return checkImageFormat(req.file)
     }
   }
 }
@@ -106,7 +124,7 @@ export const createDishCategoryValidator = validate(
     {
       name: nameValidation,
       description: descriptionValidation,
-      image: imageValidation,
+      image: imageRequiredValidation,
       display_order: displayOrderValidation,
       status: statusValidation
     },
@@ -126,10 +144,7 @@ export const updateDishCategoryValidator = validate(
         notEmpty: false
       },
       description: descriptionValidation,
-      image: {
-        optional: true,
-        ...imageValidation
-      },
+      image: imageOptionalValidation,
       display_order: {
         ...displayOrderValidation,
         notEmpty: false,

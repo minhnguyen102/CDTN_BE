@@ -46,14 +46,24 @@ export const updateDishCategoryController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const payload = pick(req.body, ["name", "display_order", "status", "description", "image"])
+  const _payload = pick(req.body, ["name", "display_order", "status", "description", "image"])
+  const payload: any = { ..._payload }
   if (req.file) {
     payload.image = req.file.path as string
+    payload.image_id = req.file.filename as string
   }
   const result = await dishCategoryService.update({ id, payload })
 
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.CATEGORY_UPDATED_SUCCESSFULLY,
     data: result
+  })
+}
+
+export const deleteDishCategoryController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  await dishCategoryService.delete({ id })
+  res.json({
+    message: USER_MESSAGES.DELETE_DISH_CATEGORY_SUCCESS
   })
 }
