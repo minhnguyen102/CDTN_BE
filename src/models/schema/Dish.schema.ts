@@ -1,9 +1,9 @@
 import { ObjectId } from "mongodb"
 import { DishStatus } from "../../constants/enums"
 
-interface DishRecipe {
-  ingredientId: ObjectId // Tham chiếu đến collection 'ingredients'
-  quantity: number // Số lượng tiêu hao cho 1 suất ăn (theo đơn vị gốc của kho)
+export interface DishRecipe {
+  ingredientId: ObjectId
+  quantity: number
 }
 
 interface DishType {
@@ -11,12 +11,15 @@ interface DishType {
   name: string
   price: number
   description: string
+  image: string
+  image_id?: string
   status: DishStatus
-  categoryId: ObjectId // Tham chiếu đến collection 'dish_categories' (Danh mục món)
+  categoryId: ObjectId
   recipe: DishRecipe[]
 
-  isFeatured?: boolean // true: Món nổi bật/Bán chạy (hiện lên đầu hoặc mục Hot)
-  image?: string
+  isFeatured?: boolean
+  deleted?: boolean
+  deletedAt?: Date
   createdAt?: Date
   updatedAt?: Date
 }
@@ -25,12 +28,15 @@ export default class Dish {
   _id?: ObjectId
   name: string
   price: number
-  description: string
+  description?: string
+  image: string
+  image_id: string
   status: DishStatus
   categoryId: ObjectId
   recipe: DishRecipe[]
   isFeatured: boolean
-  image: string
+  deleted: boolean
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
 
@@ -38,15 +44,20 @@ export default class Dish {
     const date = new Date()
     this.name = dish.name
     this.price = dish.price
-    this.description = dish.description
+    this.description = dish.description || ""
+    this.image = dish.image
+    this.image_id = dish.image_id || ""
     this.status = dish.status
-    this.categoryId = dish.categoryId
-    this.recipe = dish.recipe.map((item) => ({
-      ingredientId: item.ingredientId,
+    this.categoryId = new ObjectId(dish.categoryId)
+
+    this.recipe = (dish.recipe || []).map((item) => ({
+      ingredientId: new ObjectId(item.ingredientId),
       quantity: item.quantity
     }))
+
     this.isFeatured = dish.isFeatured || false
-    this.image = dish.image || ""
+    this.deleted = dish.deleted || false
+    this.deletedAt = dish.deletedAt || null
     this.createdAt = dish.createdAt || date
     this.updatedAt = dish.updatedAt || date
   }
