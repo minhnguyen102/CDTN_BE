@@ -142,7 +142,7 @@ class AccountsServices {
       ])
       .toArray()
 
-    // console.log("roleData: ", roleData)
+    console.log("roleData: ", roleData)
 
     if (roleData.length === 0) {
       throw new ErrorWithStatus({
@@ -157,6 +157,7 @@ class AccountsServices {
 
   async login({ account }: { account: Account }) {
     const { _id, verify, role_id } = account
+    console.log("role_id: ", role_id)
     const user_id = (_id as ObjectId).toString()
     const { role_name, permissions } = await this.getRoleData({ role_id })
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({

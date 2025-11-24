@@ -34,6 +34,12 @@ class RoleServices {
     const roles = await databaseService.roles
       .aggregate([
         {
+          $match: {
+            status: RoleStatus.ACTIVE,
+            isDeleted: false
+          }
+        },
+        {
           $lookup: {
             from: "permissions",
             localField: "permissionIds",
