@@ -11,9 +11,11 @@ type ErrorsType = Record<
 export class ErrorWithStatus {
   message: string
   status: number
-  constructor({ message, status }: { message: string; status: number }) {
+  code?: string
+  constructor({ message, status, code }: { message: string; status: number; code?: string }) {
     this.message = message
     this.status = status
+    this.code = code
   }
 }
 

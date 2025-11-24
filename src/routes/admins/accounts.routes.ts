@@ -28,7 +28,8 @@ import {
   verifiedUserValidation,
   updateMeValidation,
   changePasswordValidation,
-  updateAccountValidation
+  updateAccountValidation,
+  resendEmailVerifyTokenValidation
 } from "../../middlewares/admins/accounts.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { uploadCloud } from "../../utils/cloudinary"
@@ -79,7 +80,11 @@ accountRoutes.post("/verify-email", emailVerifyTokenValidation, wrapHandlerFunct
  * PATH: admin/accounts/resend-verify-email
  * Body: {email_verify_token: string}
  */
-accountRoutes.post("/resend-verify-email", emailVerifyTokenValidation, wrapHandlerFunction(resendEmailVerifyController))
+accountRoutes.post(
+  "/resend-verify-email",
+  resendEmailVerifyTokenValidation,
+  wrapHandlerFunction(resendEmailVerifyController)
+)
 
 /**
  * Description: forgot-password

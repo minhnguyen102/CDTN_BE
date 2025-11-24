@@ -11,7 +11,7 @@ import { JsonWebTokenError } from "jsonwebtoken"
 import _ from "lodash"
 import { ObjectId } from "mongodb"
 import { TokenPayload } from "../../models/requests/Account.request"
-import { AccountStatus, AccountVerifyStatus, RoleAccount } from "../../constants/enums"
+import { AccountStatus, AccountVerifyStatus, MESSAGE_CODES, RoleAccount } from "../../constants/enums"
 
 const nameValidation: ParamSchema = {
   notEmpty: {
@@ -281,10 +281,83 @@ export const emailVerifyTokenValidation = validate(
               // console.log(decoded_email_verify_token)
             } catch (error) {
               // Lỗi do verify:
-              throw new ErrorWithStatus({
-                message: _.capitalize((error as JsonWebTokenError).message),
-                status: HTTP_STATUS.UNAUTHORIZED
+              // throw new ErrorWithStatus({
+              //   message: _.capitalize((error as JsonWebTokenError).message),
+              //   status: HTTP_STATUS.UNAUTHORIZED
+              // })
+              if (error instanceof JsonWebTokenError) {
+                // Trường hợp hết hạn
+                if (error.name === "TokenExpiredError") {
+                  throw new ErrorWithStatus({
+                    message: "Token expired, please resend",
+                    status: HTTP_STATUS.UNAUTHORIZED,
+                    code: MESSAGE_CODES.EMAIL_TOKEN_EXPIRED
+                  })
+                }
+
+                // Trường hợp sai chữ ký / token rác
+                throw new ErrorWithStatus({
+                  message: "Invalid token",
+                  status: HTTP_STATUS.UNAUTHORIZED,
+                  code: MESSAGE_CODES.INVALID_TOKEN
+                })
+              }
+              throw error
+            }
+            return true
+          }
+        }
+      }
+    },
+    ["body"]
+  )
+)
+export const resendEmailVerifyTokenValidation = validate(
+  checkSchema(
+    {
+      email_verify_token: {
+        notEmpty: {
+          errorMessage: new ErrorWithStatus({
+            message: USER_MESSAGES.EMAIL_VERIFY_TOKEN_TOKEN_IS_REQUIRED,
+            status: HTTP_STATUS.BAD_REQUEST
+          })
+        },
+        custom: {
+          options: async (value, { req }) => {
+            try {
+              const decoded_email_verify_token = await verifyToken({
+                token: value,
+                secretOrPublicKey: process.env.PRIVATE_KEY_SIGN_EMAIL_VERIFY_TOKEN as string,
+                options: { ignoreExpiration: true }
               })
+              ;(req as Request).decoded_email_verify_token = decoded_email_verify_token
+              // console.log(decoded_email_verify_token)
+            } catch (error) {
+              // // Lỗi do verify:
+              // throw new ErrorWithStatus({
+              //   message: _.capitalize((error as JsonWebTokenError).message),
+              //   status: HTTP_STATUS.UNAUTHORIZED,
+              //   code: MESSAGE_CODES.EMAIL_TOKEN_EXPIRED
+              // })
+
+              if (error instanceof JsonWebTokenError) {
+                // Trường hợp hết hạn
+                if (error.name === "TokenExpiredError") {
+                  throw new ErrorWithStatus({
+                    message: "Token expired, please resend",
+                    status: HTTP_STATUS.UNAUTHORIZED,
+                    code: MESSAGE_CODES.EMAIL_TOKEN_EXPIRED
+                  })
+                }
+
+                // Trường hợp sai chữ ký / token rác
+                throw new ErrorWithStatus({
+                  message: "Invalid token",
+                  status: HTTP_STATUS.UNAUTHORIZED,
+                  code: MESSAGE_CODES.INVALID_TOKEN
+                })
+              }
+              throw error
             }
             return true
           }

@@ -13,10 +13,10 @@ import {
 import accountsServices from "../../services/accounts.services"
 import { ParamsDictionary } from "express-serve-static-core"
 import USER_MESSAGES from "../../constants/message"
-import { ObjectId } from "mongodb"
+import { Code, ObjectId } from "mongodb"
 import databaseService from "../../services/database.servies"
 import HTTP_STATUS from "../../constants/httpStatus"
-import { AccountVerifyStatus } from "../../constants/enums"
+import { AccountVerifyStatus, MESSAGE_CODES } from "../../constants/enums"
 import Account from "../../models/schema/Account.schema"
 import { pick } from "lodash"
 import { paginationQueryParser } from "../../utils/helpers"
@@ -75,13 +75,15 @@ export const emailVerifyController = async (
   // Nếu đã verify email trước đó
   if (account.email_verify_token === "" && account.verify === AccountVerifyStatus.VERIFIED) {
     return res.json({
-      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
+      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED,
+      code: MESSAGE_CODES.EMAIL_ALREADY_VERIFIED
     })
   }
   const { email } = account
   await accountsServices.verifyEmail({ user_id, email })
   res.json({
-    message: USER_MESSAGES.VERIFY_EMAIL_SUCCESS
+    message: USER_MESSAGES.VERIFY_EMAIL_SUCCESS,
+    code: MESSAGE_CODES.VERIFY_SUCCESS
   })
 }
 
@@ -100,13 +102,15 @@ export const resendEmailVerifyController = async (req: Request<ParamsDictionary,
   // Nếu đã verify email trước đó
   if (account.verify === AccountVerifyStatus.VERIFIED) {
     return res.json({
-      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
+      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED,
+      code: MESSAGE_CODES.EMAIL_ALREADY_VERIFIED
     })
   }
   const { email } = account
   await accountsServices.resendEmailVerify({ user_id, verify, email })
   res.json({
-    message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS
+    message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS,
+    code: MESSAGE_CODES.RESEND_VERIFY_EMAIL_SUCCESS
   })
 }
 
