@@ -269,7 +269,9 @@ const USER_MESSAGES = {
   RECIPE_QUANTITY_REQUIRED: "Recipe quantity is required",
   RECIPE_QUANTITY_MUST_BE_POSITIVE: "Recipe quantity must be greater than 0",
 
-  DISH_IMAGE_REQUIRED: "Dish image is required"
+  DISH_IMAGE_REQUIRED: "Dish image is required",
+  FORGOT_PASSWORD_TOKEN_EXPIRED: "Reset password token has expired. Please request a new one.",
+  SESSION_EXPIRED: "Session has expired. Please try again."
 }
 
 export default USER_MESSAGES

@@ -435,10 +435,19 @@ export const forgotPasswordTokenValidation = validate(
               req.decoded_forgot_password_token = decoded_forgot_password_token
             } catch (error) {
               // Lỗi do verify
+
               if (error instanceof JsonWebTokenError) {
+                if (error.name === "TokenExpiredError") {
+                  throw new ErrorWithStatus({
+                    message: USER_MESSAGES.FORGOT_PASSWORD_TOKEN_EXPIRED,
+                    status: HTTP_STATUS.UNAUTHORIZED,
+                    code: MESSAGE_CODES.FORGOT_PASSWORD_TOKEN_EXPIRED
+                  })
+                }
                 throw new ErrorWithStatus({
                   message: _.capitalize(error.message),
-                  status: HTTP_STATUS.UNAUTHORIZED
+                  status: HTTP_STATUS.UNAUTHORIZED,
+                  code: MESSAGE_CODES.FORGOT_PASSWORD_TOKEN_INVALID
                 })
               }
               throw error

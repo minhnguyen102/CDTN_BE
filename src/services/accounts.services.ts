@@ -289,7 +289,7 @@ class AccountsServices {
 
   async resendEmailVerify({ user_id, verify, email }: { user_id: string; verify: AccountVerifyStatus; email: string }) {
     const new_email_verify_token = await this.signEmailVerifyToken({ user_id, verify })
-    console.log("Giả lập gửi new_email_verify_token cho account: ", new_email_verify_token)
+    // console.log("Giả lập gửi new_email_verify_token cho account: ", new_email_verify_token)
 
     const verificationLink = `${process.env.BASE_URL}/resend-verify-email?token=${new_email_verify_token}`
     const html = `
@@ -301,37 +301,26 @@ class AccountsServices {
         </a>
       </div>
     `
-    await sendVerificationEmail({ toEmail: email, subject: "Xác thực tài khoản", html })
-
-    await databaseService.accounts.updateOne(
-      { _id: new ObjectId(user_id) },
-      {
-        $set: {
-          email_verify_token: new_email_verify_token
-        },
-        $currentDate: {
-          updatedAt: true
+    await Promise.all([
+      sendVerificationEmail({ toEmail: email, subject: "Xác thực tài khoản", html }),
+      databaseService.accounts.updateOne(
+        { _id: new ObjectId(user_id) },
+        {
+          $set: {
+            email_verify_token: new_email_verify_token
+          },
+          $currentDate: {
+            updatedAt: true
+          }
         }
-      }
-    )
+      )
+    ])
   }
 
   async forgotPassword({ user_id, verify, email }: { user_id: string; verify: AccountVerifyStatus; email: string }) {
     // sign forgot_password_token và lưu vào db
     const forgot_password_token = await this.signForgotPasswordToken({ user_id, verify })
-    await databaseService.accounts.updateOne(
-      { _id: new ObjectId(user_id) },
-      {
-        $set: {
-          forgot_password_token
-        },
-        $currentDate: {
-          updatedAt: true
-        }
-      }
-    )
-    // Send email cho user để thực hiện điều hướng sang trang đổi mật khẩu
-    console.log("Giả định gửi link forgor_password_token cho người dùng: ", forgot_password_token)
+    // console.log("Giả định gửi link forgor_password_token cho người dùng: ", forgot_password_token)
     const resetLink = `${process.env.BASE_URL}/forgot-password-token?token=${forgot_password_token}`
     const html = `
       <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
@@ -352,7 +341,21 @@ class AccountsServices {
         </p>
       </div>
     `
-    await sendVerificationEmail({ toEmail: email, subject: "Hỗ trợ lấy lại mật khẩu", html })
+    await Promise.all([
+      databaseService.accounts.updateOne(
+        { _id: new ObjectId(user_id) },
+        {
+          $set: {
+            forgot_password_token
+          },
+          $currentDate: {
+            updatedAt: true
+          }
+        }
+      ),
+      // Send email cho user để thực hiện điều hướng sang trang đổi mật khẩu
+      sendVerificationEmail({ toEmail: email, subject: "Hỗ trợ lấy lại mật khẩu", html })
+    ])
     return true
   }
 
