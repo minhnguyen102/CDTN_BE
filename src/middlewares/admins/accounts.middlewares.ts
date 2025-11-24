@@ -132,7 +132,7 @@ export const registerValidation = validate(
       // password: passwordValidation,
       phone: phoneValidation,
       status: statusValidation,
-      confirm_password: confirmPasswordValidation,
+      // confirm_password: confirmPasswordValidation,
       date_of_birth: dateOfBirthValidation
     },
     ["body"]

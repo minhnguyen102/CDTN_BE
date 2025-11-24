@@ -79,96 +79,6 @@ paths:
           description: Email or password is incorrect
         '422':
           description: Validation error
-  /accounts/register:
-    post:
-      tags:
-        - account
-      summary: Register a new user
-      operationId: accountsRegister
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                email:
-                  type: string
-                password:
-                  type: string
-                confirm_password:
-                  type: string
-                date_of_birth:
-                  type: string
-                  format: date-time
-                role_id:
-                  type: string
-              required:
-                - name
-                - email
-                - password
-                - confirm_password
-                - date_of_birth
-                - role_id
-            example:
-              name: "Gao red 2"
-              email: "nhanvien2+2@gmail.com"
-              password: "Benten123@!"
-              confirm_password: "Benten123@!"
-              date_of_birth: "1999-01-20T00:00:00Z"
-              role_id: "691a9a6f7800bd3806be258e"
-      responses:
-        200:
-          description: Registration successful
-          content:
-            application/json:
-              example:
-                message: "Registration successful. Please check your email to verify your account."
-                result:
-                  access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwidG9rZW5fdHlwZSI6ImFjY2Vzc190b2tlbiIsInZlcmlmeSI6InVudmVyaWZpZWQiLCJyb2xlX25hbWUiOiJFbXBsb3llZSIsInBlcm1pc3Npb25zIjpbInZpZXdfaW1wb3J0X29yZGVyX2RldGFpbCIsImRlbGV0ZV9kaXNoIiwidmlld19pbXBvcnRfb3JkZXJfbGlzdCIsImNyZWF0ZV9kaXNoIiwiY3JlYXRlX2ltcG9ydF9vcmRlciIsInZpZXdfZGlzaGVzIiwidXBkYXRlX2Rpc2giLCJ2aWV3X2Rhc2hib2FyZCJdLCJpYXQiOjE3NjM1Mjg0MTEsImV4cCI6MTc2MzUyOTMxMX0.bwfoQx9EH-1q3tRiZyz1Ku3szXOL9LLkB0yYJTyh68c"
-                  refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwidG9rZW5fdHlwZSI6InJlZnJlc2hfdG9rZW4iLCJ2ZXJpZnkiOiJ1bnZlcmlmaWVkIiwiaWF0IjoxNzYzNTI4NDExLCJleHAiOjE3NzIxNjg0MTF9.jtMZT-UP-4hsmAFIGe7wq0QqXX1ZoDOqeatxRk9aLMw"
-        409:
-          description: Email already exists
-          content:
-            application/json:
-              example:
-                message: "This email already exists"
-        422:
-          description: Validation error
-  /accounts/logout:
-    post:
-      tags:
-        - account
-      summary: Logout user
-      operationId: accountsLogout
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                refresh_token:
-                  type: string
-              required:
-                - refresh_token
-            example:
-              refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-      responses:
-        200:
-          description: Logout successfully
-          content:
-            application/json:
-              example:
-                message: "Logout successfully"
-        401:
-          description: Used refresh token or not exist
-          content:
-            application/json:
-              example:
-                message: "Used refresh token or not exist"
   /accounts/refresh-token:
     post:
       tags:
@@ -204,12 +114,101 @@ paths:
             application/json:
               example:
                 message: "Invalid token"
+  /accounts/register:
+    post:
+      tags:
+        - account
+      summary: Register a new user
+      operationId: accountsRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                date_of_birth:
+                  type: string
+                  format: date-time
+                role_id:
+                  type: string
+              required:
+                - name
+                - email
+                - date_of_birth
+                - role_id
+            example:
+              name: "Gao red 2"
+              email: "svhn1@luxsev.com"
+              phone: "0325793630"
+              date_of_birth: "1999-01-20T00:00:00Z"
+              role_id: "691a9a6f7800bd3806be258e"
+
+      responses:
+        200:
+          description: Registration successful
+          content:
+            application/json:
+              example:
+                message: "Registration successful. Please check your email to verify your account."
+
+        409:
+          description: Email already exists
+          content:
+            application/json:
+              example:
+                message: "This email already exists"
+
+        422:
+          description: Validation error
+          content:
+            application/json:
+              example:
+                message: "Validation error"
+  /accounts/logout:
+    post:
+      tags:
+        - account
+      summary: Logout user
+      operationId: accountsLogout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+              required:
+                - refresh_token
+            example:
+              refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        200:
+          description: Logout successfully
+          content:
+            application/json:
+              example:
+                message: "Logout successfully"
+        401:
+          description: Used refresh token or not exist
+          content:
+            application/json:
+              example:
+                message: "Used refresh token or not exist"
   /accounts/verify-email:
     post:
       tags:
         - account
-      summary: Verify email
-      operationId: accountsVerifyEmail
+      summary: Verify user email
+      operationId: verifyEmail
       requestBody:
         required: true
         content:
@@ -222,32 +221,96 @@ paths:
               required:
                 - email_verify_token
             example:
-              email_verify_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwiVG9rZW5UeXBlIjoiZW1haWxfdmVyaWZ5X3Rva2VuIiwidmVyaWZ5IjoidW52ZXJpZmllZCIsImlhdCI6MTc2MzUyODQwNywiZXhwIjoxNzY0MTMzMjA3fQ.nAO5y3Mi5gpnJbx9ELjV9Zyp_PmNZ64G5ZPgY2hY3NQ"
+              email_verify_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       responses:
         200:
-          description: Verify email success
+          description: Email verification successful
           content:
             application/json:
               example:
-                message: "Verify email success"
-                result:
-                  access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwidG9rZW5fdHlwZSI6ImFjY2Vzc190b2tlbiIsInZlcmlmeSI6InVudmVyaWZpZWQiLCJyb2xlX25hbWUiOiJFbXBsb3llZSIsInBlcm1pc3Npb25zIjpbInZpZXdfZGFzaGJvYXJkIiwidXBkYXRlX2Rpc2giLCJjcmVhdGVfaW1wb3J0X29yZGVyIiwidmlld19kaXNoZXMiLCJ2aWV3X2ltcG9ydF9vcmRlcl9saXN0IiwiY3JlYXRlX2Rpc2giLCJ2aWV3X2ltcG9ydF9vcmRlcl9kZXRhaWwiLCJkZWxldGVfZGlzaCJdLCJpYXQiOjE3NjM1MjkyMTcsImV4cCI6MTc2MzUzMDExN30.BjhQd7E845shZIdWVh2eOlU7dvEnqKKPxpADJsVkiyY"
-                  refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjkxZDRlZDcxYjRmNDljZGFkYzBkYzA2IiwidG9rZW5fdHlwZSI6InJlZnJlc2hfdG9rZW4iLCJ2ZXJpZnkiOiJ1bnZlcmlmaWVkIiwiaWF0IjoxNzYzNTI5MjE3LCJleHAiOjE3NzIxNjkyMTd9.fuuuNlvtJNDaWui6cUEnHwn1bJqk532HK8JLf6PabnQ"
+                message: "Your account has been successfully verified. Please check your email to receive the password."
+                code: "VERIFY_SUCCESS"
+        401:
+          description: Unauthorized - Token invalid or expired
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid token
+                  code:
+                    type: string
+                    example: INVALID_TOKEN
+              examples:
+                InvalidToken:
+                  summary: Invalid token
+                  value:
+                    message: Invalid token
+                    code: INVALID_TOKEN
+                TokenExpired:
+                  summary: Token expired
+                  value:
+                    message: Token expired, please resend
+                    code: EMAIL_TOKEN_EXPIRED
   /accounts/resend-verify-email:
     post:
-      operationId: accountsResendVerifyEmail
       tags:
         - account
-      summary: Resend email verification
-      security:
-        - BearerAuth: []
+      summary: Gửi lại email xác thực (Resend Verify Email)
+      description: API này sử dụng để gửi lại email xác thực dựa trên token được cung cấp.
+      operationId: resendVerifyEmail
+      requestBody:
+        description: Thông tin cần thiết để gửi lại email xác thực
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_verify_token:
+                  type: string
+                  description: Chuỗi token xác thực email (JWT). (Duy nhât ở đây khong check hạn của token)
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              required:
+                - email_verify_token
       responses:
-        200:
-          description: Verification email resent successfully
+        '200':
+          description: OK
           content:
             application/json:
-              example:
-                message: "A new verification email has been sent. Please check your inbox."
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  code:
+                    type: string
+              examples:
+                Success: # Trường hợp mới (Hình này)
+                  summary: Gửi lại email thành công
+                  value:
+                    message: "A new verification email has been sent. Please check your inbox."
+                    code: "RESEND_VERIFY_EMAIL_SUCCESS"
+                AlreadyVerified: # Trường hợp cũ (Hình trước)
+                  summary: Email đã được xác thực trước đó
+                  value:
+                    message: "This email has already been verified."
+                    code: "EMAIL_ALREADY_VERIFIED"
+        '401':
+          description: Lỗi xác thực (Token không hợp lệ hoặc đã hết hạn).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid token"
+                  code:
+                    type: string
+                    example: "INVALID_TOKEN"
   /accounts/forgot-password:
     post:
       operationId: accountsForgotPassword
@@ -266,7 +329,7 @@ paths:
               required:
                 - email
             example:
-              email: "nhanvien2+2@gmail.com"
+              email: svhn1@luxsev.com
       responses:
         200:
           description: Password reset instructions sent
@@ -309,11 +372,27 @@ paths:
               example:
                 message: "Forgot password token is required."
         401:
-          description: Invalid token
+          description: Unauthorized (Lỗi xác thực token)
           content:
             application/json:
-              example:
-                message: "Invalid token"
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  code:
+                    type: string
+              examples:
+                TokenExpired: # Trường hợp mới (Hình này)
+                  summary: Token đã hết hạn
+                  value:
+                    message: "Reset password token has expired. Please request a new one."
+                    code: "FORGOT_PASSWORD_TOKEN_EXPIRED"
+                InvalidSignature: # Trường hợp cũ (Hình trước)
+                  summary: Token không hợp lệ / Chữ ký sai
+                  value:
+                    message: "Invalid signature"
+                    code: "FORGOT_PASSWORD_TOKEN_INVALID"
   /accounts/reset-password:
     post:
       operationId: accountsResetPassword
@@ -355,11 +434,27 @@ paths:
               example:
                 message: "Forgot password token is required."
         401:
-          description: Invalid token
+          description: Unauthorized (Lỗi xác thực token)
           content:
             application/json:
-              example:
-                message: "Invalid token"
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  code:
+                    type: string
+              examples:
+                TokenExpired: # Trường hợp mới (Hình này)
+                  summary: Token đã hết hạn
+                  value:
+                    message: "Reset password token has expired. Please request a new one."
+                    code: "FORGOT_PASSWORD_TOKEN_EXPIRED"
+                InvalidSignature: # Trường hợp cũ (Hình trước)
+                  summary: Token không hợp lệ / Chữ ký sai
+                  value:
+                    message: "Invalid signature"
+                    code: "FORGOT_PASSWORD_TOKEN_INVALID"
         422:
           description: Validation error
           content:
