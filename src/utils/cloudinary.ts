@@ -5,14 +5,14 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
-// 1. Cấu hình Cloudinary
+// Cấu hình Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-// 2. Cấu hình nơi lưu trữ (Storage)
+// Cấu hình nơi lưu trữ (Storage)
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
@@ -24,14 +24,13 @@ const storage = new CloudinaryStorage({
   }
 })
 
-// 3. Khởi tạo Multer Upload Middleware
+// Khởi tạo Multer Upload Middleware
 export const uploadCloud = multer({ storage })
 
-// 4. Hàm xóa ảnh (Dùng khi update hoặc xóa món ăn)
+// Hàm xóa ảnh (Dùng khi update hoặc xóa món ăn)
 export const deleteImage = async (publicId: string) => {
   try {
     const result = await cloudinary.uploader.destroy(publicId)
-    // console.log(result)
     return result
   } catch (error) {
     console.log("Delete image error:", error)

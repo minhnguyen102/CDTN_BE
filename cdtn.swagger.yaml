@@ -53,7 +53,7 @@ paths:
                   example: admin1@gmail.com
                 password:
                   type: string
-                  example: Benten123@!
+                  example: MinhOkela123#@
         required: true
       responses:
         '200':
@@ -1813,7 +1813,255 @@ paths:
                   importedByName: "Gao red"
                   supplierName: "Hieu Bui 234"
 
-
+  /categories:
+    get:
+      tags:
+        - Category Ingredient
+      summary: Get All Categories ingredient
+      description: Lấy danh sách danh mục nguyên liệu có hỗ trợ phân trang và tìm kiếm.
+      operationId: getAllCategories
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Từ khóa tìm kiếm (tên danh mục)
+          example: "a v"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive]
+          description: Lọc theo trạng thái (active/inactive)
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Trang hiện tại
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+          description: Số lượng bản ghi trên một trang, cho phép [5, 10, 15]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get all categories success"
+                  result:
+                    type: object
+                    properties:
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                              example: "672551d4b130bafac43d0559"
+                            name:
+                              type: string
+                              example: "Gia vị"
+                            description:
+                              type: string
+                              example: "Category gia vị."
+                            status:
+                              type: string
+                              example: "active"
+                      pagination:
+                        type: object
+                        properties:
+                          currentPage:
+                            type: integer
+                            example: 1
+                          limit:
+                            type: integer
+                            example: 10
+                          total:
+                            type: integer
+                            example: 1
+                          totalPage:
+                            type: integer
+                            example: 1
+    post:
+      tags:
+        - Category Ingredient
+      summary: Create Category
+      operationId: createCategory
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Gia vị 1"
+                description:
+                  type: string
+                  example: "Category gia vị."
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  example: "active"
+              required:
+                - name
+                - description
+                - status
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category created successfully."
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "6925543f81f594b4d5983acd"
+                      name:
+                        type: string
+                        example: "Gia vị 1"
+                      description:
+                        type: string
+                        example: "Category gia vị."
+                      status:
+                        type: string
+                        example: "active"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Validation error"
+                  errors:
+                    type: object # Hoặc array tùy middleware format lỗi của bạn
+              examples:
+                MissingFields:
+                  summary: Thiếu trường bắt buộc
+                  value:
+                    message: "Validation error"
+                    errors:
+                      name: "Name is required"
+                      status: "Status is required"
+                InvalidEnum:
+                  summary: Sai giá trị Status
+                  value:
+                    message: "Validation error"
+                    errors:
+                      status: "Status must be active or inactive"
+                InvalidLength:
+                  summary: Sai độ dài Name/Description
+                  value:
+                    message: "Validation error"
+                    errors:
+                      name: "Name length must be between 1 and 50"
+  /categories/{id}:
+    patch:
+      tags:
+        - Category Ingredient
+      summary: Update Category
+      operationId: updateCategory
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của danh mục cần cập nhật
+          example: "69254fee3b367e7f37bfff12"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Meat"
+                description:
+                  type: string
+                  example: "Category meat"
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  example: "inactive"
+              # Các trường đều là optional nên không có key 'required' ở đây
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category updated successfully."
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "69254fee3b367e7f37bfff12"
+                      name:
+                        type: string
+                        example: "Meat"
+                      description:
+                        type: string
+                        example: "Category meat"
+                      status:
+                        type: string
+                        example: "inactive"
+        '400':
+          description: Bad Request (Sai định dạng ID)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid MongoDB Id format" # Message từ USER_MESSAGES.INVALID_MONGODB_ID_FORMAT
+        '422':
+          description: Validation Error (Dữ liệu body sai)
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                InvalidBody:
+                  summary: Dữ liệu gửi lên không hợp lệ
+                  value:
+                    message: "Validation error"
+                    errors:
+                      name: "Name must be a string"
+                      status: "Status must be active or inactive"
 components:
   schemas:
     Table:

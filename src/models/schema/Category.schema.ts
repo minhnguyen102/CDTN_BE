@@ -6,6 +6,7 @@ interface CategoryType {
   name: string
   description: string
   status: CategoryTypeStatus
+  name_search: string
   createdAt?: Date
   updatedAt?: Date
 }
@@ -15,6 +16,7 @@ export default class Category {
   name: string
   description: string
   status: CategoryTypeStatus
+  name_search: string
   createdAt: Date
   updatedAt: Date
 
@@ -24,6 +26,7 @@ export default class Category {
     this.name = category.name
     this.description = category.description
     this.status = category.status
+    this.name_search = category.name_search
     this.createdAt = category.createdAt || date
     this.updatedAt = category.updatedAt || date
   }

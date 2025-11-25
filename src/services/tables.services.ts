@@ -13,7 +13,6 @@ class TableServices {
   async createTable({ capacity }: { capacity: number }) {
     const number = await databaseService.tables.countDocuments()
     const qrToken = randomQrToken()
-    // console.log("qrToken", qrToken)
     const [tanleToInsert, qrCodeImageString] = await Promise.all([
       await databaseService.tables.insertOne(
         new Table({

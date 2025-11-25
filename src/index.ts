@@ -7,7 +7,6 @@ import YAML from "yaml"
 import fs from "fs"
 import path from "path"
 import swaggerUi from "swagger-ui-express"
-import { generatePassword } from "./utils/crypto"
 const app = express()
 const port = 3000
 
@@ -29,13 +28,6 @@ app.use(cors())
 routesAdmin(app)
 
 app.use(defaultErrorHandler)
-
-// // Connect database
-// databaseService.connect().catch(console.dir)
-
-// app.listen(port, () => {
-//   console.log(`Example app listening on port ${port}`)
-// })
 
 const startServer = async () => {
   try {

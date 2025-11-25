@@ -1,10 +1,9 @@
 import nodemailer from "nodemailer"
 import dotenv from "dotenv"
 
-// Load biến môi trường (nếu chưa load ở file entry point như app.js)
 dotenv.config()
 
-// 1. Cấu hình Transporter
+// Cấu hình Transporter
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -15,7 +14,7 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-// 2. Hàm gửi email (dùng export const để xuất khẩu hàm)
+// Hàm gửi email
 export const sendVerificationEmail = async ({
   toEmail,
   subject,
@@ -25,9 +24,6 @@ export const sendVerificationEmail = async ({
   subject: string
   html: string
 }) => {
-  // Giả sử frontend chạy port 3000
-  // const verificationLink = `${process.env.BASE_URL}/verify-email?token=${email_verify_token}`
-
   const mailOptions = {
     from: '"Nhà hàng QR" <no-reply@restaurant.com>',
     to: toEmail,

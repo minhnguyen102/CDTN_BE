@@ -33,3 +33,11 @@ export const paginationQueryParser = (req: Request, options: PaginationOptions =
     limit
   }
 }
+
+export const removeAccents = (str: string) => {
+  return str
+    .normalize("NFD") // Bước 1: Tách dấu ra khỏi chữ cái
+    .replace(/[\u0300-\u036f]/g, "") // Bước 2: Xóa các dấu đã tách
+    .replace(/đ/g, "d") // Bước 3: Xử lý chữ đ thường
+    .replace(/Đ/g, "D") // Bước 4: Xử lý chữ Đ hoa
+}

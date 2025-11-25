@@ -142,8 +142,6 @@ class AccountsServices {
       ])
       .toArray()
 
-    console.log("roleData: ", roleData)
-
     if (roleData.length === 0) {
       throw new ErrorWithStatus({
         message: USER_MESSAGES.ROLE_NOT_FOUND_OR_INACTIVE,
@@ -157,7 +155,6 @@ class AccountsServices {
 
   async login({ account }: { account: Account }) {
     const { _id, verify, role_id } = account
-    console.log("role_id: ", role_id)
     const user_id = (_id as ObjectId).toString()
     const { role_name, permissions } = await this.getRoleData({ role_id })
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
@@ -186,8 +183,6 @@ class AccountsServices {
       user_id: user_id.toString(),
       verify: AccountVerifyStatus.UNVERIFIED
     })
-    // console.log("Giả lập gửi email_verify_token cho account: ", email_verify_token)
-    // Giả sử frontend chạy port 3000
     const verificationLink = `${process.env.BASE_URL}/verify-email?token=${email_verify_token}`
     const html = `
       <div style="font-family: Arial, sans-serif; padding: 20px;">
@@ -290,7 +285,6 @@ class AccountsServices {
 
   async resendEmailVerify({ user_id, verify, email }: { user_id: string; verify: AccountVerifyStatus; email: string }) {
     const new_email_verify_token = await this.signEmailVerifyToken({ user_id, verify })
-    // console.log("Giả lập gửi new_email_verify_token cho account: ", new_email_verify_token)
 
     const verificationLink = `${process.env.BASE_URL}/resend-verify-email?token=${new_email_verify_token}`
     const html = `
@@ -321,7 +315,6 @@ class AccountsServices {
   async forgotPassword({ user_id, verify, email }: { user_id: string; verify: AccountVerifyStatus; email: string }) {
     // sign forgot_password_token và lưu vào db
     const forgot_password_token = await this.signForgotPasswordToken({ user_id, verify })
-    // console.log("Giả định gửi link forgor_password_token cho người dùng: ", forgot_password_token)
     const resetLink = `${process.env.BASE_URL}/forgot-password-token?token=${forgot_password_token}`
     const html = `
       <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
