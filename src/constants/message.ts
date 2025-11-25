@@ -223,6 +223,7 @@ const USER_MESSAGES = {
   CATEGORY_UPDATED_SUCCESSFULLY: "Dish category updated successfully",
   CATEGORY_DELETED_SUCCESSFULLY: "Dish category deleted successfully",
 
+  INGREDIENT_CATEGORY_NOT_FOUND: "Ingredient category not found",
   CATEGORY_NOT_FOUND: "Dish category not found",
   CATEGORY_HAS_DISHES: "Cannot delete this category because it contains dishes",
   PHONE_REQUIRED: "Phone number is required",

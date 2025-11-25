@@ -4,10 +4,11 @@ import { DishCategoryStatus } from "../../constants/enums"
 interface DishCategoryType {
   _id?: ObjectId
   name: string
-  display_order: number // 1, 2, 3... để sắp xếp thứ tự hiển thị trên Menu
+  display_order: number
   status: DishCategoryStatus
   image: string
   image_id: string
+  key_search: string
   description?: string
   deleted?: boolean
   deletedAt?: Date
@@ -18,8 +19,9 @@ interface DishCategoryType {
 export default class DishCategory {
   _id?: ObjectId
   name: string
-  display_order: number // 1, 2, 3... để sắp xếp thứ tự hiển thị trên Menu
+  display_order: number
   status: DishCategoryStatus
+  key_search: string
   image: string
   image_id: string
   description: string
@@ -34,6 +36,7 @@ export default class DishCategory {
     this.name = dishCategory.name
     this.display_order = dishCategory.display_order
     this.status = dishCategory.status
+    this.key_search = dishCategory.key_search
     this.image = dishCategory.image
     this.image_id = dishCategory.image_id
     this.description = dishCategory.description || ""

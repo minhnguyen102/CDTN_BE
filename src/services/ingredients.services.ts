@@ -2,19 +2,37 @@ import { createIngredientReqBody } from "../models/requests/Ingredient.request"
 import databaseService from "./database.servies"
 import Ingredient from "../models/schema/Ingredient.schema"
 import { ObjectId } from "mongodb"
+import { ErrorWithStatus } from "../models/Errors"
+import USER_MESSAGES from "../constants/message"
+import HTTP_STATUS from "../constants/httpStatus"
+import { removeAccents } from "../utils/helpers"
 
 class IngredientServices {
   async createIngredient({ payload }: { payload: createIngredientReqBody }) {
     const { categoryId, ...rest } = payload
     const mongoIdCategory = new ObjectId(categoryId)
-    const result = await databaseService.ingredients.insertOne(new Ingredient({ ...rest, categoryId: mongoIdCategory }))
+
+    const isValidCategory = await databaseService.categories.findOne({
+      _id: mongoIdCategory
+    })
+    if (!isValidCategory) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.INGREDIENT_CATEGORY_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    const name_search = removeAccents(payload.name)
+    const result = await databaseService.ingredients.insertOne(
+      new Ingredient({ ...rest, categoryId: mongoIdCategory, name_search })
+    )
     const { insertedId } = result
     const ingredient = await databaseService.ingredients.findOne(
       { _id: new ObjectId(insertedId) },
       {
         projection: {
           createdAt: 0,
-          updatedAt: 0
+          updatedAt: 0,
+          name_search: 0
         }
       }
     )
@@ -57,23 +75,11 @@ class IngredientServices {
 
     //Filter theo 'search' (Sử dụng Text Search)
     if (search) {
-      objectFind.$text = { $search: search }
+      objectFind.name_search = { $regex: search, $options: "i" }
     }
 
     // Xây dựng Aggregation Pipeline
-    const aggregationPipeline: any[] = [
-      // Giai đoạn 1: Lọc/Tìm kiếm
-      // Sử dụng $match với các điều kiện đã lọc ở trên
-      { $match: objectFind }
-    ]
-
-    // Xây dựng Sắp xếp
-    let sortStage: any = { $sort: { createdAt: -1 } } // Sắp xếp mặc định
-    if (search) {
-      // Nếu có tìm kiếm, sắp xếp theo độ liên quan
-      sortStage = { $sort: { score: { $meta: "textScore" } } }
-    }
-    aggregationPipeline.push(sortStage)
+    const aggregationPipeline: any[] = [{ $match: objectFind }]
 
     // Xây dựng Phân trang
     const skip = (page - 1) * limit
@@ -99,7 +105,6 @@ class IngredientServices {
       }
     })
 
-    // $project để định hình output cuối cùng
     const projectStage: any = {
       $project: {
         // Lấy tên category từ trường tạm
@@ -113,9 +118,6 @@ class IngredientServices {
       }
     }
 
-    if (search) {
-      projectStage.$project.score = { $meta: "textScore" }
-    }
     aggregationPipeline.push(projectStage)
 
     const [ingredients, totalFilteredDocuments] = await Promise.all([

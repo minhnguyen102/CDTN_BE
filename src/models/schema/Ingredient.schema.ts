@@ -6,6 +6,7 @@ interface IngredientType {
   categoryId: ObjectId
   unit: string
   minStock: number
+  name_search: string
   unitPrice?: number
   currentStock?: number
   createdAt?: Date
@@ -18,6 +19,7 @@ export default class Ingredient {
   categoryId: ObjectId
   unit: string
   unitPrice: number
+  name_search: string
   currentStock: number
   minStock: number
   createdAt: Date
@@ -29,6 +31,7 @@ export default class Ingredient {
     this.name = ingredient.name
     this.categoryId = ingredient.categoryId
     this.unit = ingredient.unit
+    this.name_search = ingredient.name_search
     this.unitPrice = ingredient.unitPrice || 0
     this.currentStock = ingredient.currentStock || 0
     this.minStock = ingredient.minStock

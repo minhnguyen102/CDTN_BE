@@ -3,7 +3,6 @@ import Table from "../models/schema/Table.schema"
 import { TableStatus } from "../constants/enums"
 import { genQRtable } from "../utils/qr"
 import { randomQrToken } from "../utils/crypto"
-// import { paginationHelper } from "../utils/helpers"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { ObjectId } from "mongodb"
@@ -24,7 +23,15 @@ class TableServices {
       ),
       await genQRtable({ qrToken })
     ])
-    const newTable = await databaseService.tables.findOne({ _id: tanleToInsert.insertedId })
+    const newTable = await databaseService.tables.findOne(
+      { _id: tanleToInsert.insertedId },
+      {
+        projection: {
+          createdAt: 0,
+          updatedAt: 0
+        }
+      }
+    )
     return {
       QRcode: qrCodeImageString,
       table: newTable

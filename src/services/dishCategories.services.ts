@@ -6,10 +6,12 @@ import { deleteImage } from "../utils/cloudinary"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import USER_MESSAGES from "../constants/message"
+import { removeAccents } from "../utils/helpers"
 
 class DishCategoryService {
   async create({ payload }: { payload: CreateDishCategoryReqBody & { image: string; image_id: string } }) {
-    const newCategory = await databaseService.dish_categories.insertOne(new DishCategory(payload))
+    const key_search = removeAccents(payload.name + " " + payload.description || "")
+    const newCategory = await databaseService.dish_categories.insertOne(new DishCategory({ ...payload, key_search }))
     const result = await databaseService.dish_categories.findOne(
       {
         _id: newCategory.insertedId
@@ -20,7 +22,8 @@ class DishCategoryService {
           updatedAt: 0,
           deleted: 0,
           deletedAt: 0,
-          image_id: 0
+          image_id: 0,
+          key_search: 0
         }
       }
     )
@@ -33,13 +36,12 @@ class DishCategoryService {
     }
 
     if (status) {
-      // active or inactive
       matchFilter.status = status
     }
 
     if (search) {
-      // search theo name
-      matchFilter.$text = { $search: search }
+      // search theo name || des
+      matchFilter.key_search = { $regex: search, $options: "i" }
     }
 
     const pipeline: any[] = [
@@ -58,7 +60,8 @@ class DishCategoryService {
           updatedAt: 0,
           deletedAt: 0,
           deleted: 0,
-          image_id: 0
+          image_id: 0,
+          key_search: 0
         }
       }
     ]
@@ -115,7 +118,8 @@ class DishCategoryService {
           updatedAt: 0,
           deletedAt: 0,
           deleted: 0,
-          image_id: 0
+          image_id: 0,
+          key_search: 0
         }
       }
     )
