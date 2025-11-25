@@ -28,7 +28,7 @@ tags:
     description: Các logic liên quan đến account
   - name: table
     description: Các logic liên quan đến table
-  - name: supplier
+  - name: Supplier
     description: Các logic liên quan đến supplier
   
     
@@ -995,149 +995,422 @@ paths:
         '404':
           description: Không tìm thấy bàn với ID được cung cấp
   
+  # Đã xong
   /suppliers:
     get:
       tags:
-        - supplier
-      summary: Lấy danh sách thông tin nhà cung cấp
-      description: Lấy danh sách thông tin nhà cung cấp
-      operationId: getAllSupplier
+        - Supplier
+      summary: Get All Suppliers
+      operationId: getAllSuppliers
       security:
         - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Tìm kiếm theo tên nhà cung cấp, email, người liên hệ hoặc số điện thoại.
+          example: "3510"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive]
+          description: Lọc theo trạng thái
+          example: "active"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Trang hiện tại
+          example: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+          description: Số lượng bản ghi trên một trang
+          example: 5
       responses:
         '200':
-          description: successful operation
+          description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: 
+                  message:
                     type: string
-                    example: "Get all supplier successfully."
-                  tables: 
-                    type: array
-                    description: Danh sách các nhà cung cấp
-                    items:
-                      $ref: '#/components/schemas/Table'
+                    example: "Get all suppliers success"
+                  result:
+                    type: object
+                    properties:
+                      suppliers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                              example: "69255e74949ebf8ff555f500"
+                            name:
+                              type: string
+                              example: "Cup cấp gạo"
+                            taxCode:
+                              type: string
+                              example: "TX12345633"
+                            status:
+                              type: string
+                              example: "active"
+                            contactPerson:
+                              type: string
+                              example: "Hồng Hạnh"
+                            phone:
+                              type: string
+                              example: "+84327593510"
+                            email:
+                              type: string
+                              example: "contact@honghanhtextile.com"
+                            address:
+                              type: string
+                              example: "123 Nguyen Trai Street, District 5, Ho Chi Minh City"
+                      pagination:
+                        type: object
+                        properties:
+                          currentPage:
+                            type: integer
+                            example: 1
+                          limit:
+                            type: integer
+                            example: 5
+                          total:
+                            type: integer
+                            example: 1
+                          totalPage:
+                            type: integer
+                            example: 1
         '401':
-          description: Access token is required
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
     post:
       tags:
-        - supplier
-      summary: Tạo mới nhà cung cấp nguyên liệu
-      description: Tạo mới nhà cung cấp nguyên liệu
+        - Supplier
+      summary: Create Supplier
       operationId: createSupplier
+      security:
+        - BearerAuth: []
       requestBody:
-        description: Thông tin tạo mới nhà cung cấp
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSupplierBody'
-        required: true
-      security:
-        - BearerAuth: [] 
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  example: "Cung cấp gạo"
+                taxCode:
+                  type: string
+                  minLength: 5
+                  maxLength: 20
+                  description: Chỉ chứa chữ và số
+                  example: "TX12345633"
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  example: "active"
+                contactPerson:
+                  type: string
+                  example: "Hồng Hạnh"
+                phone:
+                  type: string
+                  example: "+84327593510"
+                email:
+                  type: string
+                  format: email
+                  example: "contact@honghanhtextile.com"
+                address:
+                  type: string
+                  example: "123 Nguyen Trai Street, District 5, Ho Chi Minh City"
+              required:
+                - name
+                - taxCode
+                - status
+                - contactPerson
+                - phone
+                - email
+                - address
       responses:
         '200':
-          description: successful operation
+          description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: 
+                  message:
                     type: string
                     example: "Supplier created successfully."
-                  result: 
+                  result:
                     type: object
-                    description: Nhà cung cấp vừa được tạo mới
-                    $ref: '#/components/schemas/Supplier'
+                    properties:
+                      _id:
+                        type: string
+                        example: "69255e74949ebf8ff555f500"
+                      name:
+                        type: string
+                        example: "Cup cấp gạo"
+                      taxCode:
+                        type: string
+                        example: "TX12345633"
+                      status:
+                        type: string
+                        example: "active"
+                      contactPerson:
+                        type: string
+                        example: "Hồng Hạnh"
+                      phone:
+                        type: string
+                        example: "+84327593510"
+                      email:
+                        type: string
+                        example: "contact@honghanhtextile.com"
+                      address:
+                        type: string
+                        example: "123 Nguyen Trai Street, District 5, Ho Chi Minh City"
         '401':
-          description: Access token is required
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
         '422':
-          description: Validation error
+          description: Unprocessable Entity (Validation Error)
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                TaxCodeError:
+                  summary: Tax Code sai định dạng/độ dài
+                  value:
+                    message: "Validation error"
+                    errors:
+                      taxCode: "Tax code length must be between 5 and 20 characters"
+                EmailError:
+                  summary: Email không hợp lệ
+                  value:
+                    message: "Validation error"
+                    errors:
+                      email: "Email is invalid"
   /suppliers/{supplier_id}:
     patch:
       tags:
-        - supplier
-      summary: Cập nhật thông tin nhà cung cấp
-      description: Cập nhật thông tin nhà cung cấp
+        - Supplier
+      summary: Update Supplier
       operationId: updateSupplier
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: supplier_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của nhà cung cấp cần cập nhật
+          example: "69255e74949ebf8ff555f500"
       requestBody:
-        description: Thông tin cập nhật nhà cung cấp
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateSupplierBody'
-        required: true
-      parameters:
-        - name: supplier_id
-          in: path
-          description: Id của nhà cung cấp (supplier)
-          required: true
-          schema:
-            type: string
-            example: 6912ac85d509c162b40b2e77
-      security:
-        - BearerAuth: [] 
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  example: "Cup cấp gạo"
+                taxCode:
+                  type: string
+                  minLength: 5
+                  maxLength: 20
+                  example: "TX12345679"
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  example: "active"
+                contactPerson:
+                  type: string
+                  example: "Hồng Hạnh"
+                phone:
+                  type: string
+                  example: "+84981239876"
+                email:
+                  type: string
+                  format: email
+                  example: "contact@honghanhtextile.com"
+                address:
+                  type: string
+                  example: "123 Nguyen Trai Street, District 5, Ho Chi Minh City"
+              # Không có key 'required' vì các trường đều là optional
       responses:
         '200':
-          description: successful operation
+          description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: 
+                  message:
                     type: string
-                    example: "Supplier created successfully."
-                  result: 
+                    example: "Supplier updated successfully."
+                  result:
                     type: object
-                    description: Nhà cung cấp vừa được tạo mới
-                    $ref: '#/components/schemas/Supplier'
+                    properties:
+                      _id:
+                        type: string
+                        example: "69255e74949ebf8ff555f500"
+                      name:
+                        type: string
+                        example: "Cup cấp gạo"
+                      taxCode:
+                        type: string
+                        example: "TX12345633"
+                      status:
+                        type: string
+                        example: "active"
+                      contactPerson:
+                        type: string
+                        example: "Hồng Hạnh"
+                      phone:
+                        type: string
+                        example: "+84327593510"
+                      email:
+                        type: string
+                        example: "contact@honghanhtextile.com"
+                      address:
+                        type: string
+                        example: "123 Nguyen Trai Street, District 5, Ho Chi Minh City"
         '400':
-          description: The provided ID is not a valid MongoDB ObjectId format.
+          description: Bad Request (ID không hợp lệ)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid MongoDB Id format"
         '401':
-          description: Access token is required
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
         '404':
-          description: Supplier not found
+          description: Not Found (Không tìm thấy nhà cung cấp)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Supplier not found"
         '422':
-          description: Validation error
+          description: Unprocessable Entity (Validation Error - Dữ liệu gửi lên không đúng quy định)
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                InvalidFormat:
+                  summary: Sai định dạng (Email/Phone)
+                  value:
+                    message: "Validation error"
+                    errors:
+                      email: "Email is invalid"
+                      phone: "Phone number is invalid"
+                InvalidValue:
+                  summary: Sai giá trị (TaxCode/Status)
+                  value:
+                    message: "Validation error"
+                    errors:
+                      taxCode: "Tax code length must be between 5 and 20 characters"
+                      status: "Status must be active or inactive"
     delete:
       tags:
-        - supplier
-      summary: Xóa nhà cung cấp 
-      description: Xóa nhà cung cấp (Xóa mềm)
+        - Supplier
+      summary: Delete Supplier
       operationId: deleteSupplier
+      security:
+        - BearerAuth: []
       parameters:
         - name: supplier_id
           in: path
-          description: Id của nhà cung cấp (supplier)
           required: true
           schema:
             type: string
-            example: 6912ac85d509c162b40b2e77
-      security:
-        - BearerAuth: [] 
+          description: ID của nhà cung cấp cần xóa
+          example: "69255e74949ebf8ff555f500"
       responses:
         '200':
-          description: successful operation
+          description: OK (Xóa thành công)
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: 
+                  message:
                     type: string
-                    example: "Delete supplier successfully"
+                    example: "Delete supplier successfully."
         '400':
-          description: The provided ID is not a valid MongoDB ObjectId format.
+          description: Bad Request (ID sai định dạng)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The provided ID is not a valid MongoDB ObjectId format."
         '401':
-          description: Access token is required
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
         '404':
-          description: Supplier not found
-        '422':
-          description: Validation error
+          description: Not Found (Không tìm thấy nhà cung cấp)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Supplier not found"
+  
   /permissions:
     post:
       tags:
@@ -1813,6 +2086,7 @@ paths:
                   importedByName: "Gao red"
                   supplierName: "Hieu Bui 234"
 
+  # Đã xong
   /categories:
     get:
       tags:
@@ -2062,6 +2336,7 @@ paths:
                     errors:
                       name: "Name must be a string"
                       status: "Status must be active or inactive"
+
 components:
   schemas:
     Table:

@@ -6,6 +6,7 @@ import { ErrorWithStatus } from "../models/Errors"
 import USER_MESSAGES from "../constants/message"
 import HTTP_STATUS from "../constants/httpStatus"
 import { SupplierStatus } from "../constants/enums"
+import { removeAccents } from "../utils/helpers"
 
 class SupplierServices {
   async getAllSuppliers({
@@ -35,7 +36,7 @@ class SupplierServices {
       }
     }
     if (search) {
-      objectFind.$text = { $search: search }
+      objectFind.key_search = { $regex: search, $options: "i" }
     }
 
     const skip = (page - 1) * limit
@@ -47,7 +48,8 @@ class SupplierServices {
             createdAt: 0,
             updatedAt: 0,
             isDeleted: 0,
-            deletedAt: 0
+            deletedAt: 0,
+            key_search: 0
           }
         })
         .limit(limit)
@@ -63,14 +65,16 @@ class SupplierServices {
       pagination: {
         currentPage: page,
         limit: limit,
-        total: totalFilteredDocuments, // Tổng số item (đã lọc)
-        totalPage: totalPage // Tổng số trang (đã lọc)
+        total: totalFilteredDocuments,
+        totalPage: totalPage
       }
     }
   }
 
   async createSupplier({ payload }: { payload: createSupplierReqBody }) {
-    const supplier = await databaseService.suppliers.insertOne(new Supplier(payload))
+    const { name, contactPerson, phone, email } = payload
+    const key_search = removeAccents(name + " " + contactPerson + " " + phone + " " + email)
+    const supplier = await databaseService.suppliers.insertOne(new Supplier({ ...payload, key_search }))
     const { insertedId } = supplier
     const result = await databaseService.suppliers.findOne(
       {
@@ -81,7 +85,8 @@ class SupplierServices {
           updatedAt: 0,
           createdAt: 0,
           isDeleted: 0,
-          deletedAt: 0
+          deletedAt: 0,
+          key_search: 0
         }
       }
     )
@@ -108,7 +113,8 @@ class SupplierServices {
           updatedAt: 0,
           createdAt: 0,
           isDeleted: 0,
-          deletedAt: 0
+          deletedAt: 0,
+          key_search: 0
         }
       }
     )

@@ -4,12 +4,13 @@ import { SupplierStatus } from "../../constants/enums"
 interface SupplierType {
   _id?: ObjectId
   name: string
-  taxCode: string // mã số thuế
-  status: SupplierStatus // (Rất quan trọng) "Active" hoặc "Inactive"
-  contactPerson: string // Hieu Bui
+  taxCode: string
+  status: SupplierStatus
+  contactPerson: string
   phone: string
   email: string
   address: string
+  key_search: string
   isDeleted?: boolean
   deletedAt?: Date | null
   createdAt?: Date
@@ -21,10 +22,11 @@ export default class Supplier {
   name: string
   taxCode: string
   status: SupplierStatus
-  contactPerson: string // Hieu Bui
+  contactPerson: string
   phone: string
   email: string
   address: string
+  key_search: string
   isDeleted: boolean
   deletedAt: Date | null
   createdAt: Date
@@ -40,6 +42,7 @@ export default class Supplier {
     this.phone = supplier.phone
     this.email = supplier.email
     this.address = supplier.address
+    this.key_search = supplier.key_search
     this.isDeleted = supplier.isDeleted || false
     this.deletedAt = supplier.deletedAt || null
     this.createdAt = supplier.createdAt || date
