@@ -25,17 +25,33 @@ const corsOptions = {
 // app.use(cors(corsOptions))
 app.use(cors())
 
-// Connect database
-databaseService.connect().catch(console.dir)
-
 // Router admin
 routesAdmin(app)
 
 app.use(defaultErrorHandler)
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+// // Connect database
+// databaseService.connect().catch(console.dir)
+
+// app.listen(port, () => {
+//   console.log(`Example app listening on port ${port}`)
+// })
+
+const startServer = async () => {
+  try {
+    await databaseService.connect()
+    console.log("Database connected successfully")
+
+    app.listen(port, () => {
+      console.log(`Example app listening on port ${port}`)
+    })
+  } catch (error) {
+    console.error("❌ Failed to start server:", error)
+    process.exit(1) // Tắt app nếu lỗi DB
+  }
+}
+
+startServer()
 
 // Deploy
 // export default app
