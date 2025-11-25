@@ -137,7 +137,7 @@ class ImportOrderService {
     }
     if (supplierId) objectFind.supplierId = new ObjectId(supplierId)
     if (search) {
-      objectFind.$text = { $search: search }
+      objectFind.orderNumber = { $regex: search, $options: "i" }
     }
     if (dateFrom || dateTo) {
       objectFind.importDate = {}

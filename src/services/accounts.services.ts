@@ -14,6 +14,7 @@ import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { sendVerificationEmail } from "../utils/mailer"
 import { deleteImage } from "../utils/cloudinary"
+import { removeAccents } from "../utils/helpers"
 
 class AccountsServices {
   private signAccessToken({
@@ -196,30 +197,17 @@ class AccountsServices {
     await sendVerificationEmail({ toEmail: payload.email, subject: "Xác thực tài khoản", html })
     const { role_id, ...restPayload } = payload
     const role_id_object = new ObjectId(role_id)
+    const key_search = removeAccents(payload.name + " " + payload.email)
     await databaseService.accounts.insertOne(
       new Account({
         _id: user_id,
         ...restPayload,
         role_id: role_id_object,
         email_verify_token,
-        // password: hashPassword(payload.password),
-        date_of_birth: new Date(payload.date_of_birth)
+        date_of_birth: new Date(payload.date_of_birth),
+        key_search
       })
     )
-    // const { role_name, permissions } = await this.getRoleData({ role_id: role_id_object })
-    // const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
-    //   user_id: user_id.toString(),
-    //   verify: AccountVerifyStatus.UNVERIFIED,
-    //   role_name,
-    //   permissions
-    // })
-    // await databaseService.refresh_tokens.insertOne(
-    //   new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
-    // )
-    // return {
-    //   access_token,
-    //   refresh_token
-    // }
     return true
   }
 
@@ -403,7 +391,8 @@ class AccountsServices {
             role_id: 0,
             createdAt: 0,
             updatedAt: 0,
-            role: 0
+            role: 0,
+            key_search: 0
           }
         }
       ])
@@ -433,47 +422,6 @@ class AccountsServices {
         returnDocument: "after"
       }
     )
-    // const account = await databaseService.accounts
-    //   .aggregate([
-    //     {
-    //       $match: { _id: new ObjectId(user_id) }
-    //     },
-    //     {
-    //       $lookup: {
-    //         from: "roles",
-    //         localField: "role_id",
-    //         foreignField: "_id",
-    //         as: "role"
-    //       }
-    //     },
-    //     {
-    //       $unwind: {
-    //         path: "$role",
-    //         preserveNullAndEmptyArrays: true
-    //       }
-    //     },
-    //     {
-    //       $addFields: {
-    //         role_name: "$role.name"
-    //       }
-    //     },
-    //     {
-    //       $project: {
-    //         // password: 0,
-    //         // email_verify_token: 0,
-    //         // forgot_password_token: 0,
-    //         // verify: 0,
-    //         // role_id: 0,
-    //         // role: 0, // Ẩn object role gốc
-    //         // createdAt: 0,
-    //         // updatedAt: 0
-    //         date_of_birth: 1,
-    //         name: 1,
-    //         phone: 1
-    //       }
-    //     }
-    //   ])
-    //   .toArray()
 
     return account
   }
@@ -529,15 +477,14 @@ class AccountsServices {
     status?: string
   }) {
     const objectFind: any = {}
-    //Filter theo RoleId
     if (roleId) {
       objectFind.role_id = new ObjectId(roleId)
     }
 
     //Filter theo Search (Tìm theo Tên, Email)
     if (search) {
-      // objectFind.$text = { $search: search }
-      objectFind.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }]
+      // objectFind.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }]
+      objectFind.key_search = { $regex: search, $options: "i" }
     }
 
     if (status) {
@@ -545,13 +492,8 @@ class AccountsServices {
     }
 
     const pipeline: any[] = [
-      //Lọc dữ liệu
       { $match: objectFind },
-
-      //Sắp xếp (Mới nhất lên đầu)
       { $sort: { createdAt: -1 } },
-
-      //Phân trang
       { $skip: (page - 1) * limit },
       { $limit: limit },
 
@@ -589,7 +531,8 @@ class AccountsServices {
           role_id: 0,
           createdAt: 0,
           updatedAt: 0,
-          roleDetails: 0
+          roleDetails: 0,
+          key_search: 0
         }
       }
     ]

@@ -10,6 +10,7 @@ interface AccountType {
   status?: AccountStatus
   date_of_birth: Date
   role_id: ObjectId
+  key_search: string // search theo name and mail
   avatar?: string
   avatar_id?: string
   createdAt?: Date
@@ -28,6 +29,7 @@ export default class Account {
   status: AccountStatus
   date_of_birth: Date
   role_id: ObjectId
+  key_search: string // search theo name and mail
   avatar: string // optional
   avatar_id: string
   createdAt: Date
@@ -46,6 +48,7 @@ export default class Account {
     this.status = account.status || AccountStatus.INACTIVE
     this.date_of_birth = account.date_of_birth
     this.role_id = account.role_id
+    this.key_search = account.key_search
     this.avatar = account.avatar || ""
     this.avatar_id = account.avatar_id || ""
     this.createdAt = account.createdAt || date

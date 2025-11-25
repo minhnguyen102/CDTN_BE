@@ -172,18 +172,15 @@ export const changePasswordController = async (
 }
 
 export const getAccountsController = async (req: Request, res: Response) => {
-  // 1. Lấy page và limit từ helper
   const { page, limit } = paginationQueryParser(req, {
     defaultLimit: 10,
     allowLimits: [5, 10, 15, 20]
   })
 
-  // 2. Lấy các tham số filter/search
   const search = (req.query.search as string) || undefined
   const roleId = (req.query.roleId as string) || undefined
-  const status = (req.query.status as string) || undefined // 'Active', 'Inactive'
+  const status = (req.query.status as string) || undefined
 
-  // 3. Gọi Service
   const result = await accountsServices.getList({
     page,
     limit,
@@ -192,7 +189,6 @@ export const getAccountsController = async (req: Request, res: Response) => {
     status
   })
 
-  // 5. Trả về response
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.ACCOUNTS_FETCHED_SUCCESSFULLY,
     result
