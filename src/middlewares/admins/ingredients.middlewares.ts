@@ -4,6 +4,7 @@ import { validate } from "../../utils/validation" // (Giả định)
 import USER_MESSAGES from "../../constants/message" // (Giả định)
 import HTTP_STATUS from "../../constants/httpStatus" // (Giả định)
 import { ErrorWithStatus } from "../../models/Errors" // (Giả định)
+import { ObjectId } from "mongodb"
 
 const nameValidation: ParamSchema = {
   notEmpty: {
@@ -40,6 +41,24 @@ const unitValidation: ParamSchema = {
     errorMessage: USER_MESSAGES.UNIT_MUST_BE_STRING
   },
   trim: true
+}
+
+const supplierIdsValidation: ParamSchema = {
+  optional: true,
+  isArray: {
+    errorMessage: "Supplier IDs must be an array"
+  },
+  custom: {
+    options: (value: string[]) => {
+      if (value.length === 0) return true
+
+      const isAllObjectId = value.every((id) => ObjectId.isValid(id))
+      if (!isAllObjectId) {
+        throw new Error("Array contains invalid Supplier ID")
+      }
+      return true
+    }
+  }
 }
 
 const unitPriceValidation: ParamSchema = {
@@ -83,7 +102,8 @@ export const createIngredientValidation = validate(
       name: nameValidation,
       categoryId: categoryIdValidation,
       unit: unitValidation,
-      minStock: minStockValidation
+      minStock: minStockValidation,
+      supplierIds: supplierIdsValidation
     },
     ["body"]
   )

@@ -44,13 +44,15 @@ class IngredientServices {
     limit,
     search,
     categoryId,
-    status
+    status,
+    supplierId
   }: {
     page: number
     limit: number
     search?: string
     categoryId?: string
     status?: string
+    supplierId?: string
   }) {
     const objectFind: any = {}
 
@@ -66,6 +68,10 @@ class IngredientServices {
     } else if (status === "in_stock") {
       // Còn hàng (nhiều): currentStock > minStock
       objectFind.$expr = { $gt: ["$currentStock", "$minStock"] }
+    }
+
+    if (supplierId) {
+      objectFind.supplierIds = { $in: [new ObjectId(supplierId)] }
     }
 
     //Filter theo 'categoryId'
@@ -105,11 +111,26 @@ class IngredientServices {
       }
     })
 
+    aggregationPipeline.push({
+      $lookup: {
+        from: "suppliers", // Tên collection trong DB
+        localField: "supplierIds", // Trường mảng ID trong ingredients
+        foreignField: "_id",
+        as: "supplierDetails" // Tên biến tạm chứa thông tin chi tiết
+      }
+    })
+
     const projectStage: any = {
       $project: {
         // Lấy tên category từ trường tạm
         categoryName: "$categoryDetails.name",
-
+        supplierNames: {
+          $map: {
+            input: "$supplierDetails",
+            as: "supplier", // Biến tạm cho từng phần tử
+            in: { _id: "$$supplier._id", name: "$$supplier.name" }
+          }
+        },
         name: 1,
         unit: 1,
         unitPrice: 1,

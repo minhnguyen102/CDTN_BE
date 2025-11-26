@@ -5,6 +5,7 @@ export interface createIngredientReqBody {
   categoryId: string
   unit: string
   minStock: number
+  supplierIds?: string[]
 }
 
 export interface updateIngredientReqBody {

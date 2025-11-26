@@ -11,7 +11,7 @@ export const createIngredientController = async (
   req: Request<ParamsDictionary, any, createIngredientReqBody>,
   res: Response
 ) => {
-  const payload = pick(req.body, ["name", "categoryId", "unit", "minStock"])
+  const payload = pick(req.body, ["name", "categoryId", "unit", "minStock", "supplierIds"])
   const result = await ingredientServices.createIngredient({ payload })
   res.json({
     message: USER_MESSAGES.INGREDIENT_CREATED_SUCCESSFULLY,
@@ -25,20 +25,23 @@ export const listIngredientsController = async (req: Request, res: Response) => 
     allowLimits: [10, 15, 20]
   })
 
-  // 2. Lấy các tham số filter và search
+  const supplierId = (req.query.supplierId as string) || undefined
+
+  // Lấy các tham số filter và search
   const search = (req.query.search as string) || undefined // search theo name
   const categoryId = (req.query.categoryId as string) || undefined
 
   // 'status' là một trường ảo (In Stock, Low Stock, Out of Stock)
   const status = (req.query.status as string) || undefined
 
-  // 3. Gọi service để lấy dữ liệu
+  // Gọi service để lấy dữ liệu
   const result = await ingredientServices.getList({
     page,
     limit,
     search,
     categoryId,
-    status
+    status,
+    supplierId
   })
 
   // 5. Trả về kết quả
