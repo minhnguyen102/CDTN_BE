@@ -83,7 +83,6 @@ export const createIngredientValidation = validate(
       name: nameValidation,
       categoryId: categoryIdValidation,
       unit: unitValidation,
-      unitPrice: unitPriceValidation,
       minStock: minStockValidation
     },
     ["body"]
