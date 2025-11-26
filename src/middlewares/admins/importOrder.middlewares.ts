@@ -119,3 +119,27 @@ export const importOrderIdValidator = validate(
     ["params"]
   )
 )
+
+export const changeImportOrderStatusValidator = validate(
+  checkSchema(
+    {
+      id: { ...mongoIdSchema, errorMessage: "" },
+      status: {
+        trim: true,
+        custom: {
+          options: (value: string) => {
+            // YÊU CẦU: Chỉ cho phép chuyển sang 'confirmed'
+            if (value !== ImportOrderStatus.CONFIRMED) {
+              throw new ErrorWithStatus({
+                message: "Only 'confirmed' status is accepted for this action",
+                status: HTTP_STATUS.BAD_REQUEST
+              })
+            }
+            return true
+          }
+        }
+      }
+    },
+    ["params"]
+  )
+)

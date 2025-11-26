@@ -7,6 +7,7 @@ import { CreateImportOrderReqBody } from "../../models/requests/ImportOrder.requ
 import importOderService from "../../services/importOrders.services"
 import { JwtPayload } from "jsonwebtoken"
 import { paginationQueryParser } from "../../utils/helpers"
+import { ImportOrderStatus } from "../../constants/enums"
 
 export const createImportOrderController = async (
   req: Request<ParamsDictionary, any, CreateImportOrderReqBody>,
@@ -59,5 +60,16 @@ export const getImportOrderDetailController = async (req: Request, res: Response
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.IMPORT_ORDER_DETAIL_FETCHED_SUCCESSFULLY,
     data: importOrder
+  })
+}
+
+export const changeImportOrderStatusController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const status = req.params.status as ImportOrderStatus
+  const result = await importOderService.changeStatus({ id, newStatus: status })
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.IMPORT_ORDER_CONFIRMED_SUCCESSFULLY,
+    data: result
   })
 }

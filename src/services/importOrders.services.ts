@@ -46,22 +46,34 @@ class ImportOrderService {
   async create({ payload, user_id }: { payload: CreateImportOrderReqBody; user_id: string }) {
     const { items, supplierId, importDate, taxRate = 0, notes, status } = payload
 
-    // 1. Lấy danh sách ID của các nguyên liệu trong payload
+    //check supplierID
+    const supplier = await databaseService.suppliers.findOne({
+      _id: new ObjectId(supplierId)
+    })
+    if (!supplier) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.SUPPLIER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    // Lấy danh sách ID của các nguyên liệu trong payload
     const ingredientIds = items.map((item) => new ObjectId(item.ingredientId))
 
-    // 2. Tìm thông tin nguyên liệu từ DB (để lấy tên & check tồn tại)
+    // Tìm thông tin nguyên liệu từ DB (để lấy tên & check tồn tại)
     const ingredients = await databaseService.ingredients
       .find(
         { _id: { $in: ingredientIds } },
         {
           projection: {
             createdAt: 0,
-            updatedAt: 0
+            updatedAt: 0,
+            name_search: 0
           }
         }
       )
       .toArray()
-
+    console.log("ingredients: ", ingredients)
     if (ingredients.length !== items.length) {
       throw new ErrorWithStatus({
         message: USER_MESSAGES.ITEM_INGREDIENT_ID_INVALID,
@@ -71,6 +83,7 @@ class ImportOrderService {
 
     // Tạo Map để truy xuất nhanh thông tin ingredient theo ID
     const ingredientMap = new Map(ingredients.map((ing) => [ing._id.toString(), ing]))
+    console.log("ingredientMap: ", ingredientMap)
 
     // Tính toán chi tiết cho từng Item (Total) và Subtotal
     let subtotal = 0
@@ -286,6 +299,53 @@ class ImportOrderService {
     }
 
     return importOrder
+  }
+
+  async changeStatus({ id, newStatus }: { id: string; newStatus: ImportOrderStatus }) {
+    const orderId = new ObjectId(id)
+
+    const order = await databaseService.import_orders.findOne({ _id: orderId })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.IMPORT_ORDER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    // Nếu đơn hàng ĐÃ Confirmed rồi -> Báo lỗi ngay (Không cho làm lại, không cho quay về Draft)
+    if (order.status === ImportOrderStatus.CONFIRMED) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.IMPORT_ORDER_ALREADY_CONFIRMED,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    // Nếu đơn hàng không phải Draft (ví dụ Cancelled) -> Cũng chặn
+    if (order.status !== ImportOrderStatus.DRAFT) {
+      throw new ErrorWithStatus({
+        message: "Only Draft orders can be confirmed",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    // 3. Thực hiện Update trạng thái trong DB
+    const updatedOrder = await databaseService.import_orders.findOneAndUpdate(
+      { _id: orderId },
+      {
+        $set: {
+          status: newStatus, // 'confirmed'
+          updatedAt: new Date()
+        }
+      },
+      { returnDocument: "after" }
+    )
+
+    if (newStatus === ImportOrderStatus.CONFIRMED) {
+      await this.updateInventory(order.items)
+    }
+
+    return updatedOrder
   }
 }
 

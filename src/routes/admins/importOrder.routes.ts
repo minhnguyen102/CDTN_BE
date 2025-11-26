@@ -1,8 +1,13 @@
 import { Router } from "express"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
-import { createImportOrderValidation, importOrderIdValidator } from "../../middlewares/admins/importOrder.middlewares"
 import {
+  changeImportOrderStatusValidator,
+  createImportOrderValidation,
+  importOrderIdValidator
+} from "../../middlewares/admins/importOrder.middlewares"
+import {
+  changeImportOrderStatusController,
   createImportOrderController,
   getImportOrderDetailController,
   getImportOrdersController
@@ -62,6 +67,21 @@ importOrderRoutes.get(
   checkPermission("view_import_order_detail"),
   importOrderIdValidator,
   wrapHandlerFunction(getImportOrderDetailController)
+)
+
+/**
+ * Description: Change import order status (Draft -> Confirmed)
+ * PATH: admin/import-orders/:id/:status
+ * Method: PATCH
+ * Params: { id: string, status: string }
+ */
+importOrderRoutes.patch(
+  "/:id/:status",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("update_import_order"),
+  changeImportOrderStatusValidator,
+  wrapHandlerFunction(changeImportOrderStatusController)
 )
 
 export default importOrderRoutes
