@@ -15,4 +15,5 @@ export interface updateIngredientReqBody {
   unitPrice?: number
   currentStock?: number
   minStock?: number
+  supplierIds?: ObjectId[]
 }

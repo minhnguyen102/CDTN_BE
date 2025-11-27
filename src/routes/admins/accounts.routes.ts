@@ -91,11 +91,7 @@ accountRoutes.post(
  * PATH: admin/accounts/forgot-password
  * Body: { email: string}
  */
-accountRoutes.post(
-  "/forgot-password",
-  forgotPasswordRequestValidation, // kiểm tra email gửi lên có hợp lệ và trong hệ thống không
-  wrapHandlerFunction(forgotPasswordController)
-)
+accountRoutes.post("/forgot-password", forgotPasswordRequestValidation, wrapHandlerFunction(forgotPasswordController))
 
 /**
  * Description: verify forgot-password-token
@@ -104,7 +100,7 @@ accountRoutes.post(
  */
 accountRoutes.post(
   "/verify-forgot-password",
-  forgotPasswordTokenValidation, // kiểm tra forgot_password_token có hợp lệ và còn hạn không
+  forgotPasswordTokenValidation,
   wrapHandlerFunction(verifyForgotPasswordTokenController)
 )
 
@@ -115,8 +111,8 @@ accountRoutes.post(
  */
 accountRoutes.post(
   "/reset-password",
-  resetPasswordValidation, // validate (password and confirm_password)
-  forgotPasswordTokenValidation, // kiểm tra forgot_password_token có hợp lệ và còn hạn không
+  resetPasswordValidation,
+  forgotPasswordTokenValidation,
   wrapHandlerFunction(resetPasswordTokenController)
 )
 
@@ -149,7 +145,7 @@ accountRoutes.patch(
 accountRoutes.patch(
   "/change-password",
   accessTokenValidation,
-  verifiedUserValidation, // chỉ email verify mới được change
+  verifiedUserValidation,
   changePasswordValidation,
   wrapHandlerFunction(changePasswordController)
 )
@@ -178,10 +174,10 @@ accountRoutes.get(
  */
 accountRoutes.patch(
   "/me/avatar",
-  accessTokenValidation, // 1. Phải đăng nhập mới được sửa
+  accessTokenValidation,
   verifiedUserValidation,
-  uploadCloud.single("image"), // 2. Middleware upload ảnh lên Cloudinary
-  wrapHandlerFunction(updateAvatarController) // 3. Controller lưu link vào DB
+  uploadCloud.single("image"),
+  wrapHandlerFunction(updateAvatarController)
 )
 
 /**
@@ -193,7 +189,7 @@ accountRoutes.patch(
  */
 accountRoutes.patch(
   "/:id",
-  accessTokenValidation, // 1. Phải đăng nhập mới được sửa
+  accessTokenValidation,
   verifiedUserValidation,
   checkPermission("update_account"),
   updateAccountValidation,

@@ -401,8 +401,21 @@ class AccountsServices {
     return account[0]
   }
 
-  async updateMe({ user_id, payload }: { user_id: string; payload: updateMeReqBody }) {
+  async updateMe({ user_id, payload }: { user_id: string; payload: updateMeReqBody & { key_search?: string } }) {
+    const _account = await databaseService.accounts.findOne({
+      _id: new ObjectId(user_id)
+    })
+    const { email } = _account as Account
+
+    // Xử lí date_of_birth
     const _payload = payload.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload
+
+    // Xử lí khi thay đổi name => phải thay đổi key_search
+    const { name } = payload
+    if (name) {
+      _payload.key_search = removeAccents(name + " " + email)
+    }
+    console.log(_payload)
     const account = await databaseService.accounts.findOneAndUpdate(
       { _id: new ObjectId(user_id) },
       {

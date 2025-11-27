@@ -138,7 +138,8 @@ export const updateIngredientValidation = validate(
         optional: true,
         ...minStockValidation,
         notEmpty: false
-      }
+      },
+      supplierIds: supplierIdsValidation
     },
     ["params", "body"]
   )

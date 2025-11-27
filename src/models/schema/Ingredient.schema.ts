@@ -20,8 +20,8 @@ export default class Ingredient {
   categoryId: ObjectId
   unit: string
   unitPrice: number
-  name_search: string
   supplierIds: ObjectId[]
+  name_search: string
   currentStock: number
   minStock: number
   createdAt: Date

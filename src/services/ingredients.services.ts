@@ -1,4 +1,4 @@
-import { createIngredientReqBody } from "../models/requests/Ingredient.request"
+import { createIngredientReqBody, updateIngredientReqBody } from "../models/requests/Ingredient.request"
 import databaseService from "./database.servies"
 import Ingredient from "../models/schema/Ingredient.schema"
 import { ObjectId } from "mongodb"
@@ -20,6 +20,20 @@ class IngredientServices {
         message: USER_MESSAGES.INGREDIENT_CATEGORY_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
       })
+    }
+    if (payload.supplierIds) {
+      const supplierObjectIds = payload.supplierIds.map((sid) => new ObjectId(sid))
+      const foundSuppliers = await databaseService.suppliers
+        .find({
+          _id: { $in: supplierObjectIds }
+        })
+        .toArray()
+      if (foundSuppliers.length !== supplierObjectIds.length) {
+        throw new ErrorWithStatus({
+          message: "Error supplier ID",
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
     }
     const name_search = removeAccents(payload.name)
     const result = await databaseService.ingredients.insertOne(
@@ -155,6 +169,70 @@ class IngredientServices {
         totalPages: totalPages
       }
     }
+  }
+
+  async update({ id, payload }: { id: string; payload: updateIngredientReqBody & { name_search?: string } }) {
+    const ingredient = await databaseService.ingredients.findOne({
+      _id: new ObjectId(id)
+    })
+
+    if (!ingredient) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.INGREDIENT_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    if (payload.name) {
+      payload.name_search = removeAccents(payload.name)
+    }
+
+    if (payload.categoryId) {
+      const isExistsCategory = await databaseService.categories.findOne({
+        _id: new ObjectId(payload.categoryId)
+      })
+      if (!isExistsCategory) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGES.INGREDIENT_CATEGORY_NOT_FOUND,
+          status: HTTP_STATUS.NOT_FOUND
+        })
+      }
+      payload.categoryId = new ObjectId(payload.categoryId)
+    }
+
+    if (payload.supplierIds) {
+      const supplierObjectIds = payload.supplierIds.map((sid) => new ObjectId(sid))
+      const foundSuppliers = await databaseService.suppliers
+        .find({
+          _id: { $in: supplierObjectIds }
+        })
+        .toArray()
+      if (foundSuppliers.length !== supplierObjectIds.length) {
+        throw new ErrorWithStatus({
+          message: "Error supplier ID",
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+      payload.supplierIds = supplierObjectIds
+    }
+
+    const result = await databaseService.ingredients.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...payload
+        }
+      },
+      {
+        returnDocument: "after",
+        projection: {
+          createdAt: 0,
+          updatedAt: 0
+        }
+      }
+    )
+
+    return result
   }
 }
 

@@ -84,7 +84,13 @@ class DishCategoryService {
     }
   }
 
-  async update({ id, payload }: { id: string; payload: UpdateDishCategoryReqBody & { image_id?: string } }) {
+  async update({
+    id,
+    payload
+  }: {
+    id: string
+    payload: UpdateDishCategoryReqBody & { image_id?: string; key_search: string }
+  }) {
     // update image (xóa cũ, thêm mới)
     const dish_category = await databaseService.dish_categories.findOne({
       _id: new ObjectId(id)
@@ -99,6 +105,15 @@ class DishCategoryService {
       const old_image_id = dish_category?.image_id as string
       await deleteImage(old_image_id)
     }
+
+    if (payload.name || payload.description) {
+      if (payload.description) {
+        payload.key_search = removeAccents(dish_category.name + " " + payload.description)
+      } else {
+        payload.name = removeAccents(payload.name + " " + dish_category.description)
+      }
+    }
+
     const updateDishCategory = await databaseService.dish_categories.findOneAndUpdate(
       {
         _id: new ObjectId(id)

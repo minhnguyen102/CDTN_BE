@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
 import USER_MESSAGES from "../../constants/message"
 import { pick } from "lodash"
-import { createIngredientReqBody } from "../../models/requests/Ingredient.request"
+import { createIngredientReqBody, updateIngredientReqBody } from "../../models/requests/Ingredient.request"
 import ingredientServices from "../../services/ingredients.services"
 import { paginationQueryParser } from "../../utils/helpers"
 import HTTP_STATUS from "../../constants/httpStatus"
@@ -48,5 +48,19 @@ export const listIngredientsController = async (req: Request, res: Response) => 
   return res.json({
     message: USER_MESSAGES.INGREDIENTS_FETCHED_SUCCESSFULLY,
     result
+  })
+}
+
+export const updateIngredientController = async (
+  req: Request<ParamsDictionary, any, updateIngredientReqBody>,
+  res: Response
+) => {
+  const { id } = req.params
+  const payload = pick(req.body, ["name", "categoryId", "unit", "minStock", "supplierIds"])
+  const result = await ingredientServices.update({ id, payload })
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.INGREDIENT_UPDATED_SUCCESSFULLY, // "Ingredient updated successfully"
+    data: result
   })
 }

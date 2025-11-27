@@ -3,7 +3,6 @@ import { ImportOrderStatus } from "../../constants/enums"
 
 interface ImportOrderItem {
   ingredientId: ObjectId
-  ingredientName: string
   quantity: number
   importPrice: number
   total: number
@@ -53,7 +52,6 @@ export default class ImportOrder {
     this.items = importOrder.items.map((item) => ({
       // map() để đảm bảo cấu trúc
       ingredientId: new ObjectId(item.ingredientId),
-      ingredientName: item.ingredientName,
       quantity: item.quantity,
       importPrice: item.importPrice,
       total: item.total

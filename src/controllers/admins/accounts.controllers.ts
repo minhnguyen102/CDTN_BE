@@ -151,7 +151,7 @@ export const getMeController = async (req: Request, res: Response) => {
 
 export const updateMeController = async (req: Request<ParamsDictionary, any, updateMeReqBody>, res: Response) => {
   const { user_id } = req.decoded_access_token as TokenPayload
-  const payload = pick(req.body, ["name", "date_of_birth", "phone"]) // Chỉ cho upadate những key này, tránh bị phá bởi Postman
+  const payload = pick(req.body, ["name", "date_of_birth", "phone"])
   const result = await accountsServices.updateMe({ user_id, payload: payload })
   res.json({
     message: USER_MESSAGES.UPDATE_INFOR_SUCCESS,

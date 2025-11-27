@@ -1,11 +1,15 @@
 import { Router } from "express"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
-import { createIngredientValidation } from "../../middlewares/admins/ingredients.middlewares"
+import {
+  createIngredientValidation,
+  updateIngredientValidation
+} from "../../middlewares/admins/ingredients.middlewares"
 
 import {
   createIngredientController,
-  listIngredientsController
+  listIngredientsController,
+  updateIngredientController
   // listIngredientsController,
   // getIngredientDetailController,
   // updateIngredientController,
@@ -48,21 +52,20 @@ ingredientRoutes.get(
 
 /**
  * Description: Update an ingredient
- * PATH: admin/ingredients/update/:id
+ * PATH: admin/ingredients/:id
  * Method: PUT
  * Params: { id: string }
  * Body: { name: string, categoryId: string, unit: string, unitPrice: number, minStock: number }
  * Headers: {Authorization: Bearer access_token}
  */
-// ingredientRoutes.put(
-//   "/update/:id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   checkPermission("update_ingredient"),
-//   isObjectIdValidation("id"), // Kiểm tra params.id
-//   updateIngredientValidation, // Kiểm tra body
-//   wrapHandlerFunction(updateIngredientController)
-// )
+ingredientRoutes.patch(
+  "/:id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("update_ingredient"),
+  updateIngredientValidation,
+  wrapHandlerFunction(updateIngredientController)
+)
 
 /**
  * Description: Deactivate/Reactivate an ingredient (Soft Delete)

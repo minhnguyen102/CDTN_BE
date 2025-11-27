@@ -80,7 +80,10 @@ class CategoryServices {
     return category
   }
 
-  async updateCategory({ id, payload }: { id: string; payload: updateCategoryReqBody }) {
+  async updateCategory({ id, payload }: { id: string; payload: updateCategoryReqBody & { name_search?: string } }) {
+    if (payload.name) {
+      payload.name_search = removeAccents(payload.name)
+    }
     const result = await databaseService.categories.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {

@@ -94,6 +94,17 @@ class SupplierServices {
   }
 
   async updateSupplier({ payload, supplier_id }: { payload: updateSupplierReqBody; supplier_id: string }) {
+    const supplier = await databaseService.suppliers.findOne({ _id: new ObjectId(supplier_id) })
+    if (!supplier) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.SUPPLIER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    const { name, contactPerson, phone, email } = supplier
+    // if (name || contactPerson || phone || email) {
+
+    // }
     const result = await databaseService.suppliers.findOneAndUpdate(
       {
         _id: new ObjectId(supplier_id),
@@ -118,12 +129,6 @@ class SupplierServices {
         }
       }
     )
-    if (!result) {
-      throw new ErrorWithStatus({
-        message: USER_MESSAGES.SUPPLIER_NOT_FOUND,
-        status: HTTP_STATUS.NOT_FOUND
-      })
-    }
     return result
   }
 

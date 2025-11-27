@@ -1,4 +1,5 @@
 const USER_MESSAGES = {
+  INGREDIENT_NOT_FOUND: "Ingredient not found",
   IMPORT_ORDER_ALREADY_CONFIRMED: "This order is already confirmed",
   IMPORT_ORDER_CONFIRMED_SUCCESSFULLY: "Import order confirmed successfully",
   GET_ALL_CATEGORY_SUCCESS: "Get all categories success",
