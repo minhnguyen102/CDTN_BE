@@ -99,7 +99,7 @@ const idParamValidation: ParamSchema = {
 export const createIngredientValidation = validate(
   checkSchema(
     {
-      name: idParamValidation,
+      name: nameValidation,
       categoryId: categoryIdValidation,
       unit: unitValidation,
       minStock: minStockValidation,
