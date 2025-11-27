@@ -31,7 +31,7 @@ export const listIngredientsController = async (req: Request, res: Response) => 
   const search = (req.query.search as string) || undefined // search theo name
   const categoryId = (req.query.categoryId as string) || undefined
 
-  // 'status' là một trường ảo (In Stock, Low Stock, Out of Stock)
+  // 'status' là một trường ảo (in_stock, low_stock, out_of_stock)
   const status = (req.query.status as string) || undefined
 
   // Gọi service để lấy dữ liệu
@@ -56,11 +56,19 @@ export const updateIngredientController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const payload = pick(req.body, ["name", "categoryId", "unit", "minStock", "supplierIds"])
+  const payload = pick(req.body, ["categoryId", "minStock", "supplierIds"])
   const result = await ingredientServices.update({ id, payload })
 
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.INGREDIENT_UPDATED_SUCCESSFULLY, // "Ingredient updated successfully"
     data: result
+  })
+}
+
+export const deleteIngredientStatusController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  await ingredientServices.delete({ id })
+  res.json({
+    message: USER_MESSAGES.DELETE_INGREDIENT_SUCESSFULLY
   })
 }

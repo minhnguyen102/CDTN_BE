@@ -9,11 +9,7 @@ export interface createIngredientReqBody {
 }
 
 export interface updateIngredientReqBody {
-  name?: string
   categoryId?: ObjectId
-  unit?: string
-  unitPrice?: number
-  currentStock?: number
   minStock?: number
   supplierIds?: ObjectId[]
 }

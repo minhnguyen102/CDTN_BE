@@ -99,7 +99,7 @@ const idParamValidation: ParamSchema = {
 export const createIngredientValidation = validate(
   checkSchema(
     {
-      name: nameValidation,
+      name: idParamValidation,
       categoryId: categoryIdValidation,
       unit: unitValidation,
       minStock: minStockValidation,
@@ -113,25 +113,9 @@ export const updateIngredientValidation = validate(
   checkSchema(
     {
       id: idParamValidation,
-
-      name: {
-        optional: true,
-        ...nameValidation,
-        notEmpty: false
-      },
       categoryId: {
         optional: true,
         ...categoryIdValidation,
-        notEmpty: false
-      },
-      unit: {
-        optional: true,
-        ...unitValidation,
-        notEmpty: false
-      },
-      unitPrice: {
-        optional: true,
-        ...unitPriceValidation,
         notEmpty: false
       },
       minStock: {
@@ -143,4 +127,10 @@ export const updateIngredientValidation = validate(
     },
     ["params", "body"]
   )
+)
+
+export const deleteIngredientValidation = validate(
+  checkSchema({
+    id: idParamValidation
+  })
 )

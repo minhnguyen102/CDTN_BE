@@ -68,7 +68,9 @@ class IngredientServices {
     status?: string
     supplierId?: string
   }) {
-    const objectFind: any = {}
+    const objectFind: any = {
+      deleted: false
+    }
 
     //Filter theo 'status' (Logic phái sinh)
     if (status === "low_stock") {
@@ -172,19 +174,16 @@ class IngredientServices {
   }
 
   async update({ id, payload }: { id: string; payload: updateIngredientReqBody & { name_search?: string } }) {
-    const ingredient = await databaseService.ingredients.findOne({
-      _id: new ObjectId(id)
-    })
+    const ingredientId = new ObjectId(id)
 
+    const ingredient = await databaseService.ingredients.findOne({
+      _id: ingredientId
+    })
     if (!ingredient) {
       throw new ErrorWithStatus({
         message: USER_MESSAGES.INGREDIENT_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
       })
-    }
-
-    if (payload.name) {
-      payload.name_search = removeAccents(payload.name)
     }
 
     if (payload.categoryId) {
@@ -216,23 +215,89 @@ class IngredientServices {
       payload.supplierIds = supplierObjectIds
     }
 
-    const result = await databaseService.ingredients.findOneAndUpdate(
-      { _id: new ObjectId(id) },
+    await databaseService.ingredients.updateOne(
+      { _id: ingredientId },
       {
         $set: {
           ...payload
-        }
-      },
-      {
-        returnDocument: "after",
-        projection: {
-          createdAt: 0,
-          updatedAt: 0
+        },
+        $currentDate: {
+          updatedAt: true
         }
       }
     )
+    const [updatedIngredient] = await databaseService.ingredients
+      .aggregate([
+        { $match: { _id: ingredientId } },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "categoryId",
+            foreignField: "_id",
+            as: "categoryDetail"
+          }
+        },
+        {
+          $unwind: {
+            path: "$categoryDetail",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: "suppliers",
+            localField: "supplierIds",
+            foreignField: "_id",
+            as: "supplierDetails"
+          }
+        },
 
-    return result
+        {
+          $project: {
+            // Lấy tên Category
+            categoryName: "$categoryDetail.name",
+
+            suppliers: {
+              $map: {
+                input: "$supplierDetails",
+                as: "sup",
+                in: { _id: "$$sup._id", name: "$$sup.name" }
+              }
+            },
+
+            name: 1,
+            unit: 1,
+            minStock: 1,
+            unitPrice: 1,
+            currentStock: 1
+          }
+        }
+      ])
+      .toArray()
+    return updatedIngredient
+  }
+  async delete({ id }: { id: string }) {
+    const result = await databaseService.ingredients.updateOne(
+      {
+        _id: new ObjectId(id)
+      },
+      {
+        $set: {
+          deleted: true
+        },
+        $currentDate: {
+          updatedAt: true,
+          deletedAt: true
+        }
+      }
+    )
+    if (!result.modifiedCount) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.INGREDIENT_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    return true
   }
 }
 

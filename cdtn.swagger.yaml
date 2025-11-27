@@ -1733,10 +1733,10 @@ paths:
   
   /ingredients:
     post:
-      operationId: createIngredient
       tags:
-        - ingredient
-      summary: Create a new ingredient
+        -  Ingredient
+      summary: Create Ingredient
+      operationId: createIngredient
       security:
         - BearerAuth: []
       requestBody:
@@ -1748,144 +1748,418 @@ paths:
               properties:
                 name:
                   type: string
+                  minLength: 2
+                  description: Tên nguyên liệu (tối thiểu 2 ký tự)
+                  example: "Thịt heo"
                 categoryId:
                   type: string
+                  description: MongoID của danh mục
+                  example: "69254fee3b367e7f37bfff12"
                 unit:
                   type: string
-                unitPrice:
-                  type: number
+                  description: Đơn vị tính (kg, lít, cái...)
+                  example: "kg"
                 minStock:
-                  type: number
+                  type: integer
+                  minimum: 1
+                  description: Mức tồn kho tối thiểu (phải > 0)
+                  example: 20
+                supplierIds:
+                  type: array
+                  description: Danh sách ID các nhà cung cấp (Optional)
+                  items:
+                    type: string
+                    example: "69255cd36d1d50a5f158f868"
+                  example: ["69255cd36d1d50a5f158f868", "6926c6a7349187bd6ac5f21c"]
               required:
                 - name
                 - categoryId
                 - unit
-                - unitPrice
                 - minStock
-            example:
-              name: "Thit bo cobe"
-              categoryId: "6912ad761ef6eba42b035370"
-              unit: "kg"
-              unitPrice: 6.50
-              minStock: 20
       responses:
-        200:
-          description: Ingredient created successfully
+        '200':
+          description: OK
           content:
             application/json:
-              example:
-                message: "Ingredient created successfully"
-                result:
-                  _id: "691dcc4f645a3e307c772cd8"
-                  name: "Thit bo cobe"
-                  categoryId: "6912ad761ef6eba42b035370"
-                  unit: "kg"
-                  unitPrice: 6.5
-                  currentStock: 0
-                  minStock: 20
-        401:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Ingredient created successfully."
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "6927fb42cf4d3b71b47c5938"
+                      name:
+                        type: string
+                        example: "Thịt heo"
+                      categoryId:
+                        type: string
+                        example: "69254fee3b367e7f37bfff12"
+                      unit:
+                        type: string
+                        example: "kg"
+                      unitPrice:
+                        type: number
+                        description: Giá mặc định là 0 khi tạo mới
+                        example: 0
+                      supplierIds:
+                        type: array
+                        items:
+                          type: string
+                        example: []
+                      currentStock:
+                        type: integer
+                        example: 0
+                      minStock:
+                        type: integer
+                        example: 20
+        '400':
+          description: Bad Request (Lỗi định dạng Category ID)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category ID is invalid"
+                  status:
+                    type: integer
+                    example: 400
+        '401':
           description: Unauthorized
           content:
             application/json:
-              example:
-                message: "Invalid signature"
-        422:
-          description: Validation error
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
+        '422':
+          description: Unprocessable Entity (Validation Error)
           content:
             application/json:
-              example:
-                message: "Validation error"
+              schema:
+                type: object
+              examples:
+                InvalidData:
+                  summary: Dữ liệu không hợp lệ
+                  value:
+                    message: "Validation error"
+                    errors:
+                      name: "Ingredient name must be at least 2 chars"
+                      minStock: "Min stock must be a positive integer"
+                      supplierIds: "Array contains invalid Supplier ID"
     get:
-      operationId: ingredientsGetList
       tags:
-        - ingredient
-      summary: Get list of ingredients
+        - Ingredient
+      summary: Get All Ingredients
+      operationId: getAllIngredients
       security:
         - BearerAuth: []
       parameters:
-        - in: query
-          name: page
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Tìm kiếm theo tên nguyên liệu
+          example: "thịt"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [in_stock, low_stock, out_of_stock]
+          description: |
+            Lọc theo trạng thái tồn kho:
+            - in_stock: Còn hàng (currentStock > minStock)
+            - low_stock: Sắp hết (0 < currentStock <= minStock)
+            - out_of_stock: Hết hàng (currentStock = 0)
+          example: "in_stock"
+        - name: supplierId
+          in: query
+          schema:
+            type: string
+          description: Lọc theo ID nhà cung cấp
+          example: "6925d6a45b616421690a7150"
+        - name: page
+          in: query
           schema:
             type: integer
-          example: 1
-        - in: query
-          name: limit
+            default: 1
+          description: Trang hiện tại
+        - name: limit
+          in: query
           schema:
             type: integer
-          example: 10
-        - in: query
-          name: search
-          schema:
-            type: string
-          description: Search by ingredient name
-          example: "bo"
-        - in: query
-          name: categoryId
-          schema:
-            type: string
-          example: "6912ad761ef6eba42b035370"
-        - in: query
-          name: status
-          schema:
-            type: string
-            enum: [low_stock, out_of_stock, in_stock]
-          description: Filter by virtual field `status`
-          example: "low_stock"
+            enum: [10, 15, 20]
+            default: 10
+          description: Số lượng bản ghi trên một trang (chỉ chấp nhận 10, 15 hoặc 20)
       responses:
-        200:
-          description: Ingredients retrieved successfully
+        '200':
+          description: OK
           content:
             application/json:
-              example:
-                message: "Ingredients retrieved successfully"
-                result:
-                  ingredients:
-                    - _id: "691dcc4f645a3e307c772cd8"
-                      name: "Thit bo cobe 1"
-                      unit: "kg"
-                      unitPrice: 6.5
-                      currentStock: 0
-                      minStock: 20
-                      categoryName: "Other"
-                    - _id: "691ae55010cadf5a618bcf8e"
-                      name: "Thit bo cobe"
-                      unit: "kg"
-                      unitPrice: 5.5
-                      currentStock: 20
-                      minStock: 10
-                      categoryName: "Other"
-                    - _id: "691ae1a9885a522575e5a0ad"
-                      name: "Thit bo"
-                      unit: "kg"
-                      unitPrice: 5.5
-                      currentStock: 70
-                      minStock: 10
-                      categoryName: "Other"
-                    - _id: "690dad4474beb3c7ee4df922"
-                      name: "Gạo ST25"
-                      unit: "kg"
-                      unitPrice: 2.5
-                      currentStock: 500
-                      minStock: 100
-                      categoryName: "Other"
-                  pagination:
-                    currentPage: 1
-                    limit: 10
-                    total: 4
-                    totalPages: 1
-        401:
-          description: Invalid signature
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Ingredients retrieved successfully"
+                  result:
+                    type: object
+                    properties:
+                      ingredients:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                              example: "6927fb42cf4d3b71b47c5938"
+                            name:
+                              type: string
+                              example: "Thịt heo"
+                            unit:
+                              type: string
+                              example: "kg"
+                            unitPrice:
+                              type: number
+                              example: 0
+                            currentStock:
+                              type: integer
+                              example: 0
+                            minStock:
+                              type: integer
+                              example: 20
+                            categoryName:
+                              type: string
+                              example: "Meat"
+                            supplierNames:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  _id:
+                                    type: string
+                                    example: "69255cd36d1d50a5f158f868"
+                                  name:
+                                    type: string
+                                    example: "Cung cấp thịt"
+                      pagination:
+                        type: object
+                        properties:
+                          currentPage:
+                            type: integer
+                            example: 1
+                          limit:
+                            type: integer
+                            example: 10
+                          total:
+                            type: integer
+                            example: 1
+                          totalPage:
+                            type: integer
+                            example: 1
+        '401':
+          description: Unauthorized
           content:
             application/json:
-              example:
-                message: "Invalid signature"
-        403:
-          description: Forbidden - User does not have permission
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
+  /ingredients/{id}:
+    patch:
+      tags:
+        - Ingredient
+      summary: Update Ingredient
+      operationId: updateIngredient
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của nguyên liệu cần cập nhật
+          example: "6927fb42cf4d3b71b47c5938"
+      requestBody:
+        description: Chỉ cho phép cập nhật Category, MinStock và SupplierIDs
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId:
+                  type: string
+                  description: MongoID của danh mục mới
+                  example: "69254fee3b367e7f37bfff12"
+                minStock:
+                  type: integer
+                  minimum: 0
+                  description: Mức tồn kho tối thiểu mới
+                  example: 10
+                supplierIds:
+                  type: array
+                  description: Danh sách ID nhà cung cấp mới
+                  items:
+                    type: string
+                  example: ["69255cd36d1d50a5f158f868"]
+              # Các trường là optional, không bắt buộc gửi hết
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
-              example:
-                message: "Forbidden"
-
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Ingredient updated successfully."
+                  data: # Chú ý: Key này là data theo ảnh Postman
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "6927fb42cf4d3b71b47c5938"
+                      name:
+                        type: string
+                        example: "Thịt heo"
+                      unit:
+                        type: string
+                        example: "kg"
+                      unitPrice:
+                        type: number
+                        example: 0
+                      currentStock:
+                        type: integer
+                        example: 0
+                      minStock:
+                        type: integer
+                        example: 10
+                      categoryName:
+                        type: string
+                        example: "Meat"
+                      suppliers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: "69255cd36d1d50a5f158f868"
+                            name:
+                              type: string
+                              example: "Cung cấp thịt"
+        '400':
+          description: Bad Request (ID không hợp lệ)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid MongoDB Id format"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Ingredient not found"
+        '422':
+          description: Unprocessable Entity (Validation Error)
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                InvalidData:
+                  summary: Dữ liệu không hợp lệ
+                  value:
+                    message: "Validation error"
+                    errors:
+                      minStock: "Min stock must be a positive integer"
+                      categoryId: "Category ID is invalid"
+    delete:
+      tags:
+        - Ingredient
+      summary: Delete Ingredient
+      operationId: deleteIngredient
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của nguyên liệu cần xóa
+          example: "6927fb42cf4d3b71b47c5938"
+      responses:
+        '200':
+          description: OK (Xóa thành công)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Delete ingredient successfully"
+        '400':
+          description: Bad Request (ID sai định dạng)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid MongoDB Id format"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
+        '404':
+          description: Not Found (Không tìm thấy nguyên liệu)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Ingredient not found"
   /import-orders:
     post:
       tags:

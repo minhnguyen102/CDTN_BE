@@ -10,8 +10,10 @@ interface IngredientType {
   supplierIds?: string[]
   unitPrice?: number
   currentStock?: number
+  deleted?: boolean
+  deletedAt?: Date
   createdAt?: Date
-  updatedAt?: Date
+  updatedAt?: Date | null
 }
 
 export default class Ingredient {
@@ -26,6 +28,8 @@ export default class Ingredient {
   minStock: number
   createdAt: Date
   updatedAt: Date
+  deleted: boolean
+  deletedAt: Date | null
 
   constructor(ingredient: IngredientType) {
     const date = new Date()
@@ -38,6 +42,8 @@ export default class Ingredient {
     this.unitPrice = ingredient.unitPrice || 0
     this.currentStock = ingredient.currentStock || 0
     this.minStock = ingredient.minStock
+    this.deleted = ingredient.deleted || false
+    this.deletedAt = ingredient.deletedAt || null
     this.createdAt = ingredient.createdAt || date
     this.updatedAt = ingredient.updatedAt || date
   }

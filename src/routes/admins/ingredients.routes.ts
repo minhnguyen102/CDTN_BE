@@ -3,11 +3,13 @@ import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import {
   createIngredientValidation,
+  deleteIngredientValidation,
   updateIngredientValidation
 } from "../../middlewares/admins/ingredients.middlewares"
 
 import {
   createIngredientController,
+  deleteIngredientStatusController,
   listIngredientsController,
   updateIngredientController
   // listIngredientsController,
@@ -75,14 +77,13 @@ ingredientRoutes.patch(
  * Body: { status: "Active" | "Inactive" }
  * Headers: {Authorization: Bearer access_token}
  */
-// ingredientRoutes.patch(
-//   "/status/:id",
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   checkPermission("delete_ingredient"),
-//   isObjectIdValidation("id"), // Kiểm tra params.id
-//   updateIngredientStatusValidation, // Kiểm tra body.status
-//   wrapHandlerFunction(updateIngredientStatusController)
-// )
+ingredientRoutes.delete(
+  "/:id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("delete_ingredient"),
+  deleteIngredientValidation,
+  wrapHandlerFunction(deleteIngredientStatusController)
+)
 
 export default ingredientRoutes
