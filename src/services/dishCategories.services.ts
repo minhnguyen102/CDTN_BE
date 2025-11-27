@@ -41,7 +41,7 @@ class DishCategoryService {
 
     if (search) {
       // search theo name || des
-      matchFilter.key_search = { $regex: search, $options: "i" }
+      matchFilter.key_search = { $regex: removeAccents(search), $options: "i" }
     }
 
     const pipeline: any[] = [

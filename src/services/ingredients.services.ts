@@ -97,7 +97,7 @@ class IngredientServices {
 
     //Filter theo 'search' (Sử dụng Text Search)
     if (search) {
-      objectFind.name_search = { $regex: search, $options: "i" }
+      objectFind.name_search = { $regex: removeAccents(search), $options: "i" }
     }
 
     // Xây dựng Aggregation Pipeline

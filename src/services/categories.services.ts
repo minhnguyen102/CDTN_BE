@@ -34,7 +34,7 @@ class CategoryServices {
       }
     }
     if (search) {
-      objectFind.name_search = { $regex: search, $options: "i" }
+      objectFind.name_search = { $regex: removeAccents(search), $options: "i" }
     }
     const skip = (page - 1) * limit
     const [categories, totalFilteredDocuments] = await Promise.all([

@@ -497,7 +497,7 @@ class AccountsServices {
     //Filter theo Search (Tìm theo Tên, Email)
     if (search) {
       // objectFind.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }]
-      objectFind.key_search = { $regex: search, $options: "i" }
+      objectFind.key_search = { $regex: removeAccents(search), $options: "i" }
     }
 
     if (status) {

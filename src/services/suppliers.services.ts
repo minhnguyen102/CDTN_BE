@@ -36,7 +36,7 @@ class SupplierServices {
       }
     }
     if (search) {
-      objectFind.key_search = { $regex: search, $options: "i" }
+      objectFind.key_search = { $regex: removeAccents(search), $options: "i" }
     }
 
     const skip = (page - 1) * limit
