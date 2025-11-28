@@ -101,10 +101,18 @@ class SupplierServices {
         status: HTTP_STATUS.NOT_FOUND
       })
     }
-    const { name, contactPerson, phone, email } = supplier
-    // if (name || contactPerson || phone || email) {
-
+    // let key_search = ""
+    // if (payload.name) {
+    //   key_search += removeAccents(payload.name)
+    // } else {
+    //   key_search += removeAccents(supplier.name)
     // }
+    const name = payload.name !== undefined ? payload.name : supplier.name
+    const contactPerson = payload.contactPerson !== undefined ? payload.contactPerson : supplier.contactPerson
+    const email = payload.email !== undefined ? payload.email : supplier.email
+    const phone = payload.phone !== undefined ? payload.phone : supplier.phone
+
+    const key_seacrh = removeAccents(`${name} ${contactPerson} ${email} ${phone}`)
     const result = await databaseService.suppliers.findOneAndUpdate(
       {
         _id: new ObjectId(supplier_id),
@@ -112,7 +120,8 @@ class SupplierServices {
       },
       {
         $set: {
-          ...payload
+          ...payload,
+          key_search: key_seacrh
         },
         $currentDate: {
           updatedAt: true
