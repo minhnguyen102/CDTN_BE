@@ -6,6 +6,7 @@ import { ErrorWithStatus } from "../models/Errors"
 import USER_MESSAGES from "../constants/message"
 import HTTP_STATUS from "../constants/httpStatus"
 import { removeAccents } from "../utils/helpers"
+import { CategoryTypeStatus } from "../constants/enums"
 
 class IngredientServices {
   async createIngredient({ payload }: { payload: createIngredientReqBody }) {
@@ -68,6 +69,18 @@ class IngredientServices {
     status?: string
     supplierId?: string
   }) {
+    const activeCategories = await databaseService.categories
+      .find(
+        { status: CategoryTypeStatus.ACTIVE },
+        {
+          projection: {
+            _id: 1
+          }
+        }
+      )
+      .toArray()
+    const activeCategoryIds = activeCategories.map((c) => c._id)
+
     const objectFind: any = {
       deleted: false
     }
@@ -92,7 +105,19 @@ class IngredientServices {
 
     //Filter theo 'categoryId'
     if (categoryId) {
+      const isCategoryActive = activeCategoryIds.some((id) => id.toString() === categoryId)
+      // const isCategoryActive = activeCategoryIds.include(categoryId)
+
+      if (!isCategoryActive) {
+        return {
+          ingredients: [],
+          pagination: { currentPage: page, limit, total: 0, totalPages: 0 }
+        }
+      }
+      // Nếu active thì tìm chính xác theo ID đó
       objectFind.categoryId = new ObjectId(categoryId)
+    } else {
+      objectFind.categoryId = { $in: activeCategoryIds }
     }
 
     //Filter theo 'search' (Sử dụng Text Search)
