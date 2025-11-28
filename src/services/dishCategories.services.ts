@@ -140,27 +140,6 @@ class DishCategoryService {
     )
     return updateDishCategory
   }
-
-  async delete({ id }: { id: string }) {
-    const result = await databaseService.dish_categories.updateOne(
-      { _id: new ObjectId(id), deleted: false },
-      {
-        $set: {
-          deleted: true
-        },
-        $currentDate: {
-          deletedAt: true
-        }
-      }
-    )
-    if (!result.modifiedCount) {
-      throw new ErrorWithStatus({
-        message: USER_MESSAGES.DISH_CATEFORY_ID_NOT_FOUND,
-        status: HTTP_STATUS.NOT_FOUND
-      })
-    }
-    return true
-  }
 }
 
 const dishCategoryService = new DishCategoryService()

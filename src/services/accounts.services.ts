@@ -489,6 +489,7 @@ class AccountsServices {
     roleId?: string
     status?: string
   }) {
+    // Cho phép hiển thị cả những tài khoản đang inactive
     const objectFind: any = {}
     if (roleId) {
       objectFind.role_id = new ObjectId(roleId)

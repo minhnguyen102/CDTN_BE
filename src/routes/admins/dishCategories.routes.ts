@@ -3,18 +3,12 @@ import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import {
   createDishCategoryController,
-  deleteDishCategoryController,
   getDishCategoriesController,
   updateDishCategoryController
-  // getDishCategoriesController,
-  // getDishCategoryDetailController,
-  // updateDishCategoryController,
-  // deleteDishCategoryController
 } from "../../controllers/admins/dishCategories.controllers"
 import {
   createDishCategoryValidator,
-  updateDishCategoryValidator,
-  dishCategoryIdValidator
+  updateDishCategoryValidator
 } from "../../middlewares/admins/dishCategories.middlewares"
 import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 import { uploadCloud } from "../../utils/cloudinary"
@@ -69,22 +63,6 @@ dishCategoriesRoutes.patch(
   uploadCloud.single("image"),
   updateDishCategoryValidator,
   wrapHandlerFunction(updateDishCategoryController)
-)
-
-/**
- * Description: Delete (or Soft Delete) a dish category
- * PATH: /:id
- * Method: DELETE
- * Params: { id: string }
- * Headers: { Authorization: Bearer <access_token> }
- */
-dishCategoriesRoutes.delete(
-  "/:id",
-  accessTokenValidation,
-  verifiedUserValidation,
-  checkPermission("delete_dish_category"),
-  dishCategoryIdValidator, // Validate param ID
-  wrapHandlerFunction(deleteDishCategoryController)
 )
 
 export default dishCategoriesRoutes

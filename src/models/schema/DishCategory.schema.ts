@@ -10,8 +10,6 @@ interface DishCategoryType {
   image_id: string
   key_search: string
   description?: string
-  deleted?: boolean
-  deletedAt?: Date
   createdAt?: Date
   updatedAt?: Date
 }
@@ -25,8 +23,6 @@ export default class DishCategory {
   image: string
   image_id: string
   description: string
-  deleted: boolean
-  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
 
@@ -40,8 +36,6 @@ export default class DishCategory {
     this.image = dishCategory.image
     this.image_id = dishCategory.image_id
     this.description = dishCategory.description || ""
-    this.deleted = dishCategory.deleted || false
-    this.deletedAt = dishCategory.deletedAt || null
     this.createdAt = dishCategory.createdAt || date
     this.updatedAt = dishCategory.updatedAt || date
   }

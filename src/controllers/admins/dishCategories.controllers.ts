@@ -59,11 +59,3 @@ export const updateDishCategoryController = async (
     data: result
   })
 }
-
-export const deleteDishCategoryController = async (req: Request, res: Response) => {
-  const { id } = req.params
-  await dishCategoryService.delete({ id })
-  res.json({
-    message: USER_MESSAGES.DELETE_DISH_CATEGORY_SUCCESS
-  })
-}
