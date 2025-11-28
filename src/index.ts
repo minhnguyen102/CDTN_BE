@@ -20,7 +20,6 @@ const whitelist: string[] = [
   // Môi trường Local
   "http://localhost:3000", // api
   "http://localhost:4000", // trang chính
-  "http://localhost:4001", // admin
 
   // Môi trường Production
   "https://snackio.io.vn",
