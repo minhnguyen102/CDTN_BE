@@ -20,6 +20,7 @@ class SupplierServices {
     status?: string
     search?: string
   }) {
+    // Chp phép lấy ra những nhà cung cấp có status = inactive
     const objectFind: any = {
       isDeleted: false
     }

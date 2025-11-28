@@ -4,7 +4,7 @@ import databaseService from "./database.servies"
 import { ErrorWithStatus } from "../models/Errors"
 import USER_MESSAGES from "../constants/message"
 import HTTP_STATUS from "../constants/httpStatus"
-import { ImportOrderStatus } from "../constants/enums"
+import { ImportOrderStatus, SupplierStatus } from "../constants/enums"
 import ImportOrder from "../models/schema/ImportOrder.schema"
 
 interface GetImportOrdersParams {
@@ -48,7 +48,9 @@ class ImportOrderService {
 
     //check supplierID
     const supplier = await databaseService.suppliers.findOne({
-      _id: new ObjectId(supplierId)
+      _id: new ObjectId(supplierId),
+      deleted: false,
+      status: SupplierStatus.ACTIVE
     })
     if (!supplier) {
       throw new ErrorWithStatus({
@@ -148,7 +150,7 @@ class ImportOrderService {
         })
       }
     }
-    if (supplierId) objectFind.supplierId = new ObjectId(supplierId)
+    if (supplierId) objectFind.supplierId = new ObjectId(supplierId) // ngay cả khi bị xóa hay inactive thì vẫn phải lấy ra
     if (search) {
       objectFind.orderNumber = { $regex: search, $options: "i" }
     }

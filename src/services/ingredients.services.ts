@@ -81,6 +81,7 @@ class IngredientServices {
       .toArray()
     const activeCategoryIds = activeCategories.map((c) => c._id)
 
+    // Cho phép lấy cả status là inactive
     const objectFind: any = {
       deleted: false
     }

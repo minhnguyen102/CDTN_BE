@@ -4,7 +4,7 @@ import { RoleStatus } from "../../constants/enums"
 interface RoleType {
   _id?: ObjectId
   name: string
-  description?: string // Mô tả vai trò (ví dụ: 'Quyền owner cao nhất')
+  description?: string
   status: RoleStatus
   permissionIds: ObjectId[]
   isDeleted?: boolean
@@ -16,7 +16,7 @@ interface RoleType {
 export default class Role {
   _id?: ObjectId
   name: string
-  description: string // Sẽ gán giá trị mặc định nếu không có
+  description: string
   status: RoleStatus
   permissionIds: ObjectId[]
   isDeleted?: boolean
