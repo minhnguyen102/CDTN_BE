@@ -51,7 +51,7 @@ const corsOptions: CorsOptions = {
 app.use(cors(corsOptions))
 
 // Router admin
-// routesAdmin(app)
+routesAdmin(app)
 
 app.use(defaultErrorHandler)
 
