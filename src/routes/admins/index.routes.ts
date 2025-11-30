@@ -11,7 +11,7 @@ import dishCategoriesRoutes from "./dishCategories.routes"
 
 export const routesAdmin = (app: Express) => {
   const PATH_ADMIN = "/admin"
-  // app.use(PATH_ADMIN + "/accounts", accountRoutes)
+  app.use(PATH_ADMIN + "/accounts", accountRoutes)
   app.use(PATH_ADMIN + "/tables", tableRoutes)
   app.use(PATH_ADMIN + "/suppliers", supplierRoutes)
   app.use(PATH_ADMIN + "/categories", categoriesRouter)
