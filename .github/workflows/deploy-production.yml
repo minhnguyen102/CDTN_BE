@@ -42,4 +42,4 @@ jobs:
             echo "${{ secrets.ENV_PRODUCTION }}" > .env
             npm install --force
             npm run build
-            pm2 restart API CDTN
+            pm2 restart "API CDTN"
