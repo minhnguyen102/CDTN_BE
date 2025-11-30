@@ -22,3 +22,24 @@ jobs:
         run: echo "${{secrets.ENV_PRODUCTION}}" > .env
       - run: npm i --force
       - run: npm run build
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST_PRODUCTION }}       
+          username: ${{ secrets.USER_PRODUCTION }}
+          password: ${{ secrets.PASSWORD_PRODUCTION }}
+          port: 22
+          script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            cd /home/prod/CDTN_BE
+            git fetch --all
+            git reset --hard origin/main
+            echo "${{ secrets.ENV_PRODUCTION }}" > .env
+            npm install --force
+            npm run build
+            pm2 restart API CDTN
