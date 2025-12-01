@@ -70,3 +70,11 @@ export const MESSAGE_CODES = {
   FORGOT_PASSWORD_TOKEN_EXPIRED: "FORGOT_PASSWORD_TOKEN_EXPIRED",
   FORGOT_PASSWORD_TOKEN_INVALID: "FORGOT_PASSWORD_TOKEN_INVALID"
 }
+
+export enum OrderStatus {
+  Pending = "Pending",
+  Processing = "Processing",
+  Delivered = "Delivered",
+  Paid = "Paid",
+  Cancelled = "Cancelled"
+}
