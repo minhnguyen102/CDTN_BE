@@ -12,11 +12,14 @@ interface DishType {
   price: number
   description: string
   image: string
-  image_id?: string
   status: DishStatus
-  categoryId: ObjectId
-  recipe: DishRecipe[]
-
+  categoryId: string
+  recipe: {
+    ingredientId: string
+    quantity: number
+  }[]
+  name_search: string
+  image_id?: string
   isFeatured?: boolean
   deleted?: boolean
   deletedAt?: Date
@@ -28,12 +31,13 @@ export default class Dish {
   _id?: ObjectId
   name: string
   price: number
-  description?: string
+  description: string
   image: string
   image_id: string
   status: DishStatus
   categoryId: ObjectId
   recipe: DishRecipe[]
+  name_search: string
   isFeatured: boolean
   deleted: boolean
   deletedAt: Date | null
@@ -44,7 +48,7 @@ export default class Dish {
     const date = new Date()
     this.name = dish.name
     this.price = dish.price
-    this.description = dish.description || ""
+    this.description = dish.description
     this.image = dish.image
     this.image_id = dish.image_id || ""
     this.status = dish.status
@@ -55,6 +59,7 @@ export default class Dish {
       quantity: item.quantity
     }))
 
+    this.name_search = dish.name_search
     this.isFeatured = dish.isFeatured || false
     this.deleted = dish.deleted || false
     this.deletedAt = dish.deletedAt || null

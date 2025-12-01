@@ -47,7 +47,9 @@ class IngredientServices {
         projection: {
           createdAt: 0,
           updatedAt: 0,
-          name_search: 0
+          name_search: 0,
+          deleted: 0,
+          deletedAt: 0
         }
       }
     )

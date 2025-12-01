@@ -32,7 +32,9 @@ const priceValidation: ParamSchema = {
 }
 
 const descriptionValidation: ParamSchema = {
-  optional: true,
+  notEmpty: {
+    errorMessage: USER_MESSAGES.DISH_DESCRIPTION_REQUIRED
+  },
   isString: {
     errorMessage: USER_MESSAGES.DISH_DESCRIPTION_MUST_BE_STRING
   },
@@ -67,6 +69,20 @@ const categoryIdValidation: ParamSchema = {
 }
 
 const recipeValidation: ParamSchema = {
+  customSanitizer: {
+    options: (value) => {
+      // Nếu là string (do gửi form-data), thử parse nó ra JSON
+      if (typeof value === "string") {
+        try {
+          return JSON.parse(value)
+        } catch (error) {
+          // Nếu parse lỗi, trả về nguyên bản để các validator sau bắt lỗi
+          return value
+        }
+      }
+      return value
+    }
+  },
   notEmpty: {
     errorMessage: USER_MESSAGES.DISH_RECIPE_REQUIRED
   },
@@ -133,8 +149,8 @@ export const createDishValidation = validate(
       name: nameValidation,
       price: priceValidation,
       status: statusValidation,
-      categoryId: categoryIdValidation,
       description: descriptionValidation,
+      categoryId: categoryIdValidation,
       image: imageRequiredValidation,
 
       recipe: recipeValidation,
@@ -145,7 +161,10 @@ export const createDishValidation = validate(
         custom: {
           options: async (value: string) => {
             if (!ObjectId.isValid(value)) {
-              throw new Error(USER_MESSAGES.RECIPE_INGREDIENT_ID_INVALID)
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.RECIPE_INGREDIENT_ID_INVALID,
+                status: HTTP_STATUS.BAD_REQUEST
+              })
             }
             return true
           }
@@ -197,8 +216,9 @@ export const updateDishValidation = validate(
         notEmpty: false
       },
       description: {
+        optional: true,
         ...descriptionValidation,
-        optional: true
+        notEmpty: false
       },
       image: {
         optional: true,

@@ -8,6 +8,7 @@ import rolesRouter from "./roles.routes"
 import permissionsRouter from "./permissions.routes"
 import importOrderRoutes from "./importOrder.routes"
 import dishCategoriesRoutes from "./dishCategories.routes"
+import dishesRoutes from "./dishs.routes"
 
 export const routesAdmin = (app: Express) => {
   const PATH_ADMIN = "/admin"
@@ -20,4 +21,5 @@ export const routesAdmin = (app: Express) => {
   app.use(PATH_ADMIN + "/permissions", permissionsRouter)
   app.use(PATH_ADMIN + "/import-orders", importOrderRoutes)
   app.use(PATH_ADMIN + "/dish-categories", dishCategoriesRoutes)
+  app.use(PATH_ADMIN + "/dishes", dishesRoutes)
 }

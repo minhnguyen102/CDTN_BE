@@ -31,9 +31,7 @@ class DishCategoryService {
   }
 
   async getList({ page, limit, search, status }: { page: number; limit: number; search?: string; status?: string }) {
-    const matchFilter: any = {
-      deleted: false
-    }
+    const matchFilter: any = {}
 
     if (status) {
       matchFilter.status = status

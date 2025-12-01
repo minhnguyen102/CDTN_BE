@@ -1,4 +1,6 @@
 const USER_MESSAGES = {
+  DISH_UPDATED_SUCCESSFULLY: "Updated dish successfully",
+  DISH_CREATED_SUCCESSFULLY: "Dish created successfully",
   DELETE_INGREDIENT_SUCESSFULLY: "Delete ingredient successfully",
   INGREDIENT_NOT_FOUND: "Ingredient not found",
   IMPORT_ORDER_ALREADY_CONFIRMED: "This order is already confirmed",
@@ -258,6 +260,7 @@ const USER_MESSAGES = {
   DISH_PRICE_REQUIRED: "Dish price is required",
   DISH_PRICE_MUST_BE_NUMBER: "Dish price must be a number",
   DISH_PRICE_MUST_BE_POSITIVE: "Dish price must be greater than or equal to 0",
+  DISH_DESCRIPTION_REQUIRED: "Dish description is required",
 
   DISH_DESCRIPTION_MUST_BE_STRING: "Description must be a string",
 

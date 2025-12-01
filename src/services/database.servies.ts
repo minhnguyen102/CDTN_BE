@@ -66,8 +66,8 @@ class DatabaseService {
   get permissions(): Collection<Permission> {
     return this.db.collection("permissions")
   }
-  get dishs(): Collection<Dish> {
-    return this.db.collection("dishs")
+  get dishes(): Collection<Dish> {
+    return this.db.collection("dishes")
   }
   get dish_categories(): Collection<DishCategory> {
     return this.db.collection("dish_categories")

@@ -2160,6 +2160,7 @@ paths:
                   message:
                     type: string
                     example: "Ingredient not found"
+  
   /import-orders:
     post:
       tags:
@@ -2611,6 +2612,494 @@ paths:
                       name: "Name must be a string"
                       status: "Status must be active or inactive"
 
+  /dishes:
+    post:
+      tags:
+        - Dishes
+      summary: Create a new dish
+      operationId: createDish
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File ảnh của món ăn (jpg, png, webp)
+                name:
+                  type: string
+                  description: Tên món ăn
+                  example: "Cánh gà chiên mắm (4 chiếc)"
+                price:
+                  type: number
+                  description: Giá bán
+                  example: 85000
+                description:
+                  type: string
+                  description: Mô tả món ăn
+                  example: "Cánh gà chiên nước mắm đậm đà, da giòn."
+                status:
+                  type: string
+                  enum:
+                    - available
+                    - unavailable
+                    - hidden
+                  default: available
+                  description: Trạng thái kinh doanh
+                categoryId:
+                  type: string
+                  description: ObjectId của danh mục món ăn
+                  example: "692cf1c2e2c4e6ad4964e8a2"
+                isFeatured:
+                  type: boolean
+                  default: false
+                  description: Đánh dấu là món nổi bật
+                  example: true
+                recipe:
+                  type: string
+                  description: 'Chuỗi JSON đại diện cho mảng công thức. Bắt buộc format: [{"ingredientId": "...", "quantity": ...}]'
+                  example: '[{"ingredientId": "692cf2c3e2c4e6ad4964e8a3", "quantity": 0.4}]'
+              required:
+                - name
+                - description
+                - price
+                - image
+                - status
+                - categoryId
+                - recipe
+              
+      responses:
+        '201':
+          description: Dish created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Dish created successfully"
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      name:
+                        type: string
+                      price:
+                        type: number
+                      description:
+                        type: string
+                      image:
+                        type: string
+                      status:
+                        type: string
+                      categoryId:
+                        type: string
+                      isFeatured:
+                        type: boolean
+                      recipe:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            ingredientId:
+                              type: string
+                            quantity:
+                              type: number
+              example:
+                message: "Dish created successfully"
+                data:
+                  _id: "692cf98aa018b5563c300239"
+                  name: "Cánh gà chiên mắm (8 chiếc)"
+                  price: 85000
+                  description: "Cánh gà chiên nước mắm đậm đà, da giòn."
+                  image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764555144/restaurant-app/img_1764555142678.jpg"
+                  status: "available"
+                  categoryId: "692ceff06e1be3877b5ec4b3"
+                  recipe:
+                    - ingredientId: "692cf42ee2c4e6ad4964e8a5"
+                      quantity: 0.8
+                  isFeatured: false
+                
+        '400':
+          description: Lỗi Logic Nghiệp vụ (Business Logic Errors)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Nội dung thông báo lỗi chi tiết
+              examples:
+                
+                CategoryNotFound:
+                  summary: Danh mục không tồn tại
+                  value:
+                    message: "Dish category not found"
+
+                CategoryInactive:
+                  summary: Danh mục đang bị khóa
+                  value:
+                    message: "Dish category is currently inactive"
+
+                InvalidRecipeJson:
+                  summary: Recipe sai định dạng JSON
+                  value:
+                    message: "Recipe must be a valid JSON string (Array of objects)"
+
+                DuplicateIngredient:
+                  summary: Trùng lặp nguyên liệu
+                  value:
+                    message: "Recipe contains duplicate ingredients. Please merge them."
+
+                InvalidIngredients:
+                  summary: Nguyên liệu không hợp lệ
+                  value:
+                    message: "Validation failed for ingredients. The following IDs are either non-existent or deleted: [654a..., 654b...]"
+
+                InvalidImage:
+                  summary: Ảnh không hợp lệ hoặc thiếu
+                  value:
+                    message: "File type not supported (only .jpg, .jpeg, .png, .webp)"
+
+        '422':
+          description: Lỗi Validation Dữ liệu (Input Validation Errors)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  errors:
+                    type: object
+              examples:
+                # Trường hợp thiếu trường hoặc sai kiểu dữ liệu
+                ValidationError:
+                  summary: Dữ liệu đầu vào sai
+                  value:
+                    message: "Validation error"
+                    errors:
+                      price:
+                        msg: "Dish price must be a number"
+                        value: "abc"
+                      recipe:
+                        msg: "Dish recipe must be an array"
+                        value: "..."
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Không có quyền create_dish)
+    get:
+      tags:
+        - Dishes
+      summary: Lấy danh sách món ăn (Filter & Search)
+      description: >
+        Lấy danh sách món ăn có phân trang.
+        Hỗ trợ tìm kiếm theo tên, lọc theo danh mục, trạng thái, khoảng giá và món nổi bật.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Trang số (Mặc định 1)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Số lượng bản ghi mỗi trang (Mặc định 10, cho phép [10, 20, 30])
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Từ khóa tìm kiếm (Tên món ăn)
+        - in: query
+          name: categoryId
+          schema:
+            type: string
+          description: Lọc theo ID danh mục (ObjectId)
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [available, unavailable, hidden]
+          description: Lọc theo trạng thái món
+        - in: query
+          name: isFeatured
+          schema:
+            type: boolean
+          description: Lọc món nổi bật (true/false)
+        - in: query
+          name: minPrice
+          schema:
+            type: number
+          description: Lọc giá tối thiểu
+        - in: query
+          name: maxPrice
+          schema:
+            type: number
+          description: Lọc giá tối đa
+      responses:
+        '200':
+          description: Lấy danh sách thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get list dishes successfully"
+                  data:
+                    type: object
+                    properties:
+                      dishes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            name:
+                              type: string
+                            price:
+                              type: number
+                            description:
+                              type: string
+                            image:
+                              type: string
+                            status:
+                              type: string
+                            isFeatured:
+                              type: boolean
+                            categoryName:
+                              type: string
+                              description: Tên danh mục (Lookup)
+                            recipe:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  ingredientId:
+                                    type: string
+                                  quantity:
+                                    type: number
+                                  ingredientName:
+                                    type: string
+                                    description: Tên nguyên liệu (Lookup)
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                          limit:
+                            type: integer
+                          total:
+                            type: integer
+                          totalPages:
+                            type: integer
+              example:
+                message: "Get list dishes successfully"
+                data:
+                  dishes:
+                    - _id: "692cf98aa018b5563c300239"
+                      name: "Cánh gà chiên mắm (8 chiếc)"
+                      price: 85000
+                      description: "Cánh gà chiên nước mắm đậm đà, da giòn."
+                      image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764555144/restaurant-app/img_1764555142678.jpg"
+                      status: "available"
+                      recipe:
+                        - ingredientId: "692cf42ee2c4e6ad4964e8a5"
+                          quantity: 0.8
+                          ingredientName: "Cánh gà"
+                      isFeatured: false
+                      categoryName: "Danh mục đồ ăn nhanh"
+                    - _id: "692cf925c75387d0237246bf"
+                      name: "Cánh gà chiên mắm (6 chiếc)"
+                      price: 85000
+                      description: "Cánh gà chiên nước mắm đậm đà, da giòn."
+                      image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764555044/restaurant-app/img_1764555042237.jpg"
+                      status: "available"
+                      recipe:
+                        - ingredientId: "692cf42ee2c4e6ad4964e8a5"
+                          quantity: 0.6
+                          ingredientName: "Cánh gà"
+                      isFeatured: false
+                      categoryName: "Danh mục đồ ăn nhanh"
+                  pagination:
+                    page: 1
+                    limit: 10
+                    total: 3
+                    totalPages: 1
+        '401':
+          description: Unauthorized
+  /dishes/{id}:
+    patch:
+      tags:
+        - Dishes
+      summary: Cập nhật món ăn
+      operationId: updateDish
+      description: >
+        Cập nhật thông tin món ăn.
+        Chỉ gửi những trường cần thay đổi.
+        Nếu gửi ảnh mới, ảnh cũ sẽ bị xóa và thay thế.
+        Nếu không gửi ảnh, ảnh cũ được giữ nguyên.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID của món ăn cần sửa
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File ảnh mới (Nếu không gửi -> Giữ ảnh cũ)
+                name:
+                  type: string
+                  description: Tên món ăn mới
+                  example: "Cánh gà chiên mắm (Sốt cay)"
+                price:
+                  type: number
+                  description: Giá bán mới
+                  example: 90000
+                description:
+                  type: string
+                  description: Mô tả mới
+                status:
+                  type: string
+                  enum: [available, unavailable, hidden]
+                  description: Trạng thái kinh doanh
+                categoryId:
+                  type: string
+                  description: ID danh mục mới (Phải tồn tại và Active)
+                isFeatured:
+                  type: boolean
+                  description: Đánh dấu nổi bật
+                recipe:
+                  type: string
+                  description: >
+                    Chuỗi JSON công thức mới (sẽ ghi đè công thức cũ).
+                    Format: `[{"ingredientId": "...", "quantity": ...}]`
+                  example: '[{"ingredientId": "692cf2c3e2c4e6ad4964e8a3", "quantity": 0.5}]'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Updated dish successfully"
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      name:
+                        type: string
+                      price:
+                        type: number
+                      description:
+                        type: string
+                      image:
+                        type: string
+                      image_id:
+                        type: string
+                        description: Public ID của ảnh trên Cloudinary
+                      status:
+                        type: string
+                      categoryId:
+                        type: string
+                      categoryName:
+                        type: string
+                        description: Tên danh mục (Lookup)
+                      isFeatured:
+                        type: boolean
+                      recipe:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            ingredientId:
+                              type: string
+                            quantity:
+                              type: number
+                            ingredientName:
+                              type: string
+                              description: Tên nguyên liệu (Lookup)
+              example:
+                message: "Updated dish successfully"
+                data:
+                  _id: "692cf98aa018b5563c300239"
+                  name: "Cánh gà chiên mắm (8 chiếc)"
+                  price: 85000
+                  description: "Cánh gà chiên nước mắm đậm đà, da giònn."
+                  image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764561789/restaurant-app/img_1764561787028.jpg"
+                  image_id: "restaurant-app/img_1764561787028"
+                  status: "available"
+                  categoryId: "692ceff06e1be3877b5ec4b3"
+                  categoryName: "Danh mục đồ ăn nhanh"
+                  isFeatured: false
+                  recipe:
+                    - ingredientId: "692cf42ee2c4e6ad4964e8a5"
+                      quantity: 0.8
+                      ingredientName: "Cánh gà"
+        '400':
+          description: Lỗi Validation hoặc Logic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                InvalidId:
+                  summary: ID không hợp lệ
+                  value:
+                    message: "Invalid Dish ID"
+                CategoryError:
+                  summary: Danh mục lỗi
+                  value:
+                    message: "Dish category not found or inactive"
+                IngredientError:
+                  summary: Nguyên liệu lỗi
+                  value:
+                    message: "One or more ingredients in recipe are invalid"
+                ImgError:
+                  summary: Ảnh lỗi
+                  value:
+                    message: "File type not supported"
+        '404':
+          description: Không tìm thấy
+          content:
+            application/json:
+              example:
+                message: "Dish not found"
+        '401':
+          description: Unauthorized
 components:
   schemas:
     Table:
