@@ -8,7 +8,7 @@ const guestRoutes = Router()
 /**
  * Description: Guest Login via QR Code
  * Path: /
- * Body: { qrToken: string, name: string }
+ * Body: { qrToken: string, guestName: string }
  */
 guestRoutes.post("/auth/login", guestLoginValidation, wrapHandlerFunction(guestLoginController))
 

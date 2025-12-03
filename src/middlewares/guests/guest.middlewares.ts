@@ -4,7 +4,7 @@ import USER_MESSAGES from "../../constants/message"
 import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
 
-const nameValidation: ParamSchema = {
+const guestNameValidation: ParamSchema = {
   notEmpty: {
     errorMessage: "Name is required"
   },
@@ -28,7 +28,7 @@ const qrTokenValidation: ParamSchema = {
 export const guestLoginValidation = validate(
   checkSchema(
     {
-      name: nameValidation,
+      guestName: guestNameValidation,
       qrToken: qrTokenValidation
     },
     ["body"]

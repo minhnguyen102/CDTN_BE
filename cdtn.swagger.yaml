@@ -3100,6 +3100,356 @@ paths:
                 message: "Dish not found"
         '401':
           description: Unauthorized
+
+  # Xong
+  /dish-categories:
+    post:
+      tags:
+        - Dish Category
+      summary: Create Dish Category
+      description: Tạo mới danh mục món ăn (Yêu cầu upload ảnh).
+      operationId: createDishCategory
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File ảnh danh mục (jpg, jpeg, png, webp)
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  example: "Burger"
+                description:
+                  type: string
+                  maxLength: 255
+                  example: "Danh mục Burger"
+                display_order:
+                  type: integer
+                  minimum: 1
+                  example: 1
+                status:
+                  type: string
+                  enum: [active, inactive, hidden]
+                  example: "active"
+              required:
+                - image
+                - name
+                - display_order
+                - status
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Dish category created successfully"
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "692faffcdab9b8cb472875da"
+                      name:
+                        type: string
+                        example: "Burger"
+                      display_order:
+                        type: integer
+                        example: 1
+                      status:
+                        type: string
+                        example: "active"
+                      image:
+                        type: string
+                        example: "https://res.cloudinary.com/..."
+                      description:
+                        type: string
+                        example: "Danh mục Burger"
+        '400':
+          description: Bad Request (Lỗi liên quan đến File hoặc Logic)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: integer
+              examples:
+                MissingFile:
+                  summary: Thiếu file ảnh
+                  value:
+                    message: "Image is required"
+                    status: 400
+                InvalidFileType:
+                  summary: Định dạng file không hỗ trợ
+                  value:
+                    message: "File type is not supported"
+                    status: 400
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
+        '422':
+          description: Unprocessable Entity (Validation Error)
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                ValidationError:
+                  summary: Lỗi dữ liệu đầu vào
+                  value:
+                    message: "Validation error"
+                    errors:
+                      name: "Category name length must be between 1 and 50"
+                      display_order: "Display order must be a positive integer"
+                      status: "Status is invalid"
+    get:
+      tags:
+        - Dish Category
+      summary: Get List Dish Categories
+      description: Lấy danh sách danh mục món ăn có hỗ trợ phân trang, tìm kiếm và lọc theo trạng thái.
+      operationId: getDishCategories
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Trang hiện tại
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            enum: [5, 10, 15]
+            default: 5
+          description: Số lượng bản ghi trên một trang (Chỉ cho phép 5, 10, 15)
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Tìm kiếm theo tên hoặc mô tả
+          example: "Burger"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive]
+          description: Lọc theo trạng thái hoạt động
+          example: "active"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get dish categories success"
+                  result:
+                    type: object
+                    properties:
+                      dishCategories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                              example: "692faffcdab9b8cb472875da"
+                            name:
+                              type: string
+                              example: "Burger"
+                            display_order:
+                              type: integer
+                              example: 1
+                            status:
+                              type: string
+                              example: "active"
+                            image:
+                              type: string
+                              example: "https://res.cloudinary.com/..."
+                            description:
+                              type: string
+                              example: "Danh mục Burger"
+                      pagination:
+                        type: object
+                        properties:
+                          currentPage:
+                            type: integer
+                            example: 1
+                          limit:
+                            type: integer
+                            example: 5
+                          total:
+                            type: integer
+                            example: 10
+                          totalPages:
+                            type: integer
+                            example: 2
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
+  /dish-categories/{id}:
+    patch:
+      tags:
+        - Dish Category
+      summary: Update Dish Category
+      description: Cập nhật thông tin danh mục (Ảnh và các trường khác đều là tùy chọn).
+      operationId: updateDishCategory
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của danh mục cần cập nhật
+          example: "692faffcdab9b8cb472875da"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File ảnh mới (nếu muốn thay đổi)
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  example: "Burger Special"
+                description:
+                  type: string
+                  maxLength: 255
+                  example: "Danh mục Burger đặc biệt"
+                display_order:
+                  type: integer
+                  minimum: 1
+                  example: 2
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  example: "inactive"
+              # Không có required vì tất cả đều optional khi update
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Dish category updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "692faffcdab9b8cb472875da"
+                      name:
+                        type: string
+                        example: "Burger Special"
+                      display_order:
+                        type: integer
+                        example: 2
+                      status:
+                        type: string
+                        example: "inactive"
+                      image:
+                        type: string
+                        example: "https://res.cloudinary.com/new-image-url..."
+                      description:
+                        type: string
+                        example: "Danh mục Burger đặc biệt"
+        '400':
+          description: Bad Request (ID sai hoặc File không hợp lệ)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid MongoDB Id format"
+              examples:
+                InvalidID:
+                  summary: ID không đúng định dạng
+                  value:
+                    message: "Category ID is invalid"
+                InvalidFile:
+                  summary: File ảnh không hỗ trợ
+                  value:
+                    message: "File type is not supported"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "accesstoken is require"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Dish category not found"
+        '422':
+          description: Unprocessable Entity (Lỗi validation dữ liệu gửi lên)
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                InvalidData:
+                  summary: Dữ liệu không hợp lệ
+                  value:
+                    message: "Validation error"
+                    errors:
+                      name: "Category name length must be between 1 and 50"
+                      status: "Status is invalid"
 components:
   schemas:
     Table:
