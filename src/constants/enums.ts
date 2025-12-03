@@ -79,4 +79,11 @@ export enum OrderStatus {
   Cancelled = "Cancelled"
 }
 
+//Trạng thái cho từng món ăn lẻ (để track món nào ra rồi, món nào chưa)
+export enum OrderItemStatus {
+  Pending = "Pending", // Chờ nấu
+  Cooking = "Cooking", // Đang nấu
+  Done = "Done" // Đã xong/Đã ra món
+}
+
 export const ROLE_GUEST = "Guest"
