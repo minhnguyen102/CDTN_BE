@@ -1,7 +1,9 @@
 import { Express } from "express"
-import guestRoutes from "./guest.routes"
+import guestRoutes from "./auth.routes"
+import menuGuestRoutes from "./menu.routes"
 
 export const routesGuest = (app: Express) => {
   const PATH = "/guest"
-  app.use(PATH, guestRoutes)
+  app.use(PATH + "/auth", guestRoutes)
+  app.use(PATH + "/menu", menuGuestRoutes)
 }

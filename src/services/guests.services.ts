@@ -2,7 +2,7 @@ import databaseService from "../services/database.servies"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { signToken } from "../utils/jwt"
-import { ROLE_GUEST, TableStatus, TokenType } from "../constants/enums"
+import { DishCategoryStatus, DishStatus, ROLE_GUEST, TableStatus, TokenType } from "../constants/enums"
 
 class GuestService {
   private signAccessToken({
@@ -64,6 +64,67 @@ class GuestService {
       },
       currentOrderId // Frontend dựa vào đây để biết có cần load lại đơn cũ không
     }
+  }
+
+  async getMenu() {
+    const menu = await databaseService.dish_categories
+      .aggregate([
+        {
+          $match: {
+            status: DishCategoryStatus.ACTIVE
+          }
+        },
+        {
+          $sort: { display_order: 1 }
+        },
+        {
+          $lookup: {
+            from: "dishes",
+            localField: "_id",
+            foreignField: "categoryId",
+            pipeline: [
+              {
+                $match: {
+                  status: { $in: [DishStatus.AVAILABLE, DishStatus.UNAVAILABLE] },
+                  deleted: { $ne: true }
+                }
+              },
+              {
+                $sort: { isFeatured: -1, createdAt: -1 }
+              },
+              {
+                $project: {
+                  _id: 1,
+                  name: 1,
+                  price: 1,
+                  image: 1,
+                  description: 1,
+                  status: 1,
+                  isFeatured: 1
+                }
+              }
+            ],
+            as: "dishes"
+          }
+        },
+        {
+          $match: {
+            dishes: { $not: { $size: 0 } }
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            description: 1,
+            image: 1,
+            dishes: 1
+          }
+        }
+      ])
+      .toArray()
+
+    return menu
   }
 }
 const guestServices = new GuestService()
