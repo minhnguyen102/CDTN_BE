@@ -7,6 +7,7 @@ import YAML from "yaml"
 import fs from "fs"
 import path from "path"
 import swaggerUi from "swagger-ui-express"
+import { routesGuest } from "./routes/guests/index.routes"
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -52,6 +53,8 @@ app.use(cors(corsOptions))
 
 // Router admin
 routesAdmin(app)
+// Router guest
+routesGuest(app)
 
 app.use(defaultErrorHandler)
 

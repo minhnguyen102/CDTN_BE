@@ -78,3 +78,5 @@ export enum OrderStatus {
   Paid = "Paid",
   Cancelled = "Cancelled"
 }
+
+export const ROLE_GUEST = "Guest"
