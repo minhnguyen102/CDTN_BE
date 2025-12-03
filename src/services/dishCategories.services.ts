@@ -108,7 +108,7 @@ class DishCategoryService {
       if (payload.description) {
         payload.key_search = removeAccents(dish_category.name + " " + payload.description)
       } else {
-        payload.name = removeAccents(payload.name + " " + dish_category.description)
+        payload.key_search = removeAccents(payload.name + " " + dish_category.description)
       }
     }
 

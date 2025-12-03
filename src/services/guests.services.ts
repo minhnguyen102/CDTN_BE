@@ -3,8 +3,6 @@ import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { signToken } from "../utils/jwt"
 import { ROLE_GUEST, TableStatus, TokenType } from "../constants/enums"
-import RefreshToken from "../models/schema/RefreshToken.schema"
-import { ObjectId } from "mongodb"
 
 class GuestService {
   private signAccessToken({
@@ -28,29 +26,7 @@ class GuestService {
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string,
       optionals: {
-        expiresIn: "3h"
-      }
-    })
-  }
-  private signRefreshToken({
-    userId,
-    tableNumber,
-    guestName
-  }: {
-    userId: string
-    tableNumber: number
-    guestName: string
-  }) {
-    return signToken({
-      payload: {
-        userId,
-        tableNumber,
-        tokenType: TokenType.REFRESH_TOKEN,
-        guestName
-      },
-      privateKey: process.env.PRIVATE_KEY_SIGN_REFRESH_TOKEN as string,
-      optionals: {
-        expiresIn: "10h"
+        expiresIn: "5h"
       }
     })
   }
@@ -66,17 +42,12 @@ class GuestService {
 
     const user_id = table._id.toString()
 
-    const [accessToken, refreshToken] = await Promise.all([
-      this.signAccessToken({ userId: user_id, tableNumber: table.number, guestName, role: ROLE_GUEST }),
-      this.signRefreshToken({ userId: user_id, tableNumber: table.number, guestName })
-    ])
-
-    await databaseService.refresh_tokens.insertOne(
-      new RefreshToken({
-        token: refreshToken,
-        user_id: new ObjectId(user_id)
-      })
-    )
+    const accessToken = await this.signAccessToken({
+      userId: user_id,
+      tableNumber: table.number,
+      guestName,
+      role: ROLE_GUEST
+    })
 
     let currentOrderId = null
     if (table.status === TableStatus.OCCUPIED && table.currentOrderId) {
@@ -85,7 +56,6 @@ class GuestService {
 
     return {
       accessToken,
-      refreshToken,
       guest: {
         id: table._id, // Trả về ID bàn
         guestName: guestName,
