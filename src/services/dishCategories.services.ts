@@ -46,7 +46,7 @@ class DishCategoryService {
       { $match: matchFilter },
       {
         $sort: {
-          displayOrder: 1, // theo thứ tự ưu tiên,
+          display_order: 1, // theo thứ tự ưu tiên,
           name: 1
         }
       },
