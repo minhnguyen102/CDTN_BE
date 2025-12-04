@@ -3450,6 +3450,206 @@ paths:
                     errors:
                       name: "Category name length must be between 1 and 50"
                       status: "Status is invalid"
+
+  /guest/auth/login:
+    post:
+      tags:
+        - Guest Auth
+      summary: Guest Login
+      description: Đăng nhập cho khách hàng quét mã QR tại bàn.
+      operationId: guestLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                guestName:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  description: Tên khách hàng (để hiển thị và phân biệt)
+                  example: "John Doe"
+                qrToken:
+                  type: string
+                  description: Token lấy từ mã QR trên bàn
+                  example: "be772197701d5c2053b6aa7850a9d7438f0f98b6"
+              required:
+                - guestName
+                - qrToken
+      responses:
+        '200':
+          description: OK (Đăng nhập thành công)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successfully"
+                  result:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        description: Token dùng để xác thực các request tiếp theo (Đặt đơn, gọi nhân viên...)
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      guest:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: ID của bàn (Table ID)
+                            example: "654a3b2c1d0e9f8a7b6c5d4e"
+                          guestName:
+                            type: string
+                            example: "John Doe"
+                          tableNumber:
+                            type: integer
+                            example: 5
+                          status:
+                            type: string
+                            description: Trạng thái hiện tại của bàn
+                            enum: [Available, Occupied, Reserved]
+                            example: "Occupied"
+                      currentOrderId:
+                        type: string
+                        nullable: true
+                        description: ID đơn hàng hiện tại nếu bàn đang có khách (dùng để load lại bill cũ)
+                        example: "6925d6a45b616421690a7150"
+        '404':
+          description: Not Found (QR Token không hợp lệ)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Table not found or invalid QR token"
+        '422':
+          description: Unprocessable Entity (Lỗi Validation)
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                MissingName:
+                  summary: Thiếu tên khách
+                  value:
+                    message: "Validation error"
+                    errors:
+                      guestName: "Name is required"
+                InvalidNameLength:
+                  summary: Tên quá dài/ngắn
+                  value:
+                    message: "Validation error"
+                    errors:
+                      guestName: "Name length must be between 1 and 50 chars"
+                MissingToken:
+                  summary: Thiếu QR Token
+                  value:
+                    message: "Validation error"
+                    errors:
+                      qrToken: "QR Token is required"
+  /guest/menu:
+    get:
+      tags:
+        - Guest
+      summary: Lấy Menu cho khách (Gom nhóm theo Danh mục)
+      description: >
+        API trả về toàn bộ thực đơn, được gom nhóm theo Danh mục (Category).
+        Chỉ trả về các món đang bán (Available/Unavailable).
+        Sắp xếp theo thứ tự ưu tiên hiển thị.
+      security:
+        - BearerAuth: []
+      # parameters:
+      #   - in: query
+      #     name: categoryId
+      #     schema:
+      #       type: string
+      #     description: Lọc theo 1 danh mục cụ thể (Optional)
+      responses:
+        '200':
+          description: Lấy menu thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get menu successfully"
+                  data:
+                    type: array
+                    description: Danh sách các Category kèm theo món ăn
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          description: ID danh mục
+                        name:
+                          type: string
+                          description: Tên danh mục (Ví dụ "Chicken", "Drink")
+                        image:
+                          type: string
+                          description: Ảnh đại diện danh mục
+                        description:
+                          type: string
+                          description: Mô tả danh mục
+                        dishes:
+                          type: array
+                          description: Danh sách món ăn thuộc danh mục này
+                          items:
+                            type: object
+                            properties:
+                              _id:
+                                type: string
+                              name:
+                                type: string
+                              price:
+                                type: number
+                              description:
+                                type: string
+                              image:
+                                type: string
+                              status:
+                                type: string
+                                enum: [available, unavailable]
+                              isFeatured:
+                                type: boolean
+              example:
+                message: "Get menu successfully"
+                data:
+                  - _id: "692ff130719ee34fa4e8da17"
+                    name: "Pho"
+                    image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764749615/restaurant-app/img_1764749613677.jpg"
+                    description: "Phở việt nam"
+                    dishes:
+                      - _id: "692ff4726474afd721cf2a72"
+                        name: "Phở Bò"
+                        price: 40000
+                        description: "Phở bò ngonn"
+                        image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764750449/restaurant-app/img_1764750447412.jpg"
+                        status: "available"
+                        isFeatured: false
+                  - _id: "692fb10fdab9b8cb472075db"
+                    name: "Chicken"
+                    image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764733198/restaurant-app/img_1764733197450.jpg"
+                    description: "Danh mục gà"
+                    dishes:
+                      - _id: "692fe855d1d14ce2ee11a96e"
+                        name: "Cánh gà BBQ (4 miếng)"
+                        price: 89000
+                        description: "Cánh gà BBQ (4 miếng)"
+                        image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764747348/restaurant-app/img_1764747346505.jpg"
+                        status: "available"
+                        isFeatured: false
+        '401':
+          description: Unauthorized (Chưa login vào bàn)
 components:
   schemas:
     Table:
