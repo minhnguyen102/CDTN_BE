@@ -8,16 +8,10 @@ import fs from "fs"
 import path from "path"
 import swaggerUi from "swagger-ui-express"
 import { routesGuest } from "./routes/guests/index.routes"
-const app = express()
-const port = process.env.PORT || 3000
+import { createServer } from "http"
+import { initSocket } from "./utils/socket"
 
-const file = fs.readFileSync(path.resolve("cdtn.swagger.yaml"), "utf8")
-const swaggerDocument = YAML.parse(file)
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-
-app.use(express.json())
-
-const whitelist: string[] = [
+export const WHILELIST_DOMAINS: string[] = [
   // Môi trường Local
   "http://localhost:3000",
   "http://admin.localhost:3000",
@@ -35,11 +29,22 @@ const whitelist: string[] = [
   "https://api.snackio.io.vn",
   "https://www.api.snackio.io.vn"
 ]
+const app = express()
+const httpServer = createServer(app)
+const port = process.env.PORT || 3000
+initSocket(httpServer)
+
+const file = fs.readFileSync(path.resolve("cdtn.swagger.yaml"), "utf8")
+const swaggerDocument = YAML.parse(file)
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
+app.use(express.json())
+
 const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // Các request từ Postman, Server-to-Server thường không có origin -> Cho phép
-    // Origin nằm trong whitelist -> Cho phép
-    if (!origin || whitelist.indexOf(origin) !== -1) {
+    // Origin nằm trong WHILELIST_DOMAINS -> Cho phép
+    if (!origin || WHILELIST_DOMAINS.indexOf(origin) !== -1) {
       callback(null, true)
     } else {
       callback(new Error(`Not allowed by CORS. Origin: ${origin}`))
@@ -63,7 +68,7 @@ const startServer = async () => {
     await databaseService.connect()
     console.log("Database connected successfully")
 
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log(`Example app listening on port ${port}`)
     })
   } catch (error) {

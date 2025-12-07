@@ -11,6 +11,7 @@ import Role from "../models/schema/Role.schema"
 import Permission from "../models/schema/Permission.schema"
 import DishCategory from "../models/schema/DishCategory.schema"
 import Dish from "../models/schema/Dish.schema"
+import Order from "./models/schema/Order.schema"
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.sqjfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -71,6 +72,9 @@ class DatabaseService {
   }
   get dish_categories(): Collection<DishCategory> {
     return this.db.collection("dish_categories")
+  }
+  get orders(): Collection<Order> {
+    return this.db.collection("orders")
   }
 }
 

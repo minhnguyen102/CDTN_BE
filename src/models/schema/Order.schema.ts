@@ -34,11 +34,11 @@ interface OrderType {
   items: OrderItemInput[]
 
   // Thông tin thanh toán
-  totalAmount: number
+  totalAmount?: number
   discount?: number
   finalAmount?: number
 
-  status: OrderStatus
+  status?: OrderStatus
 
   // Thời gian
   createdAt?: Date // Thời gian tạo đơn (lần đầu gọi món)
@@ -62,7 +62,7 @@ export default class Order {
     this._id = order._id || new ObjectId()
     this.tableId = new ObjectId(order.tableId)
     this.tableNumber = order.tableNumber
-    this.status = order.status || OrderStatus.Pending
+    this.status = order.status || OrderStatus.PENDING
 
     // Map dữ liệu items để đảm bảo tính đúng đắn
     this.items = order.items.map((item) => ({

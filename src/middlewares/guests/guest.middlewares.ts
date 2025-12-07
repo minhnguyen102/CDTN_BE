@@ -7,6 +7,7 @@ import { JsonWebTokenError } from "jsonwebtoken"
 import { verifyToken } from "../../utils/jwt"
 import _ from "lodash"
 import { ROLE_GUEST } from "../../constants/enums"
+import { ObjectId } from "mongodb"
 
 const guestNameValidation: ParamSchema = {
   notEmpty: {
@@ -81,4 +82,80 @@ export const accessTokenValidation = validate(
       }
     }
   })
+)
+
+// VALIDATE CREATE ORDER
+const itemsArrayValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.ORDER_ITEMS_REQUIRED
+  },
+  isArray: {
+    errorMessage: USER_MESSAGES.ORDER_ITEMS_MUST_BE_ARRAY,
+    options: { min: 1 }
+  },
+  custom: {
+    // Custom check thêm nếu cần (ví dụ check duplicate dishId)
+    options: (value: any[]) => {
+      if (value.length === 0) {
+        throw new Error(USER_MESSAGES.ORDER_ITEMS_EMPTY)
+      }
+      return true
+    }
+  }
+}
+
+// Validate Dish ID (cho từng item)
+const itemDishIdValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.ORDER_DISH_ID_REQUIRED
+  },
+  custom: {
+    options: async (value: string) => {
+      if (!ObjectId.isValid(value)) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGES.ORDER_DISH_ID_INVALID,
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+      return true
+    }
+  }
+}
+
+// Validate Quantity (cho từng item)
+const itemQuantityValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.ORDER_QUANTITY_REQUIRED
+  },
+  isInt: {
+    options: { gt: 0 }, // Phải là số nguyên > 0
+    errorMessage: USER_MESSAGES.ORDER_QUANTITY_MUST_BE_POSITIVE
+  },
+  toInt: true // Tự động convert string "2" thành number 2
+}
+
+// Validate Note (cho từng item - Optional)
+const itemNoteValidation: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: USER_MESSAGES.ORDER_NOTE_MUST_BE_STRING
+  },
+  trim: true
+}
+
+export const createOrderValidation = validate(
+  checkSchema(
+    {
+      // Kiểm tra mảng items
+      items: itemsArrayValidation,
+
+      // Kiểm tra chi tiết từng phần tử trong mảng items (Wildcard *)
+      "items.*.dishId": itemDishIdValidation,
+
+      "items.*.quantity": itemQuantityValidation,
+
+      "items.*.note": itemNoteValidation
+    },
+    ["body"]
+  )
 )

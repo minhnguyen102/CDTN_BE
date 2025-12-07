@@ -1,4 +1,16 @@
 const USER_MESSAGES = {
+  // --- Order Validation ---
+  ORDER_ITEMS_REQUIRED: "Order items are required",
+  ORDER_ITEMS_MUST_BE_ARRAY: "Order items must be an array",
+  ORDER_ITEMS_EMPTY: "Order must contain at least one item",
+
+  ORDER_DISH_ID_REQUIRED: "Dish ID is required",
+  ORDER_DISH_ID_INVALID: "Invalid Dish ID",
+
+  ORDER_QUANTITY_REQUIRED: "Quantity is required",
+  ORDER_QUANTITY_MUST_BE_POSITIVE: "Quantity must be greater than 0",
+
+  ORDER_NOTE_MUST_BE_STRING: "Note must be a string",
   DISH_UPDATED_SUCCESSFULLY: "Updated dish successfully",
   DISH_CREATED_SUCCESSFULLY: "Dish created successfully",
   DELETE_INGREDIENT_SUCESSFULLY: "Delete ingredient successfully",

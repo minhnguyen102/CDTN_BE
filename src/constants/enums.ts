@@ -72,11 +72,11 @@ export const MESSAGE_CODES = {
 }
 
 export enum OrderStatus {
-  Pending = "Pending",
-  Processing = "Processing",
-  Delivered = "Delivered",
-  Paid = "Paid",
-  Cancelled = "Cancelled"
+  PENDING = "Pending",
+  PROCESSING = "Processing",
+  DELIVERED = "Delivered",
+  PAID = "Paid",
+  CANCELLED = "Cancelled"
 }
 
 //Trạng thái cho từng món ăn lẻ (để track món nào ra rồi, món nào chưa)
