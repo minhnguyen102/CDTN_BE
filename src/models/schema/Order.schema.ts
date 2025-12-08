@@ -3,6 +3,7 @@ import { OrderStatus, OrderItemStatus } from "../../constants/enums"
 import { Interface } from "readline"
 
 export interface OrderItem {
+  _id: ObjectId
   dishId: ObjectId
   dishName: string
   dishPrice: number
@@ -15,6 +16,7 @@ export interface OrderItem {
 }
 
 export interface OrderItemInput {
+  _id?: ObjectId
   dishId: string
   dishName: string
   dishPrice: number
@@ -67,6 +69,7 @@ export default class Order {
     // Map dữ liệu items để đảm bảo tính đúng đắn
     this.items = order.items.map((item) => ({
       ...item,
+      _id: new ObjectId(),
       dishId: new ObjectId(item.dishId), // dữ liệu gửi lên là string nên mới phải custom lại
       note: item.note || "",
       status: item.status || OrderItemStatus.Pending,

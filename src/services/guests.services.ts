@@ -241,6 +241,7 @@ class GuestService {
     for (const item of items) {
       const dish = dishMap.get(item.dishId) as Dish
       orderItems.push({
+        _id: new ObjectId(),
         dishId: dish._id,
         dishName: dish.name,
         dishPrice: dish.price,
