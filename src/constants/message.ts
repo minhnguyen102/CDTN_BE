@@ -1,4 +1,7 @@
 const USER_MESSAGES = {
+  GET_MENU_SUCCESS: "Get menu successfully",
+  CREATE_ORDER_SUCCESS: "Order placed successfully",
+  LOGIN_GUEST_SUCCESS: "Login success",
   // --- Order Validation ---
   ORDER_ITEMS_REQUIRED: "Order items are required",
   ORDER_ITEMS_MUST_BE_ARRAY: "Order items must be an array",

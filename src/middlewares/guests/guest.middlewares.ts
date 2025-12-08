@@ -59,7 +59,7 @@ export const accessTokenValidation = validate(
               token: access_token,
               secretOrPublicKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string
             })
-            if (decoded_access_token.role !== ROLE_GUEST) {
+            if (decoded_access_token.role_name !== ROLE_GUEST) {
               throw new ErrorWithStatus({
                 message: "You are not authorized (Guest role required)",
                 status: HTTP_STATUS.FORBIDDEN

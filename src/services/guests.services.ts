@@ -23,23 +23,23 @@ interface DishItemInputFE {
 }
 class GuestService {
   private signAccessToken({
-    userId,
+    user_id,
     tableNumber,
     guestName,
-    role
+    role_name
   }: {
-    userId: string
+    user_id: string
     tableNumber: number
     guestName: string
-    role: string
+    role_name: string
   }) {
     return signToken({
       payload: {
-        userId,
+        user_id,
         tableNumber,
-        tokenType: TokenType.ACCESS_TOKEN,
+        token_type: TokenType.ACCESS_TOKEN,
         guestName,
-        role
+        role_name
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string,
       optionals: {
@@ -69,12 +69,12 @@ class GuestService {
     const session = databaseService.client.startSession()
     session.startTransaction()
 
-    console.log(ingredientUpdates)
+    // console.log(ingredientUpdates)
 
     try {
       for (const [ingredientId, quantity] of ingredientUpdates) {
-        console.log(ingredientId)
-        console.log(quantity)
+        // console.log(ingredientId)
+        // console.log(quantity)
         const result = await databaseService.ingredients.updateOne(
           {
             _id: new ObjectId(ingredientId),
@@ -85,7 +85,7 @@ class GuestService {
           },
           { session }
         )
-        console.log(result)
+        // console.log(result)
         if (result.matchedCount === 0) {
           throw new ErrorWithStatus({
             message: `Nguyên liệu ID ${ingredientId} không đủ tồn kho`,
@@ -115,10 +115,10 @@ class GuestService {
     const user_id = table._id.toString()
 
     const accessToken = await this.signAccessToken({
-      userId: user_id,
+      user_id: user_id,
       tableNumber: table.number,
       guestName,
-      role: ROLE_GUEST
+      role_name: ROLE_GUEST
     })
 
     let currentOrderId = null
@@ -254,13 +254,14 @@ class GuestService {
     }
 
     const tableObjectId = new ObjectId(tableId)
+    // console.log(tableId)
     const table = await databaseService.tables.findOne({ _id: tableObjectId })
     let orderResult
 
     if (table?.currentOrderId) {
       // Bàn Đang Ăn -> Cập nhật đơn cũ
       const currentOrderId = table.currentOrderId
-      console.log(currentOrderId)
+      // console.log(currentOrderId)
       const additionalAmount = orderItems.reduce((acc, item) => acc + item.dishPrice * item.quantity, 0)
 
       await databaseService.orders.updateOne(
@@ -294,6 +295,16 @@ class GuestService {
           }
         }
       )
+    }
+    try {
+      const io = getIO()
+      // gửi thông báo đến cho admin
+      io.to("admin_room").emit("new_order", orderResult)
+      // Gửi thông báo đến khách trong bàn ăn được đặt
+      io.to(`table_${tableId}`).emit("refresh_order", orderResult)
+    } catch (error) {
+      // Nếu socket lỗi, khách vẫn đặt món thành công
+      console.error("Socket emit error:", error)
     }
     return orderResult
   }

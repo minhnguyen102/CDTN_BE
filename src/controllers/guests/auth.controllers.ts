@@ -3,6 +3,7 @@ import HTTP_STATUS from "../../constants/httpStatus"
 import guestServices from "../../services/guests.services"
 import { ParamsDictionary } from "express-serve-static-core"
 import { GuestLoginReqBody } from "../../models/requests/Guest.request"
+import USER_MESSAGES from "../../constants/message"
 
 export const guestLoginController = async (req: Request<ParamsDictionary, any, GuestLoginReqBody>, res: Response) => {
   const { guestName, qrToken } = req.body
@@ -10,7 +11,7 @@ export const guestLoginController = async (req: Request<ParamsDictionary, any, G
   const result = await guestServices.login({ qrToken, guestName })
 
   return res.status(HTTP_STATUS.OK).json({
-    message: "Login success",
+    message: USER_MESSAGES.LOGIN_GUEST_SUCCESS,
     data: result
   })
 }
