@@ -299,9 +299,17 @@ class GuestService {
     try {
       const io = getIO()
       // gửi thông báo đến cho admin
-      io.to("admin_room").emit("new_order", orderResult)
+      io.to("admin_room").emit("new_order", {
+        type: "NEW_ORDER_CREATED",
+        message: `Bàn ${table?.number} vừa đặt món`,
+        data: orderResult
+      })
       // Gửi thông báo đến khách trong bàn ăn được đặt
-      io.to(`table_${tableId}`).emit("refresh_order", orderResult)
+      io.to(`table_${tableId}`).emit("refresh_order", {
+        type: "ORDER_UPDATED", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
+        message: "Khách hàng vừa gọi món mới",
+        data: orderResult
+      })
     } catch (error) {
       // Nếu socket lỗi, khách vẫn đặt món thành công
       console.error("Socket emit error:", error)
