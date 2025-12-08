@@ -65,53 +65,40 @@ class GuestService {
     }
     if (ingredientUpdates.size == 0) return
 
-    // Bước cập nhật
-    const bulkOps: any[] = [] // cho pheps thực hiện nhiều thao tác cùng một lúc thay vì gọi riêng lẻ
-    const ingredientIds: string[] = []
+    // Transaction
+    const session = databaseService.client.startSession()
+    session.startTransaction()
 
-    ingredientUpdates.forEach((quantity, ingredientId) => {
-      // ngược so với map về thứ tự tham số
-      ingredientIds.push(ingredientId)
-      bulkOps.push({
-        updateOne: {
-          filter: {
+    console.log(ingredientUpdates)
+
+    try {
+      for (const [ingredientId, quantity] of ingredientUpdates) {
+        console.log(ingredientId)
+        console.log(quantity)
+        const result = await databaseService.ingredients.updateOne(
+          {
             _id: new ObjectId(ingredientId),
             currentStock: { $gte: quantity }
           },
-          update: {
+          {
             $inc: { currentStock: -quantity }
-          }
+          },
+          { session }
+        )
+        console.log(result)
+        if (result.matchedCount === 0) {
+          throw new ErrorWithStatus({
+            message: `Nguyên liệu ID ${ingredientId} không đủ tồn kho`,
+            status: HTTP_STATUS.BAD_REQUEST
+          })
         }
-      })
-    })
-
-    const result = await databaseService.ingredients.bulkWrite(bulkOps)
-    if (result.matchedCount < bulkOps.length) {
-      // --- LOGIC ROLLBACK (QUAN TRỌNG) ---
-      // Vì MongoDB (nếu không dùng Replica Set Transaction) không tự rollback nếu 1 cái fail trong bulkWrite.
-      // Chúng ta phải tự cộng lại những cái đã trừ thành công.
-
-      // Bước 4a: Tìm ra những nguyên liệu bị trừ "lỡ" (nếu có) để hoàn tác,
-      // Nhưng để đơn giản và an toàn nhất ở mức code:
-      // Nếu thất bại, chúng ta sẽ cố gắng đảo ngược lại chính những lệnh vừa chạy (nhưng cộng vào).
-      // Tuy nhiên, cách tốt nhất ở đây là throw lỗi ngay.
-      // Để xử lý triệt để vấn đề rollback thủ công khá phức tạp,
-      // tôi sẽ hướng dẫn bạn cách "bắn lỗi" cho user biết món nào hết hàng.
-
-      // *Lưu ý thực tế: Nếu bạn deploy lên Atlas, hãy dùng session.startTransaction() là tốt nhất.
-      // Dưới đây là giải pháp "Manual Rollback" đơn giản cho Standalone DB:
-
-      // Logic phục hồi: Cộng lại tất cả những gì đã trừ (nếu bị modify)
-      if (result.modifiedCount > 0) {
-        // Đây là xử lý nâng cao: Phải tìm xem cái nào đã bị trừ để cộng lại.
-        // Trong phạm vi đồ án, ta có thể chấp nhận rủi ro nhỏ hoặc dùng Transaction.
-        // Ở đây tôi throw lỗi để chặn đơn hàng được tạo ra.
       }
-
-      throw new ErrorWithStatus({
-        message: "Một số món ăn đã hết nguyên liệu phục vụ, vui lòng gọi món khác.",
-        status: HTTP_STATUS.BAD_REQUEST
-      })
+      await session.commitTransaction()
+    } catch (error) {
+      await session.abortTransaction() // Nếu có bất kì 1 lỗi => Hủy toàn bộ các thay đổi trước đó
+      throw error
+    } finally {
+      await session.endSession()
     }
   }
 
@@ -308,7 +295,6 @@ class GuestService {
         }
       )
     }
-    console.log(orderResult) // null
     return orderResult
   }
 }

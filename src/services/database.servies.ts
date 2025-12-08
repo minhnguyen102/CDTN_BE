@@ -11,22 +11,26 @@ import Role from "../models/schema/Role.schema"
 import Permission from "../models/schema/Permission.schema"
 import DishCategory from "../models/schema/DishCategory.schema"
 import Dish from "../models/schema/Dish.schema"
-import Order from "./models/schema/Order.schema"
+import Order from "../models/schema/Order.schema"
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.sqjfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
 class DatabaseService {
-  private client: MongoClient
+  private _client: MongoClient
   private db: Db
   constructor() {
-    this.client = new MongoClient(uri)
-    this.db = this.client.db(process.env.DB_NAME)
+    this._client = new MongoClient(uri)
+    this.db = this._client.db(process.env.DB_NAME)
+  }
+
+  get client() {
+    return this._client
   }
 
   async connect() {
     try {
-      // Connect the client to the server	(optional starting in v4.7)
-      await this.client.connect()
+      // Connect the _client to the server	(optional starting in v4.7)
+      await this._client.connect()
       // Send a ping to confirm a successful connection
       await this.db.command({ ping: 1 })
       console.log("Pinged your deployment. You successfully connected to MongoDB!")
