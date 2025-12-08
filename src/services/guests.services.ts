@@ -280,7 +280,6 @@ class GuestService {
         tableId: tableObjectId,
         tableNumber: table?.number || 0,
         items: orderItems,
-        totalAmount: 0,
         status: OrderStatus.PENDING
       })
 
