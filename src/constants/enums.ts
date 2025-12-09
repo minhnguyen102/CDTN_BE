@@ -83,7 +83,8 @@ export enum OrderStatus {
 export enum OrderItemStatus {
   Pending = "Pending", // Chờ nấu
   Cooking = "Cooking", // Đang nấu
-  Done = "Done" // Đã xong/Đã ra món
+  Served = "Served", // Đã phục vụ
+  Reject = "Reject" // Từ chối
 }
 
 export const ROLE_GUEST = "Guest"

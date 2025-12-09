@@ -2,6 +2,10 @@ import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
 import orderServices from "../../services/orders.services"
 import { paginationQueryParser } from "../../utils/helpers"
+import { UpdateStatusItemInOrdersReqBody } from "../../models/requests/Order.request"
+import { OrderItemStatus } from "../../constants/enums"
+import { ErrorWithStatus } from "../../models/Errors"
+import HTTP_STATUS from "../../constants/httpStatus"
 
 export const getAllOrdersController = async (req: Request, res: Response) => {
   const { limit, page } = paginationQueryParser(req, { defaultLimit: 15, allowLimits: [15, 20, 25] })
@@ -15,6 +19,31 @@ export const getAllOrdersController = async (req: Request, res: Response) => {
 
   return res.json({
     message: "Get all orders successfully",
+    data: result
+  })
+}
+
+export const updateStatusItemInOrdersController = async (
+  req: Request<ParamsDictionary, any, UpdateStatusItemInOrdersReqBody>,
+  res: Response
+) => {
+  const { order_id, item_id } = req.params
+  const { status } = req.body
+
+  if (!Object.values(OrderItemStatus).includes(status)) {
+    return new ErrorWithStatus({
+      message: "Invalid status",
+      status: HTTP_STATUS.BAD_REQUEST
+    })
+  }
+  const result = await orderServices.updateItemStatus({
+    orderId: order_id,
+    itemId: item_id,
+    status: status
+  })
+
+  return res.json({
+    message: "Update item status successfully",
     data: result
   })
 }
