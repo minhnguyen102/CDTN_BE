@@ -5,27 +5,64 @@ class OrderServices {
     limit,
     page,
     status,
-    search
+    search,
+    dateFrom,
+    dateTo
   }: {
     limit: number
     page: number
     status?: string
     search?: string
+    dateFrom?: string
+    dateTo?: string
   }) {
     const match: any = {}
 
-    // Lọc theo trạng thái (Nếu có truyền lên)
+    // Lọc theo trạng thái của món ăn, chứ không phải trạng thái đơn hàng
     // Ví dụ: ?status=Pending -> Chỉ lấy đơn đang chờ
     if (status) {
-      match.status = status
+      match["items.status"] = status
     }
-
     // Phân trang (Pagination)
     const skip = (page - 1) * limit
 
-    // Query Database
+    if (search) {
+      match.tableNumber = Number(search)
+    }
+
+    if (dateFrom || dateTo) {
+      match.createdAt = {}
+      if (dateFrom) {
+        match.createdAt.$gte = new Date(dateFrom)
+      }
+      if (dateTo) {
+        match.createdAt.$lte = new Date(dateTo)
+      }
+    }
+
+    const queryPipeline: any[] = [{ $match: match }, { $sort: { createdAt: 1 } }, { $skip: skip }, { $limit: limit }]
+    console.log(queryPipeline)
+    if (status) {
+      queryPipeline.push({
+        $project: {
+          tableId: 1,
+          tableNumber: 1,
+          status: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          items: {
+            $filter: {
+              input: "$items",
+              as: "item",
+              cond: { $eq: ["$$item.status", status] }
+            }
+          }
+        }
+      })
+    }
+    console.log(queryPipeline)
     const [orders, total] = await Promise.all([
-      databaseService.orders.find(match).sort({ createdAt: -1 }).skip(skip).limit(limit).toArray(),
+      databaseService.orders.aggregate(queryPipeline).toArray(),
       databaseService.orders.countDocuments(match)
     ])
     return {
