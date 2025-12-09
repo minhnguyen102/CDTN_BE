@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
 import orderServices from "../../services/orders.services"
 import { paginationQueryParser } from "../../utils/helpers"
-import { UpdateStatusItemInOrdersReqBody } from "../../models/requests/Order.request"
+import { CreateOrderForTableController, UpdateStatusItemInOrdersReqBody } from "../../models/requests/Order.request"
 import { OrderItemStatus } from "../../constants/enums"
 import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
@@ -48,6 +48,26 @@ export const updateStatusItemInOrdersController = async (
 
   return res.json({
     message: "Update item status successfully",
+    data: result
+  })
+}
+
+export const adminCreateOrderForTableController = async (
+  req: Request<ParamsDictionary, any, CreateOrderForTableController>,
+  res: Response
+) => {
+  const { tableId, guestName, items } = req.body
+  const { user_id } = req.decoded_access_token as TokenPayload
+
+  const result = await orderServices.createOrderForTable({
+    tableId,
+    guestName,
+    items,
+    adminId: user_id
+  })
+
+  return res.json({
+    message: "Order created/updated successfully",
     data: result
   })
 }

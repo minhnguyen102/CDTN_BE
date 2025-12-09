@@ -80,8 +80,8 @@ export default class Order {
       note: item.note || "",
       status: item.status || OrderItemStatus.Pending,
       createdAt: item.createdAt || date,
-      managedBy: "",
-      processingHistory: []
+      managedBy: (item as any).managedBy || "",
+      processingHistory: (item as any).processingHistory || []
     }))
 
     // Tự động tính tổng tiền nếu không truyền vào

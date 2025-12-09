@@ -1,13 +1,65 @@
 import { ObjectId } from "mongodb"
-import { OrderItemStatus } from "../constants/enums"
+import { DishStatus, OrderItemStatus, OrderStatus, TableStatus } from "../constants/enums"
 import databaseService from "./database.servies"
 import { getIO } from "../utils/socket"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { update } from "lodash"
 import Account from "../models/schema/Account.schema"
+import USER_MESSAGES from "../constants/message"
+import Dish from "../models/schema/Dish.schema"
+import Order from "../models/schema/Order.schema"
 
+interface DishItemInputFE {
+  dishId: string
+  quantity: number
+  note: string
+}
 class OrderServices {
+  private async checkAndDeductStock(items: any[], dishMap: Map<string, any>) {
+    const ingredientUpdates = new Map<string, number>()
+
+    for (const item of items) {
+      const dish = dishMap.get(item.dishId)
+      if (dish && dish.recipe) {
+        for (const recipeItem of dish.recipe) {
+          const ingId = recipeItem.ingredientId.toString()
+          const totalQuantity = recipeItem.quantity * item.quantity
+          const currentQuantity = ingredientUpdates.get(ingId) || 0
+          ingredientUpdates.set(ingId, currentQuantity + totalQuantity)
+        }
+      }
+    }
+    if (ingredientUpdates.size === 0) return
+
+    // Transaction
+    const session = databaseService.client.startSession()
+    session.startTransaction()
+
+    try {
+      for (const [ingredientId, quantity] of ingredientUpdates) {
+        const result = await databaseService.ingredients.updateOne(
+          { _id: new ObjectId(ingredientId), currentStock: { $gte: quantity } },
+          {
+            $inc: { currentStock: -quantity }
+          }
+        )
+        if (result.matchedCount === 0) {
+          throw new ErrorWithStatus({
+            message: `Nguyên liệu ID ${ingredientId} không đủ tồn kho`,
+            status: HTTP_STATUS.BAD_REQUEST
+          })
+        }
+        await session.commitTransaction()
+      }
+    } catch (error) {
+      await session.abortTransaction() // Nếu có bất kì 1 lỗi => Hủy toàn bộ các thay đổi trước đó
+      throw error
+    } finally {
+      await session.endSession()
+    }
+  }
+
   async getAllOrders({
     limit,
     page,
@@ -160,6 +212,142 @@ class OrderServices {
       io.to(`table_${updateOrder.tableId}`).emit("update_order_item", socketPayload)
     }
     return updateOrder
+  }
+
+  async createOrderForTable({
+    tableId,
+    guestName,
+    items,
+    adminId
+  }: {
+    tableId: string
+    guestName: string
+    items: DishItemInputFE[]
+    adminId: string
+  }) {
+    const account = (await databaseService.accounts.findOne({ _id: new ObjectId(adminId) })) as Account
+    // Kiểm tra nguyên liệu
+    const dishIds = items.map((item) => new ObjectId(item.dishId))
+    const dishes = await databaseService.dishes
+      .find(
+        { _id: { $in: dishIds } },
+        {
+          projection: {
+            name_search: 0,
+            deleted: 0,
+            deletedAt: 0,
+            createdAt: 0,
+            updatedAt: 0
+          }
+        }
+      )
+      .toArray()
+    const dishMap = new Map(dishes.map((d) => [d._id.toString(), d]))
+
+    for (const item of items) {
+      const dish = dishMap.get(item.dishId)
+      if (!dish || dish.status === DishStatus.HIDDEN || dish.status === DishStatus.UNAVAILABLE) {
+        throw new ErrorWithStatus({
+          message: `Dish '${dish?.name || item.dishId}' is not available`,
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+    }
+    await this.checkAndDeductStock(items, dishMap)
+
+    // Nguyen liệu đủ => Tạo đơn
+    const orderItems: any[] = []
+    for (const item of items) {
+      const dish = dishMap.get(item.dishId) as Dish
+      orderItems.push({
+        _id: new ObjectId(),
+        dishId: dish._id,
+        dishName: dish.name,
+        dishPrice: dish.price,
+        dishImage: dish.image,
+        quantity: item.quantity,
+        note: item.note || "",
+        orderedBy: guestName,
+        status: OrderItemStatus.Pending,
+        createdAt: new Date(),
+        managedBy: account.name, // Vì đây là admin đặt hộ khách
+        processingHistory: [
+          {
+            status: OrderItemStatus.Pending,
+            updatedBy: account.name,
+            updatedAt: new Date()
+          }
+        ]
+      })
+    }
+
+    // Có đơn => Gán vào bàn (Kiểm tra bàn)
+    const tableObjectId = new ObjectId(tableId)
+    const table = await databaseService.tables.findOne({ _id: tableObjectId })
+    if (!table) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.TABLE_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    let orderResult
+    if (table.currentOrderId) {
+      // Nếu có đơn => Cập nhật đơn mới
+      const currentOrderId = table.currentOrderId
+      const additionalAmount = orderItems.reduce((acc, item) => acc + item.dishPrice * item.quantity, 0)
+
+      await databaseService.orders.updateOne(
+        { _id: currentOrderId },
+        {
+          $push: { items: { $each: orderItems } },
+          $inc: { totalAmount: additionalAmount },
+          $set: { updatedAt: new Date() }
+        }
+      )
+      orderResult = await databaseService.orders.findOne({ _id: currentOrderId })
+    } else {
+      // Bàn trống => Tạo đơn mới
+      const newOrder = new Order({
+        tableId: tableObjectId,
+        tableNumber: table.number,
+        items: orderItems,
+        status: OrderStatus.PENDING
+      })
+      const insertResult = await databaseService.orders.insertOne(newOrder)
+      orderResult = { ...newOrder, _id: insertResult.insertedId }
+
+      await databaseService.tables.updateOne(
+        { _id: tableObjectId },
+        {
+          $set: {
+            status: TableStatus.OCCUPIED,
+            currentOrderId: insertResult.insertedId
+          }
+        }
+      )
+    }
+
+    // Tạo đơn thành công => gửi thông báo
+    try {
+      const io = getIO()
+      // gửi thông báo đến cho admin
+      io.to("admin_room").emit("new_order", {
+        type: "NEW_ORDER_CREATED",
+        message: `Bàn ${table?.number} vừa đặt món`,
+        data: orderResult
+      })
+      // Gửi thông báo đến khách trong bàn ăn được đặt
+      io.to(`table_${tableId}`).emit("refresh_order", {
+        type: "ORDER_UPDATED", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
+        message: "Khách hàng vừa gọi món mới",
+        data: orderResult
+      })
+    } catch (error) {
+      // Nếu socket lỗi, khách vẫn đặt món thành công
+      console.error("Socket emit error:", error)
+    }
+    return orderResult
   }
 }
 const orderServices = new OrderServices()

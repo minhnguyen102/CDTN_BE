@@ -2,7 +2,12 @@ import { Router } from "express"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
-import { getAllOrdersController, updateStatusItemInOrdersController } from "../../controllers/admins/orders.controllers"
+import {
+  adminCreateOrderForTableController,
+  getAllOrdersController,
+  updateStatusItemInOrdersController
+} from "../../controllers/admins/orders.controllers"
+import { adminCreateOrderValidation } from "../../middlewares/admins/orders.middlewares"
 const ordersRouter = Router()
 
 /**
@@ -30,8 +35,22 @@ ordersRouter.patch(
   "/:order_id/:item_id",
   accessTokenValidation,
   verifiedUserValidation,
-  // checkPermission("update_orders"),
+  // checkPermission("update_order"), // chưa tạo mới quyền này
   wrapHandlerFunction(updateStatusItemInOrdersController)
+)
+
+/**
+ * Description: Admin tạo đơn cho bàn (Dùng cho khách có nhu cầu gọi hộ)
+ * Path: /orders/create
+ * Method: POST
+ * Body: { tableId: "...", guestName, items: [...] }
+ */
+ordersRouter.post(
+  "/create",
+  accessTokenValidation,
+  // checkPermission("create_order"), // admin chưa có
+  adminCreateOrderValidation,
+  wrapHandlerFunction(adminCreateOrderForTableController)
 )
 
 export default ordersRouter

@@ -11,3 +11,13 @@ export interface CreateOrderReqBody {
 export interface UpdateStatusItemInOrdersReqBody {
   status: OrderItemStatus
 }
+
+export interface CreateOrderForTableController {
+  tableId: string
+  guestName: string
+  items: {
+    dishId: string
+    quantity: number
+    note: string
+  }[]
+}

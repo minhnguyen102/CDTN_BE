@@ -1,4 +1,7 @@
 const USER_MESSAGES = {
+  TABLE_NOT_FOUND: "Table not found",
+  TABLE_ID_IS_REQUIRED: "Table ID is required",
+  TABLE_ID_IS_INVALID: "Invalid Table ID format",
   GET_MENU_SUCCESS: "Get menu successfully",
   CREATE_ORDER_SUCCESS: "Order placed successfully",
   LOGIN_GUEST_SUCCESS: "Login success",
