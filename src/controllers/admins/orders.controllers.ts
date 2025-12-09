@@ -6,6 +6,7 @@ import { UpdateStatusItemInOrdersReqBody } from "../../models/requests/Order.req
 import { OrderItemStatus } from "../../constants/enums"
 import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
+import { TokenPayload } from "../../models/requests/Account.request"
 
 export const getAllOrdersController = async (req: Request, res: Response) => {
   const { limit, page } = paginationQueryParser(req, { defaultLimit: 15, allowLimits: [15, 20, 25] })
@@ -30,6 +31,8 @@ export const updateStatusItemInOrdersController = async (
   const { order_id, item_id } = req.params
   const { status } = req.body
 
+  const { user_id } = req.decoded_access_token as TokenPayload
+
   if (!Object.values(OrderItemStatus).includes(status)) {
     return new ErrorWithStatus({
       message: "Invalid status",
@@ -39,7 +42,8 @@ export const updateStatusItemInOrdersController = async (
   const result = await orderServices.updateItemStatus({
     orderId: order_id,
     itemId: item_id,
-    status: status
+    status: status,
+    admin_id: user_id
   })
 
   return res.json({

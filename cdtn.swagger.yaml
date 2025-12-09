@@ -2,14 +2,38 @@ openapi: 3.0.4
 info:
   title: Chuyên đề tốt nghiệp quản lí quán ăn
   description: |-
-    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
-    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
-    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
-    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
-
-    Some useful links:
-    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
-    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+    ## 🔌 Hướng dẫn tích hợp Socket.IO (Real-time)
+    
+    Hệ thống sử dụng cơ chế Hybrid: **HTTP** để thao tác dữ liệu và **Socket.IO** để nhận thông báo thời gian thực.
+    
+    ### 1. Kết nối (Chung)
+    * **URL**: `ws://domain.com` (hoặc `http://localhost:3000`)
+    * **Auth**: Gửi Token qua `headers`.
+    ```javascript
+    const socket = io("http://localhost:3000", {
+      headers: { authorization: "Bearer <ACCESS_TOKEN>" }
+    });
+    ```
+    
+    ### 2. Luồng Khách Hàng (Guest)
+    Dành cho màn hình đặt món tại bàn.
+    * **Sự kiện Gửi đi (Emit)**: 
+      * `join_table`: Gửi ngay sau khi connect. Data: `{ tableId: "..." }`.
+    * **Sự kiện Lắng nghe (On)**:
+      * `refresh_order`: Nhận khi có đơn mới hoặc cập nhật đơn (để reload list bill).
+      * `update_order_item`: Nhận khi Bếp chuyển trạng thái từng món (ví dụ: Đang nấu).
+    
+    ### 3. Luồng Quản Trị / Bếp (Admin)
+    Dành cho màn hình Dashboard, Bếp, Thu ngân.
+    * **Sự kiện Gửi đi (Emit)**:
+      * `join_kitchen_room`: Gửi ngay sau khi connect. 
+        * **Yêu cầu**: Token của User phải có quyền `socket_join_kitchen` (Admin mặc định có).
+        * **Data**: Không cần gửi tham số.
+    * **Sự kiện Lắng nghe (On)**:
+      * `join_success`: Nhận phản hồi xác nhận đã vào phòng thành công.
+      * `new_order`: Nhận thông báo khi Khách vừa tạo đơn mới (Ting ting!).
+        * **Data**: Trả về object Order đầy đủ.
+      * `update_order_item`: Nhận thông báo khi một Admin khác vừa cập nhật trạng thái món (để đồng bộ giao diện giữa các máy Admin).
   termsOfService: https://swagger.io/terms/
   contact:
     email: apiteam@swagger.io
@@ -22,14 +46,36 @@ externalDocs:
   url: https://swagger.io
 servers:
   - url: https://cdtn-be-one.vercel.app/admin
+  - url: https://cdtn-be-one.vercel.app/guest
   - url: http://localhost:3000/admin
+  - url: http://localhost:3000/guest
 tags:
-  - name: account
+  - name: Account
     description: Các logic liên quan đến account
-  - name: table
+  - name: Table
     description: Các logic liên quan đến table
   - name: Supplier
     description: Các logic liên quan đến supplier
+  - name: Permission
+    description: Các logic liên quan đến Permission
+  - name: Role
+    description: Các logic liên quan đến Role
+  - name: Ingredient
+    description: Các logic liên quan đến Ingredient
+  - name: Import Orders
+    description: Các logic liên quan đến Import Orders
+  - name: Category Ingredient
+    description: Các logic liên quan đến Category Ingredient
+  - name: Dishes
+    description: Các logic liên quan đến Dishes
+  - name: Dish Category
+    description: Các logic liên quan đến Dish Category
+  - name: Orders
+    description: Quản lý đơn hàng (Admin)
+  - name: Guest Auth
+    description: Đăng nhập bên khách hàng
+  - name: Guest 
+    description: Logic bên khách hàng
   
     
 
@@ -37,7 +83,7 @@ paths:
   /accounts/login:
     post:
       tags:
-        - account
+        - Account
       summary: Đăng nhập
       description: Đăng nhập
       operationId: login
@@ -82,7 +128,7 @@ paths:
   /accounts/refresh-token:
     post:
       tags:
-        - account
+        - Account
       summary: Refresh access token
       operationId: accountsRefreshToken
       requestBody:
@@ -117,7 +163,7 @@ paths:
   /accounts/register:
     post:
       tags:
-        - account
+        - Account
       summary: Register a new user
       operationId: accountsRegister
       requestBody:
@@ -174,7 +220,7 @@ paths:
   /accounts/logout:
     post:
       tags:
-        - account
+        - Account
       summary: Logout user
       operationId: accountsLogout
       requestBody:
@@ -206,7 +252,7 @@ paths:
   /accounts/verify-email:
     post:
       tags:
-        - account
+        - Account
       summary: Verify user email
       operationId: verifyEmail
       requestBody:
@@ -257,7 +303,7 @@ paths:
   /accounts/resend-verify-email:
     post:
       tags:
-        - account
+        - Account
       summary: Gửi lại email xác thực (Resend Verify Email)
       description: API này sử dụng để gửi lại email xác thực dựa trên token được cung cấp.
       operationId: resendVerifyEmail
@@ -315,7 +361,7 @@ paths:
     post:
       operationId: accountsForgotPassword
       tags:
-        - account
+        - Account
       summary: Send password reset instructions
       requestBody:
         required: true
@@ -343,7 +389,7 @@ paths:
     post:
       operationId: accountsVerifyForgotPassword
       tags:
-        - account
+        - Account
       summary: Verify forgot password token
       requestBody:
         required: true
@@ -397,7 +443,7 @@ paths:
     post:
       operationId: accountsResetPassword
       tags:
-        - account
+        - Account
       summary: Reset user password
       requestBody:
         required: true
@@ -465,7 +511,7 @@ paths:
     get:
       operationId: accountsGetMe
       tags:
-        - account
+        - Account
       summary: Get current user profile
       security:
         - BearerAuth: []
@@ -492,7 +538,7 @@ paths:
     patch:
       operationId: accountsUpdateMe
       tags:
-        - account
+        - Account
       summary: Update my profile
       security:
         - BearerAuth: []
@@ -538,7 +584,7 @@ paths:
     post:
       operationId: accountsChangePassword
       tags:
-        - account
+        - Account
       summary: Change user password
       security:
         - BearerAuth: []
@@ -586,7 +632,7 @@ paths:
     get:
       operationId: accountsGetList
       tags:
-        - account
+        - Account
       summary: Get list of accounts with pagination and filters
       security:
         - BearerAuth: []
@@ -673,7 +719,7 @@ paths:
     patch:
       operationId: updateAvatar
       tags:
-        - account
+        - Account
       summary: Upload avatar
       description: Update avatar using multipart/form-data
       security:
@@ -720,7 +766,7 @@ paths:
   /accounts/{id}:
     patch:
       tags:
-        - account 
+        - Account 
       summary: Update an account (Admin only)
       description: Admin can update account's status or role.
       operationId: updateAccount
@@ -785,7 +831,7 @@ paths:
   /tables:
     post:
         tags:
-          - table
+          - Table
         summary: Tạo mới tables
         description: Tạo mới tables
         operationId: createTable
@@ -853,7 +899,7 @@ paths:
             description: Validation error
     get:
       tags:
-        - table
+        - Table
       summary: Lấy danh sách bàn
       description: Lấy danh sách bàn bao gồm phân trang và lọc theo trạng thái (Sử dụng 0, 1, 2, 3 tương ứng với Available, Occupied, Reserved, Needs_cleaning)
       operationId: getAllTable
@@ -912,7 +958,7 @@ paths:
   /tables/{id}:
     patch:
       tags:
-        - table
+        - Table
       summary: Cập nhật thông tin bàn
       description: Cập nhật thông tin bàn (Hiện tại là Số ghế và trạng thái)
       operationId: updateTable
@@ -952,7 +998,7 @@ paths:
   /tables/{id}/qr-token:
     patch:
       tags:
-        - table
+        - Table
       summary: Thay đổi mã QRCode
       description: Thay đổi qrToken -> thay đổi QRCode
       operationId: regenerateQrToken
@@ -3451,6 +3497,153 @@ paths:
                       name: "Category name length must be between 1 and 50"
                       status: "Status is invalid"
 
+  # order bên admin
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: Lấy danh sách đơn hàng
+      description: >
+        Lấy danh sách đơn hàng cho trang Admin/Bếp.
+        Hỗ trợ phân trang, tìm kiếm theo số bàn, lọc theo trạng thái món ăn và khoảng thời gian.
+      operationId: adminGetAllOrders
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Trang hiện tại
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 15
+            enum: [15, 20, 25]
+          description: Số lượng bản ghi mỗi trang
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Pending, Cooking, Served, Reject]
+          description: >
+            Lọc theo trạng thái của **món ăn** (Item Status). 
+            Nếu truyền giá trị này, danh sách `items` trong đơn hàng trả về sẽ chỉ chứa các món có trạng thái tương ứng.
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Tìm kiếm theo số bàn (Table Number)
+          example: "1"
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Lọc từ ngày (ISO string)
+          example: "2025-12-08T00:00:00.000Z"
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Lọc đến ngày (ISO string)
+          example: "2025-12-09T23:59:59.999Z"
+      responses:
+        '200':
+          description: Lấy danh sách thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get all orders successfully"
+                  data:
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OrderAdminResponse'
+                      total:
+                        type: integer
+                        example: 50
+                      page:
+                        type: integer
+                        example: 1
+                      limit:
+                        type: integer
+                        example: 15
+                      totalPages:
+                        type: integer
+                        example: 4
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Không có quyền view_orders)
+  /orders/{order_id}/{item_id}:
+    patch:
+      tags:
+        - Orders
+      summary: Cập nhật trạng thái món ăn
+      description: >
+        Admin/Bếp cập nhật trạng thái của một món ăn cụ thể trong đơn hàng (Ví dụ: Từ Pending -> Cooking).
+        Hành động này sẽ bắn socket `update_order_item` để thông báo cho các bên liên quan.
+      operationId: adminUpdateOrderItemStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của đơn hàng (Order ID)
+          example: "6936d080d41680e6b1977317"
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của món ăn trong đơn (Item ID)
+          example: "6936d080d41680e6b1977319"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderItemStatusReqBody'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Update item status successfully"
+                  data:
+                    $ref: '#/components/schemas/OrderAdminResponse'
+        '400':
+          description: Trạng thái không hợp lệ hoặc item không tìm thấy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid status"
+        '401':
+          description: Unauthorized
+
+  # order bên khách, lưu ý không dùng path của admin
   /guest/auth/login:
     post:
       tags:
@@ -3650,6 +3843,113 @@ paths:
                         isFeatured: false
         '401':
           description: Unauthorized (Chưa login vào bàn)
+  /guest/orders:
+    post:
+      tags:
+        - Guest
+      summary: 3. Guest Place Order (Đặt món)
+      description: |
+        Khách hàng gửi danh sách món ăn muốn đặt. 
+        - Yêu cầu Token Guest (lấy từ API Login).
+        - Hệ thống sẽ kiểm tra tồn kho, trạng thái món ăn.
+        - Nếu thành công: Trừ kho, Lưu đơn hàng, Bắn Socket thông báo.
+      operationId: guestCreateOrder
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderReqBody'
+      responses:
+        '200':
+          description: Đặt món thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order placed successfully"
+                  data:
+                    $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Lỗi Business Logic (Hết hàng, Món không tồn tại, v.v.)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: integer
+                    example: 400
+              examples:
+                OutOfStock:
+                  summary: Hết hàng
+                  value:
+                    message: "Dish 'Cánh gà chiên' is out of stock or not enough quantity"
+                    status: 400
+                DishHidden:
+                  summary: Món đã bị ẩn/ngưng bán
+                  value:
+                    message: "Dish 'Coca cola' is currently unavailable"
+                    status: 400
+        '401':
+          description: Lỗi xác thực (Thiếu token hoặc Token sai)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "Access token is required" # Message từ USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED
+        '403':
+          description: Lỗi phân quyền (Token đúng nhưng không phải Guest)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: "You are not authorized (Guest role required)"
+        '422':
+          description: Lỗi Validation (Dữ liệu đầu vào không hợp lệ)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Validation error"
+                  errors:
+                    type: object
+              examples:
+                InvalidFormat:
+                  summary: Mảng items rỗng hoặc sai định dạng
+                  value:
+                    message: "Validation error"
+                    errors:
+                      items: "Order items must be an array"
+                InvalidQuantity:
+                  summary: Số lượng không hợp lệ
+                  value:
+                    message: "Validation error"
+                    errors:
+                      "items[0].quantity": "Quantity must be a positive integer"
+                InvalidDishID:
+                  summary: DishID không phải MongoID
+                  value:
+                    message: "Validation error"
+                    errors:
+                      "items[0].dishId": "Invalid Dish ID format"
+
 components:
   schemas:
     Table:
@@ -4074,6 +4374,214 @@ components:
                 type: number
               importPrice:
                 type: number
+
+    # --- GUEST ORDER SCHEMAS ---
+    CreateOrderReqBody:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Danh sách các món ăn muốn đặt (Bắt buộc phải có ít nhất 1 món)
+          items:
+            type: object
+            required:
+              - dishId
+              - quantity
+            properties:
+              dishId:
+                type: string
+                description: ID của món ăn (Mongo ObjectId)
+                example: "692fe855d1d14ce2ee11a96e"
+              quantity:
+                type: integer
+                description: Số lượng (Phải là số nguyên > 0)
+                minimum: 1
+                example: 2
+              note:
+                type: string
+                description: Ghi chú cho món ăn (Optional)
+                example: "Không lấy tương ớt"
+    OrderResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "6936d080d41680e6b1977317"
+        tableId:
+          type: string
+          example: "692fab779ee9b37ecbf71d71"
+        tableNumber:
+          type: integer
+          example: 1
+        status:
+          type: string
+          enum: [Pending, Processing, Completed, Cancelled] # Thêm các enum thực tế của bạn
+          example: "Pending"
+        totalAmount:
+          type: number
+          description: Tổng tiền của đơn hàng
+          example: 386000
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-12-08T13:20:00.279Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-12-09T04:30:30.939Z"
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+                description: ID riêng của từng item trong đơn (dùng để update status)
+                example: "6936d080d41680e6b1977318"
+              dishId:
+                type: string
+                example: "692fe855d1d14ce2ee11a96e"
+              dishName:
+                type: string
+                example: "Cánh gà BBQ (4 miếng)"
+              dishPrice:
+                type: number
+                example: 89000
+              dishImage:
+                type: string
+                example: "https://res.cloudinary.com/..."
+              quantity:
+                type: integer
+                example: 2
+              note:
+                type: string
+                example: "Không lấy tương ớt"
+              orderedBy:
+                type: string
+                description: Tên người đặt món
+                example: "Minh Nguyen"
+              status:
+                type: string
+                description: Trạng thái của từng món (Pending, Cooking, Served, etc.)
+                example: "Served"
+              createdAt:
+                type: string
+                format: date-time
+              updatedAt:
+                type: string
+                format: date-time
+
+    # --- ADMIN ORDERS SCHEMAS ---
+    OrderItemStatus:
+      type: string
+      enum: [Pending, Cooking, Served, Reject]
+      description: Trạng thái của món ăn
+
+    OrderItemDetail:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID riêng của item (Dùng để update)
+          example: "6936d080d41680e6b1977319"
+        dishId:
+          type: string
+          example: "692fea21d1d14ce2ee11a972"
+        dishName:
+          type: string
+          example: "Khoai tây chiên (Cỡ vừa)"
+        dishPrice:
+          type: number
+          example: 29000
+        dishImage:
+          type: string
+          example: "https://res.cloudinary.com/..."
+        quantity:
+          type: integer
+          example: 2
+        note:
+          type: string
+          example: "Ít muối"
+        orderedBy:
+          type: string
+          description: Tên người đặt món
+          example: "Minh Nguyen"
+        status:
+          $ref: '#/components/schemas/OrderItemStatus'
+        managedBy:
+          type: string
+          description: Tên nhân viên xử lý trạng thái gần nhất
+          example: "Minh Admin"
+        processingHistory:
+          type: array
+          description: Lịch sử xử lý món ăn
+          items:
+            type: object
+            properties:
+              status: 
+                type: string
+                example: "Cooking"
+              updatedBy:
+                type: string
+                example: "Minh Admin"
+              updatedAt:
+                type: string
+                format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderAdminResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "6936d080d41680e6b1977317"
+        tableId:
+          type: string
+          example: "692fab779ee9b37ecbf71d71"
+        tableNumber:
+          type: integer
+          example: 1
+        status:
+          type: string
+          description: Trạng thái chung của đơn hàng
+          example: "Pending"
+        totalAmount:
+          type: number
+          description: Tổng tiền (Optional - có thể tính toán ở FE hoặc BE trả về)
+          example: 386000
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          description: Danh sách món ăn trong đơn
+          items:
+            $ref: '#/components/schemas/OrderItemDetail'
+
+    UpdateOrderItemStatusReqBody:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/OrderItemStatus'
+      example:
+        status: "Cooking"
   securitySchemes:
     BearerAuth:
       type: http

@@ -5,6 +5,7 @@ import { getIO } from "../utils/socket"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { update } from "lodash"
+import Account from "../models/schema/Account.schema"
 
 class OrderServices {
   async getAllOrders({
@@ -80,7 +81,18 @@ class OrderServices {
     }
   }
 
-  async updateItemStatus({ orderId, itemId, status }: { orderId: string; itemId: string; status: OrderItemStatus }) {
+  async updateItemStatus({
+    orderId,
+    itemId,
+    status,
+    admin_id
+  }: {
+    orderId: string
+    itemId: string
+    status: OrderItemStatus
+    admin_id: string
+  }) {
+    const account = (await databaseService.accounts.findOne({ _id: new ObjectId(admin_id) })) as Account
     const result = await databaseService.orders.findOneAndUpdate(
       {
         _id: new ObjectId(orderId),
@@ -89,7 +101,15 @@ class OrderServices {
       {
         $set: {
           "items.$.status": status, //Dấu $ đánh dấu vị trị tìm được
-          "items.$.updatedAt": new Date()
+          "items.$.updatedAt": new Date(),
+          "items.$.managedBy": account.name
+        },
+        $push: {
+          "items.$.processingHistory": {
+            status: status,
+            updatedBy: account.name,
+            updatedAt: new Date()
+          }
         }
       },
       {
@@ -125,6 +145,7 @@ class OrderServices {
       orderId,
       itemId,
       status,
+      mamageBy: account.name,
       message: `Món ${itemDetail.dishName} (SL: ${itemDetail.quantity}) của ${itemDetail.orderedBy} đã chuyển sang: ${statusVN}`
     }
 

@@ -13,6 +13,12 @@ export interface OrderItem {
   orderedBy: string
   status: OrderItemStatus
   createdAt: Date
+  managedBy: string
+  processingHistory: {
+    status: OrderItemStatus
+    updatedBy: string
+    updatedAt: Date
+  }[]
 }
 
 export interface OrderItemInput {
@@ -73,7 +79,9 @@ export default class Order {
       dishId: new ObjectId(item.dishId), // dữ liệu gửi lên là string nên mới phải custom lại
       note: item.note || "",
       status: item.status || OrderItemStatus.Pending,
-      createdAt: item.createdAt || date
+      createdAt: item.createdAt || date,
+      managedBy: "",
+      processingHistory: []
     }))
 
     // Tự động tính tổng tiền nếu không truyền vào

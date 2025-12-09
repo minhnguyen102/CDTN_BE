@@ -12,6 +12,6 @@ export const guestLoginController = async (req: Request<ParamsDictionary, any, G
 
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.LOGIN_GUEST_SUCCESS,
-    data: result
+    result: result
   })
 }

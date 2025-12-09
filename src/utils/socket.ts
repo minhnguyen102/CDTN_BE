@@ -1,15 +1,19 @@
 import { Server as HttpServer } from "http"
-import { Server } from "socket.io"
+import { Server, Socket } from "socket.io"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { WHILELIST_DOMAINS } from "../index"
-import { Socket } from "dgram"
 import USER_MESSAGES from "../constants/message"
 import { ROLE_GUEST } from "../constants/enums"
 import { verifyToken } from "./jwt"
 import { JsonWebTokenError } from "jsonwebtoken"
 
 let io: Server
+
+interface CustomSocket extends Socket {
+  decoded_access_token?: any
+  permissions?: string[]
+}
 
 export const initSocket = (httpServer: HttpServer) => {
   io = new Server(httpServer, {
@@ -19,7 +23,7 @@ export const initSocket = (httpServer: HttpServer) => {
   })
 
   // Kiểm tra token trước khi connect
-  io.use(async (socket, next) => {
+  io.use(async (socket: CustomSocket, next) => {
     const { Authorization } = socket.handshake.auth
     const { authorization } = socket.handshake.headers
     const access_token = (Authorization || authorization || "").split(" ")[1]
@@ -67,7 +71,7 @@ export const initSocket = (httpServer: HttpServer) => {
         socket.join("admin_room")
         console.log(`User ${decoded_access_token.user_id} joined Kitchen Room`) // user_id đây là id của người dùng bên admin
         // Phản hồi cho client biết đã join thành công
-        socket.emit("join_success", "Bạn đã vào phòng bếp")
+        socket.emit("join_success", { message: "Bạn đã vào phòng bếp", roomId: "admin_room" })
       } else {
         console.log(`User ${decoded_access_token.user_id} cố tình vào bếp nhưng không có quyền`)
         socket.emit("error_msg", "Bạn không có quyền truy cập thông báo bếp!")
