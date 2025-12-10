@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb"
-import { OrderStatus, OrderItemStatus } from "../../constants/enums"
+import { OrderStatus, OrderItemStatus, PaymentStatus, PaymentMethod } from "../../constants/enums"
 import { Interface } from "readline"
 
 export interface OrderItem {
@@ -32,6 +32,12 @@ export interface OrderItemInput {
   orderedBy: string
   status?: OrderItemStatus
   createdAt?: Date
+  managedBy?: string
+  processingHistory?: {
+    status: OrderItemStatus
+    updatedBy: string
+    updatedAt: Date
+  }[]
 }
 
 interface OrderType {
@@ -46,7 +52,10 @@ interface OrderType {
   discount?: number
   finalAmount?: number
 
-  status?: OrderStatus
+  status?: OrderStatus // Cân nhắc bỏ
+
+  paymentStatus?: PaymentStatus
+  paymentMethod?: PaymentMethod
 
   // Thời gian
   createdAt?: Date // Thời gian tạo đơn (lần đầu gọi món)
@@ -62,6 +71,8 @@ export default class Order {
   totalAmount: number
   status: OrderStatus
   createdAt: Date
+  paymentStatus?: PaymentStatus
+  paymentMethod?: PaymentMethod
   updatedAt: Date
   finishedAt?: Date
 
@@ -90,7 +101,8 @@ export default class Order {
       this.items.reduce((acc, item) => {
         return acc + item.dishPrice * item.quantity
       }, 0)
-
+    this.paymentStatus = order.paymentStatus || PaymentStatus.UNPAID
+    this.paymentMethod = order.paymentMethod || PaymentMethod.CASH
     this.createdAt = order.createdAt || date
     this.updatedAt = order.updatedAt || date
     this.finishedAt = order.finishedAt || undefined

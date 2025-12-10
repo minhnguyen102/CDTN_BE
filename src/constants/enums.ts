@@ -87,4 +87,15 @@ export enum OrderItemStatus {
   Reject = "Reject" // Từ chối
 }
 
+export enum PaymentStatus {
+  UNPAID = "Unpaid",
+  PAID = "Paid",
+  FAILED = "Failed" // Dùng cho trường hợp SePay báo lỗi hoặc giao dịch thất bại
+}
+
+export enum PaymentMethod {
+  CASH = "Cash",
+  BANK = "Bank"
+}
+
 export const ROLE_GUEST = "Guest"

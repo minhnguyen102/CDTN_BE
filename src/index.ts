@@ -10,6 +10,7 @@ import swaggerUi from "swagger-ui-express"
 import { routesGuest } from "./routes/guests/index.routes"
 import { createServer } from "http"
 import { initSocket } from "./utils/socket"
+import paymentRouter from "./routes/payments/payment.routes"
 
 export const WHILELIST_DOMAINS: string[] = [
   // Môi trường Local
@@ -60,6 +61,8 @@ app.use(cors(corsOptions))
 routesAdmin(app)
 // Router guest
 routesGuest(app)
+// Payment
+app.use("/payment", paymentRouter)
 
 app.use(defaultErrorHandler)
 
@@ -82,3 +85,8 @@ startServer()
 // Deploy
 // export default app
 // console.log(generatePassword())
+const content =
+  "MBVCB.12083909272.349229.DH 69392bd96f1f1142fcc31226.CT tu 1031175073 NGUYEN KHAC MINH toi 0327593620 NGUYEN KHAC MINH tai MB- Ma GD ACSP/ o"
+const regex = /DH\s*([a-zA-Z0-9]+)/i
+const match = content.match(regex)
+console.log("Nội dung bóc tách: ", match)

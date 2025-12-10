@@ -1,4 +1,6 @@
 const USER_MESSAGES = {
+  GET_PAYMENT_QR_SUCCESSFULLY: "Get payment QR successfully",
+  ORDER_NOT_FOUND: "Order not found",
   TABLE_NOT_FOUND: "Table not found",
   TABLE_ID_IS_REQUIRED: "Table ID is required",
   TABLE_ID_IS_INVALID: "Invalid Table ID format",
