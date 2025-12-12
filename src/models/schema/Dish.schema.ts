@@ -21,6 +21,8 @@ interface DishType {
   name_search: string
   image_id?: string
   isFeatured?: boolean
+  ratingAverage?: number // khi tạo mới thì chưa cần
+  reviewCount?: number // khi tạo mới thì chưa cần (=0)
   deleted?: boolean
   deletedAt?: Date
   createdAt?: Date
@@ -39,6 +41,8 @@ export default class Dish {
   recipe: DishRecipe[]
   name_search: string
   isFeatured: boolean
+  ratingAverage: number // khi tạo mới thì chưa cần (=0)
+  reviewCount: number // khi tạo mới thì chưa cần (=0)
   deleted: boolean
   deletedAt: Date | null
   createdAt: Date
@@ -61,6 +65,8 @@ export default class Dish {
 
     this.name_search = dish.name_search
     this.isFeatured = dish.isFeatured || false
+    this.ratingAverage = dish.ratingAverage || 0
+    this.reviewCount = dish.reviewCount || 0
     this.deleted = dish.deleted || false
     this.deletedAt = dish.deletedAt || null
     this.createdAt = dish.createdAt || date

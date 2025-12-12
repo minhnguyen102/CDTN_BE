@@ -66,7 +66,8 @@ export const accessTokenValidation = validate(
               })
             }
             req.decoded_access_token = decoded_access_token
-            // console.log("decoded_access_token", decoded_access_token)
+            console.log("decoded_access_token", decoded_access_token)
+            // Có lưu userId chính là id của bàn
           } catch (error) {
             // Lỗi do verify
             if (error instanceof JsonWebTokenError) {
@@ -155,6 +156,68 @@ export const createOrderValidation = validate(
       "items.*.quantity": itemQuantityValidation,
 
       "items.*.note": itemNoteValidation
+    },
+    ["body"]
+  )
+)
+
+export const createReviewValidation = validate(
+  checkSchema(
+    {
+      orderId: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.ORDER_ID_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: USER_MESSAGES.ORDER_ID_MUST_BE_STRING
+        },
+        trim: true,
+        custom: {
+          options: (value) => {
+            if (!ObjectId.isValid(value)) {
+              throw new Error(USER_MESSAGES.INVALID_ORDER_ID)
+            }
+            return true
+          }
+        }
+      },
+      dishId: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.DISH_ID_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: USER_MESSAGES.DISH_ID_MUST_BE_STRING
+        },
+        trim: true,
+        custom: {
+          options: (value) => {
+            if (!ObjectId.isValid(value)) {
+              throw new Error(USER_MESSAGES.INVALID_DISH_ID)
+            }
+            return true
+          }
+        }
+      },
+      rating: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.RATING_IS_REQUIRED
+        },
+        isInt: {
+          options: { min: 1, max: 5 },
+          errorMessage: USER_MESSAGES.RATING_MUST_BE_FROM_1_TO_5
+        }
+      },
+      comment: {
+        optional: true, // Comment có thể để trống
+        isString: {
+          errorMessage: USER_MESSAGES.COMMENT_MUST_BE_STRING
+        },
+        trim: true,
+        isLength: {
+          options: { max: 500 }, // Giới hạn độ dài để tránh spam văn văn
+          errorMessage: USER_MESSAGES.COMMENT_LENGTH_MUST_BE_LESS_THAN_500
+        }
+      }
     },
     ["body"]
   )

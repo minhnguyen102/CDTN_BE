@@ -1,4 +1,22 @@
 const USER_MESSAGES = {
+  ORDER_ID_IS_REQUIRED: "Order ID is required",
+  ORDER_ID_MUST_BE_STRING: "Order ID must be a string",
+  INVALID_ORDER_ID: "Invalid Order ID type",
+
+  DISH_ID_IS_REQUIRED: "Dish ID is required",
+  DISH_ID_MUST_BE_STRING: "Dish ID must be a string",
+  INVALID_DISH_ID: "Invalid Dish ID type",
+
+  RATING_IS_REQUIRED: "Rating is required",
+  RATING_MUST_BE_FROM_1_TO_5: "Rating must be an integer from 1 to 5",
+
+  COMMENT_MUST_BE_STRING: "Comment must be a string",
+  COMMENT_LENGTH_MUST_BE_LESS_THAN_500: "Comment length must be less than 500 characters",
+  REVIEW_POSTED_SUCCESSFULLY: "Review posted successfully",
+  THIS_ITEMS_ALREADY_REVIEWED: "This item already reviewed",
+  YOU_NOT_ALLOW_REVIEW_THIS_ORDER: "You not allow review this order",
+  DISH_NOT_FOUND: "Dish not found",
+  ORDER_NOT_PAID: "Order not paid",
   GET_PAYMENT_QR_SUCCESSFULLY: "Get payment QR successfully",
   ORDER_NOT_FOUND: "Order not found",
   TABLE_NOT_FOUND: "Table not found",
