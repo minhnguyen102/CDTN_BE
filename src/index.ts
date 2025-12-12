@@ -85,8 +85,3 @@ startServer()
 // Deploy
 // export default app
 // console.log(generatePassword())
-const content =
-  "MBVCB.12083909272.349229.DH 69392bd96f1f1142fcc31226.CT tu 1031175073 NGUYEN KHAC MINH toi 0327593620 NGUYEN KHAC MINH tai MB- Ma GD ACSP/ o"
-const regex = /DH\s*([a-zA-Z0-9]+)/i
-const match = content.match(regex)
-console.log("Nội dung bóc tách: ", match)

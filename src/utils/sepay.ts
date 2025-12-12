@@ -16,6 +16,6 @@ export const generatePaymentQR = ({ amount, des }: { amount: number; des: string
     des: des,
     template: bank_template
   })
-  console.log(`${baseUrl}?${query}`)
+  // console.log(`${baseUrl}?${query}`)
   return `${baseUrl}?${query}`
 }

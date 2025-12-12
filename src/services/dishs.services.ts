@@ -104,7 +104,7 @@ class DishService {
 
     if (categoryId) {
       const isCategoryActive = activeCategoryIds.some((id) => id.toString() === categoryId)
-      console.log("isCategoryActive: ", isCategoryActive)
+      // console.log("isCategoryActive: ", isCategoryActive)
       // const isCategoryActive = activeCategoryIds.includes(categoryId)
 
       if (!isCategoryActive) {

@@ -49,7 +49,7 @@ class ImportOrderService {
     //check supplierID
     const supplier = await databaseService.suppliers.findOne({
       _id: new ObjectId(supplierId),
-      deleted: false,
+      isDeleted: false,
       status: SupplierStatus.ACTIVE
     })
     if (!supplier) {
@@ -75,7 +75,7 @@ class ImportOrderService {
         }
       )
       .toArray()
-    console.log("ingredients: ", ingredients)
+    // console.log("ingredients: ", ingredients)
     if (ingredients.length !== items.length) {
       throw new ErrorWithStatus({
         message: USER_MESSAGES.ITEM_INGREDIENT_ID_INVALID,
@@ -85,7 +85,7 @@ class ImportOrderService {
 
     // Tạo Map để truy xuất nhanh thông tin ingredient theo ID
     const ingredientMap = new Map(ingredients.map((ing) => [ing._id.toString(), ing]))
-    console.log("ingredientMap: ", ingredientMap)
+    // console.log("ingredientMap: ", ingredientMap)
 
     // Tính toán chi tiết cho từng Item (Total) và Subtotal
     let subtotal = 0
