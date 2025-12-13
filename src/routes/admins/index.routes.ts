@@ -10,7 +10,6 @@ import importOrderRoutes from "./importOrder.routes"
 import dishCategoriesRoutes from "./dishCategories.routes"
 import dishesRoutes from "./dishs.routes"
 import ordersRouter from "./orders.routes"
-import reviewRoutes from "./reviews.routes"
 
 export const routesAdmin = (app: Express) => {
   const PATH_ADMIN = "/admin"
@@ -25,5 +24,4 @@ export const routesAdmin = (app: Express) => {
   app.use(PATH_ADMIN + "/dish-categories", dishCategoriesRoutes)
   app.use(PATH_ADMIN + "/dishes", dishesRoutes)
   app.use(PATH_ADMIN + "/orders", ordersRouter)
-  app.use(PATH_ADMIN + "/reviews", reviewRoutes)
 }

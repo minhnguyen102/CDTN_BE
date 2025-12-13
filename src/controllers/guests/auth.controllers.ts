@@ -9,11 +9,6 @@ export const guestLoginController = async (req: Request<ParamsDictionary, any, G
   const { guestName, qrToken } = req.body
 
   const result = await guestServices.login({ qrToken, guestName })
-  res.cookie("token", result.accessToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax"
-  })
 
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.LOGIN_GUEST_SUCCESS,
