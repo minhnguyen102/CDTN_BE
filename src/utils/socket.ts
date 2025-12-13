@@ -15,6 +15,15 @@ interface CustomSocket extends Socket {
   permissions?: string[]
 }
 
+export function getTokenFromCookies(cookies: string): string | null {
+  const cookieArray = cookies.split("; ")
+  const tokenCookie = cookieArray.find((cookie) => cookie.startsWith("token="))
+  if (tokenCookie) {
+    return tokenCookie.split("=")[1]
+  }
+  return null
+}
+
 export const initSocket = (httpServer: HttpServer) => {
   io = new Server(httpServer, {
     cors: {
@@ -24,18 +33,22 @@ export const initSocket = (httpServer: HttpServer) => {
 
   // Kiểm tra token trước khi connect
   io.use(async (socket: CustomSocket, next) => {
-    const { Authorization } = socket.handshake.auth
-    const { authorization } = socket.handshake.headers
-    const access_token = (Authorization || authorization || "").split(" ")[1]
+    const tokenFromAuth = (socket.handshake.auth && socket.handshake.auth.token) || undefined
+    const cookie = socket.handshake.headers.cookie || ""
+    const tokenFromCookie = getTokenFromCookies(cookie)
+    const authHeader = socket.handshake.headers.authorization
+    const tokenFromHeader = authHeader && authHeader.startsWith("Bearer ") ? authHeader.substring(7) : undefined
+    const token = tokenFromCookie || tokenFromAuth || tokenFromHeader
+
     try {
-      if (!access_token) {
+      if (!token) {
         throw new ErrorWithStatus({
           message: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
           status: HTTP_STATUS.UNAUTHORIZED
         })
       }
       const decoded_access_token = await verifyToken({
-        token: access_token,
+        token,
         secretOrPublicKey: process.env.PRIVATE_KEY_SIGN_ACCESS_TOKEN as string
       })
       // console.log("decoded_access_token: ", decoded_access_token)
@@ -55,6 +68,7 @@ export const initSocket = (httpServer: HttpServer) => {
       if (error instanceof JsonWebTokenError) {
         return next(new Error(`Unauthorized: ${error.message}`))
       }
+      console.log(error)
       return next(new Error("Unauthorized: Invalid Token"))
     }
   })
