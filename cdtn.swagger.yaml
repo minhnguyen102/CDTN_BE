@@ -21,8 +21,72 @@ info:
       * `join_table`: Gửi ngay sau khi connect. Data: `{ tableId: "..." }`.
     * **Sự kiện Lắng nghe (On)**:
       * `refresh_order`: Nhận khi có đơn mới hoặc cập nhật đơn (để reload list bill).
+        data `
+          {
+            "type": "ORDER_UPDATED",
+            "message": "Khách hàng vừa gọi món mới",
+            "data": {
+                "_id": "693f7a63e7455fa6893e7080",
+                "tableId": "6937e6e480646d49c4d56e9d",
+                "tableNumber": 2,
+                "items": [
+                    {
+                        "_id": "693f7a63e7455fa6893e7081",
+                        "dishId": "692fe855d1d14ce2ee11a96e",
+                        "dishName": "Cánh gà BBQ (4 miếng)",
+                        "dishPrice": 89000,
+                        "dishImage": "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764747348/restaurant-app/img_1764747346505.jpg",
+                        "quantity": 2,
+                        "note": "Không lấy tương ớt",
+                        "orderedBy": "Minh Nguyen",
+                        "status": "Pending",
+                        "createdAt": "2025-12-15T03:02:59.341Z",
+                        "managedBy": "",
+                        "processingHistory": []
+                    },
+                    {
+                        "_id": "693f7a63e7455fa6893e7082",
+                        "dishId": "692feb30d1d14ce2ee11a974",
+                        "dishName": "Coca cola",
+                        "dishPrice": 30000,
+                        "dishImage": "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764748078/restaurant-app/img_1764748078007.jpg",
+                        "quantity": 1,
+                        "note": "",
+                        "orderedBy": "Minh Nguyen",
+                        "status": "Pending",
+                        "createdAt": "2025-12-15T03:02:59.341Z",
+                        "managedBy": "",
+                        "processingHistory": []
+                    }
+                ],
+                "totalAmount": 208000,
+                "status": "Pending",
+                "createdAt": "2025-12-15T03:02:59.612Z",
+                "paymentStatus": "Unpaid",
+                "paymentMethod": "Cash",
+                "updatedAt": "2025-12-15T03:02:59.612Z"
+            }
+          }`
       * `update_order_item`: Nhận khi Bếp chuyển trạng thái từng món (ví dụ: Đang nấu).
-    
+        Data 
+          `
+            {
+              "orderId": "693f7a63e7455fa6893e7080",
+              "itemId": "693f7a63e7455fa6893e7081",
+              "status": "Cooking",
+              "mamageBy": "Van Thu",
+              "message": "Món Cánh gà BBQ (4 miếng) (SL: 2) của Minh Nguyen đã chuyển sang: Đang nấu"
+            }
+          `
+      * `payment_success`: Nhận về khi khách hàng thanh toán thành công
+        Data
+        `
+        {
+            "orderId": "693f7a63e7455fa6893e7080",
+            "amount": 266000,
+            "message": "Thanh toán thành công!"
+        }
+        `
     ### 3. Luồng Quản Trị / Bếp (Admin)
     Dành cho màn hình Dashboard, Bếp, Thu ngân.
     * **Sự kiện Gửi đi (Emit)**:
@@ -31,9 +95,78 @@ info:
         * **Data**: Không cần gửi tham số.
     * **Sự kiện Lắng nghe (On)**:
       * `join_success`: Nhận phản hồi xác nhận đã vào phòng thành công.
+          Data 
+          `
+            { message: "Bạn đã vào phòng bếp", roomId: "admin_room" }
+          `
       * `new_order`: Nhận thông báo khi Khách vừa tạo đơn mới (Ting ting!).
-        * **Data**: Trả về object Order đầy đủ.
+        * **Data**: `{
+          "type": "NEW_ORDER_CREATED",
+          "message": "Bàn 2 vừa đặt món",
+          "data": {
+              "_id": "693f7a63e7455fa6893e7080",
+              "tableId": "6937e6e480646d49c4d56e9d",
+              "tableNumber": 2,
+              "items": [
+                  {
+                      "_id": "693f7a63e7455fa6893e7081",
+                      "dishId": "692fe855d1d14ce2ee11a96e",
+                      "dishName": "Cánh gà BBQ (4 miếng)",
+                      "dishPrice": 89000,
+                      "dishImage": "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764747348/restaurant-app/img_1764747346505.jpg",
+                      "quantity": 2,
+                      "note": "Không lấy tương ớt",
+                      "orderedBy": "Minh Nguyen",
+                      "status": "Pending",
+                      "createdAt": "2025-12-15T03:02:59.341Z",
+                      "managedBy": "",
+                      "processingHistory": []
+                  },
+                  {
+                      "_id": "693f7a63e7455fa6893e7082",
+                      "dishId": "692feb30d1d14ce2ee11a974",
+                      "dishName": "Coca cola",
+                      "dishPrice": 30000,
+                      "dishImage": "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764748078/restaurant-app/img_1764748078007.jpg",
+                      "quantity": 1,
+                      "note": "",
+                      "orderedBy": "Minh Nguyen",
+                      "status": "Pending",
+                      "createdAt": "2025-12-15T03:02:59.341Z",
+                      "managedBy": "",
+                      "processingHistory": []
+                  }
+              ],
+              "totalAmount": 208000,
+              "status": "Pending",
+              "createdAt": "2025-12-15T03:02:59.612Z",
+              "paymentStatus": "Unpaid",
+              "paymentMethod": "Cash",
+              "updatedAt": "2025-12-15T03:02:59.612Z"
+          }
+        }`.
       * `update_order_item`: Nhận thông báo khi một Admin khác vừa cập nhật trạng thái món (để đồng bộ giao diện giữa các máy Admin).
+        Data 
+        `
+          {
+            "orderId": "693f7a63e7455fa6893e7080",
+            "itemId": "693f7a63e7455fa6893e7081",
+            "status": "Cooking",
+            "mamageBy": "Van Thu",
+            "message": "Món Cánh gà BBQ (4 miếng) (SL: 2) của Minh Nguyen đã chuyển sang: Đang nấu"
+          }
+        `
+      
+      * `payment_received`: Nhận khi khách thanh toán thành công
+        Data 
+          `
+          {
+              "orderId": "693f7a63e7455fa6893e7080",
+              "tableNumber": 2,
+              "amount": 266000,
+              "message": "Bàn 2 vừa thanh toán 266,000đ"
+          }
+          `
   termsOfService: https://swagger.io/terms/
   contact:
     email: apiteam@swagger.io
@@ -3949,6 +4082,219 @@ paths:
                     message: "Validation error"
                     errors:
                       "items[0].dishId": "Invalid Dish ID format"
+  /guest/reviews:
+    post:
+      tags:
+        - Guest
+      summary: Gửi đánh giá món ăn (Guest)
+      description: |
+        Khách hàng gửi đánh giá cho một món ăn trong đơn hàng đã thanh toán.
+        
+        **Quy tắc nghiệp vụ:**
+        1. Đơn hàng phải có trạng thái thanh toán là **PAID**.
+        2. Khách hàng chỉ được đánh giá đơn của chính bàn mình 
+        3. Món ăn phải tồn tại trong đơn hàng đó.
+        4. Mỗi món trong một đơn chỉ được đánh giá **1 lần**.
+        5. Sau khi đánh giá, hệ thống tự động tính lại `ratingAverage` và `reviewCount` cho món ăn.
+      operationId: createGuestReview
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - orderId
+                - dishId
+                - rating
+              properties:
+                orderId:
+                  type: string
+                  description: ID của đơn hàng (MongoDB ObjectId)
+                  example: "693f7a63e7455fa6893e7080"
+                dishId:
+                  type: string
+                  description: ID của món ăn cần đánh giá (MongoDB ObjectId)
+                  example: "692fe055d1d14ce2ee11a96e"
+                rating:
+                  type: integer
+                  description: Điểm đánh giá (từ 1 đến 5 sao)
+                  minimum: 1
+                  maximum: 5
+                  example: 5
+                comment:
+                  type: string
+                  description: Nội dung nhận xét (Tối đa 500 ký tự). Có thể để trống.
+                  maxLength: 500
+                  example: "Món này rất ngon, nước dùng đậm đà!"
+      responses:
+        '200':
+          description: Đánh giá thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Review posted successfully"
+                  result:
+                    type: object
+                    properties:
+                      acknowledged:
+                        type: boolean
+                        example: true
+                      insertedId:
+                        type: string
+                        description: ID của bản ghi Review vừa tạo
+                        example: "693f8ae7886d2e99e4cb6e25"
+        '400':
+          description: Lỗi Logic (Chưa thanh toán hoặc Đã đánh giá rồi)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: integer
+                    example: 400
+              examples:
+                OrderNotPaid:
+                  summary: Đơn hàng chưa thanh toán
+                  value:
+                    message: "Order is not paid yet"
+                    status: 400
+                AlreadyReviewed:
+                  summary: Món này đã được đánh giá trước đó
+                  value:
+                    message: "You have already reviewed this item in this order"
+                    status: 400
+        '401':
+          description: Unauthorized (Chưa đăng nhập)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access token is required"
+        '403':
+          description: Forbidden (Không có quyền đánh giá đơn này)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "You are not allowed to review this order"
+                  status:
+                    type: integer
+                    example: 403
+        '404':
+          description: Không tìm thấy Đơn hàng hoặc Món ăn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order not found" # Hoặc "Dish not found in this order"
+                  status:
+                    type: integer
+                    example: 404
+        '422':
+          description: Lỗi Validation (Dữ liệu đầu vào sai)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Validation error"
+                  errors:
+                    type: object
+                    example:
+                      rating: "Rating must be an integer from 1 to 5"
+                      dishId: "Invalid Dish ID"
+  /payment/qr/{orderId}:
+    get:
+      tags:
+        - Payment
+      summary: Lấy mã QR thanh toán (Sepay/VietQR)
+      description: |
+        Tạo và trả về đường dẫn ảnh QR Code để khách hàng chuyển khoản.
+        - Dựa trên `totalAmount` của đơn hàng.
+        - Nội dung chuyển khoản: "DH {orderId}".
+      operationId: getPaymentQr
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: string
+          required: true
+          description: ID của đơn hàng (MongoDB ObjectId)
+          example: "693f7a63e7455fa6893e7080"
+      responses:
+        '200':
+          description: Lấy QR thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get payment QR successfully"
+                  data:
+                    type: object
+                    properties:
+                      orderId:
+                        type: string
+                        description: ID đơn hàng
+                        example: "693f7a63e7455fa6893e7080"
+                      totalAmount:
+                        type: number
+                        description: Tổng tiền cần thanh toán
+                        example: 266000
+                      paymentUrl:
+                        type: string
+                        description: Đường dẫn ảnh QR code (được tạo từ bên thứ 3 như Sepay)
+                        example: "https://qr.sepay.vn/img?acc=0327593620&bank=MB&amount=266000&des=DH693f7a63e7455fa6893e7080"
+        '404':
+          description: Không tìm thấy đơn hàng (Order Not Found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order not found"
+                  status:
+                    type: integer
+                    example: 404
+        '401':
+          description: Unauthorized (Chưa đăng nhập hoặc Token hết hạn)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access token is required"
+        '500':
+          description: Lỗi Server nội bộ
 
 components:
   schemas:

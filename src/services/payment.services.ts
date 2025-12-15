@@ -16,7 +16,7 @@ class PaymentService {
     // Cấu hình SePay của bạn là "DH", nên regex sẽ tìm chữ "DH" + khoảng trắng + chuỗi ký tự
     const regex = /DH\s*([a-zA-Z0-9]+)/i
     const match = content.match(regex)
-    console.log("Nội dung bóc tách: ", match)
+    // console.log("Nội dung bóc tách: ", match)
     if (!match) {
       return { success: false, message: "Invalid content format (Order ID not found)" }
     }

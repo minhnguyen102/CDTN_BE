@@ -92,7 +92,7 @@ class ReviewService {
       ])
       .toArray()
 
-    console.log("stats: ", stats)
+    // console.log("stats: ", stats)
 
     if (stats.length > 0) {
       const { avgRating, count } = stats[0]

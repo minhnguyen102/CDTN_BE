@@ -7,6 +7,8 @@ import USER_MESSAGES from "../constants/message"
 import { ROLE_GUEST } from "../constants/enums"
 import { verifyToken } from "./jwt"
 import { JsonWebTokenError } from "jsonwebtoken"
+import { config } from "dotenv"
+config()
 
 let io: Server
 
@@ -24,9 +26,20 @@ export const initSocket = (httpServer: HttpServer) => {
 
   // Kiểm tra token trước khi connect
   io.use(async (socket: CustomSocket, next) => {
+    // const rawToken = socket.handshake.auth.Authorization || socket.handshake.headers.authorization
+    // if (!rawToken) {
+    //   throw new ErrorWithStatus({
+    //     message: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
+    //     status: HTTP_STATUS.UNAUTHORIZED
+    //   })
+    // }
     const { Authorization } = socket.handshake.auth
     const { authorization } = socket.handshake.headers
+    // console.log("Au", Authorization) // k co
+    // console.log("au", authorization) // co
     const access_token = (Authorization || authorization || "").split(" ")[1]
+    // console.log(access_token)
+    // const access_token = rawToken.startsWith("Bearer ") ? rawToken.split(" ")[1] : rawToken
     try {
       if (!access_token) {
         throw new ErrorWithStatus({
@@ -53,7 +66,7 @@ export const initSocket = (httpServer: HttpServer) => {
       next()
     } catch (error) {
       if (error instanceof JsonWebTokenError) {
-        return next(new Error(`Unauthorized: ${error.message}`))
+        return next(new Error(`Unauthorized 1: ${error.message}`))
       }
       return next(new Error("Unauthorized: Invalid Token"))
     }

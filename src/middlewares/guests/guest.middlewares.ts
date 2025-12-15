@@ -66,7 +66,7 @@ export const accessTokenValidation = validate(
               })
             }
             req.decoded_access_token = decoded_access_token
-            console.log("decoded_access_token", decoded_access_token)
+            // console.log("decoded_access_token", decoded_access_token)
             // Có lưu userId chính là id của bàn
           } catch (error) {
             // Lỗi do verify
@@ -221,4 +221,26 @@ export const createReviewValidation = validate(
     },
     ["body"]
   )
+)
+
+export const getUrlPaymentValidation = validate(
+  checkSchema({
+    orderId: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.ORDER_ID_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGES.ORDER_ID_MUST_BE_STRING
+      },
+      trim: true,
+      custom: {
+        options: (value) => {
+          if (!ObjectId.isValid(value)) {
+            throw new Error(USER_MESSAGES.INVALID_ORDER_ID)
+          }
+          return true
+        }
+      }
+    }
+  })
 )

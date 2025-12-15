@@ -28,7 +28,7 @@ class PermissionServices {
 
     // console.log(permissions)
     const permission_ids = permissions.map((permission) => permission._id.toString())
-    console.log(permission_ids)
+    // console.log(permission_ids)
     // Trả về mảng các permission
     return permissions as Permission[]
   }
