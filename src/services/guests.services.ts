@@ -138,65 +138,55 @@ class GuestService {
     }
   }
 
-  async getMenu() {
-    const menu = await databaseService.dish_categories
-      .aggregate([
+  async getDishCategories() {
+    const dishCategories = await databaseService.dish_categories
+      .find(
         {
-          $match: {
-            status: DishCategoryStatus.ACTIVE
-          }
+          status: DishCategoryStatus.ACTIVE
         },
         {
-          $sort: { display_order: 1 }
-        },
-        {
-          $lookup: {
-            from: "dishes",
-            localField: "_id",
-            foreignField: "categoryId",
-            pipeline: [
-              {
-                $match: {
-                  status: { $in: [DishStatus.AVAILABLE, DishStatus.UNAVAILABLE] },
-                  deleted: { $ne: true }
-                }
-              },
-              {
-                $sort: { isFeatured: -1, createdAt: -1 }
-              },
-              {
-                $project: {
-                  _id: 1,
-                  name: 1,
-                  price: 1,
-                  image: 1,
-                  description: 1,
-                  status: 1,
-                  isFeatured: 1
-                }
-              }
-            ],
-            as: "dishes"
-          }
-        },
-        {
-          $match: {
-            dishes: { $not: { $size: 0 } }
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            name: 1,
-            description: 1,
-            image: 1,
-            dishes: 1
+          projection: {
+            createdAt: 0,
+            updatedAt: 0,
+            key_search: 0,
+            image_id: 0
           }
         }
-      ])
+      )
       .toArray()
-
-    return menu
+    return dishCategories
+  }
+  async getMenu({ categoryId, page, limit }: { categoryId: string; page: number; limit: number }) {
+    const objectFind: any = {
+      deleted: false,
+      status: DishStatus.AVAILABLE,
+      categoryId: new ObjectId(categoryId)
+    }
+    const [menu, total] = await Promise.all([
+      databaseService.dishes
+        .find(objectFind, {
+          projection: {
+            name_search: 0,
+            deleted: 0,
+            deletedAt: 0,
+            createdAt: 0,
+            updatedAt: 0
+          }
+        })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .toArray(),
+      databaseService.dishes.countDocuments(objectFind)
+    ])
+    return {
+      menu,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    }
   }
 
   async createOrder({ tableId, guestName, items }: { tableId: string; guestName: string; items: DishItemInputFE[] }) {

@@ -3880,26 +3880,39 @@ paths:
                     message: "Validation error"
                     errors:
                       qrToken: "QR Token is required"
-  /guest/menu:
+  /guest/menu/{categoryId}/dishes:
     get:
+      summary: Lấy danh sách món ăn theo danh mục (Guest)
+      description: API lấy danh sách món ăn hiển thị cho khách, có phân trang (Page-based).
       tags:
         - Guest
-      summary: Lấy Menu cho khách (Gom nhóm theo Danh mục)
-      description: >
-        API trả về toàn bộ thực đơn, được gom nhóm theo Danh mục (Category).
-        Chỉ trả về các món đang bán (Available/Unavailable).
-        Sắp xếp theo thứ tự ưu tiên hiển thị.
       security:
         - BearerAuth: []
-      # parameters:
-      #   - in: query
-      #     name: categoryId
-      #     schema:
-      #       type: string
-      #     description: Lọc theo 1 danh mục cụ thể (Optional)
+      parameters:
+        - in: path
+          name: categoryId
+          schema:
+            type: string
+            example: "692fb10fdab9b8cb472075db"
+          required: true
+          description: ID của danh mục món ăn (ObjectId)
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Số trang hiện tại
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            enum: [10, 20, 30]
+          description: Số lượng món trên một trang
       responses:
         '200':
-          description: Lấy menu thành công
+          description: Lấy dữ liệu thành công
           content:
             application/json:
               schema:
@@ -3909,73 +3922,131 @@ paths:
                     type: string
                     example: "Get menu successfully"
                   data:
+                    type: object
+                    properties:
+                      menu:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                              example: "692fded120cb0fc05c9c3376"
+                            name:
+                              type: string
+                              example: "Cánh gà BBQ (6 miếng)"
+                            price:
+                              type: number
+                              example: 129000
+                            description:
+                              type: string
+                              example: "Cánh gà BBQ (6 miếng) kèm sốt đặc biệt"
+                            image:
+                              type: string
+                              example: "https://res.cloudinary.com/.../img.jpg"
+                            image_id:
+                              type: string
+                              example: "restaurant-app/img_12345"
+                            status:
+                              type: string
+                              enum: [available, unavailable]
+                              example: "available"
+                            categoryId:
+                              type: string
+                              example: "692fb10fdab9b8cb472075db"
+                            recipe:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  ingredientId:
+                                    type: string
+                                    example: "692cf42ee2c4e6ad4964e8a5"
+                                  quantity:
+                                    type: number
+                                    example: 0.6
+                            isFeatured:
+                              type: boolean
+                              example: false
+                            ratingAverage:
+                              type: number
+                              example: 4.5
+                            reviewCount:
+                              type: number
+                              example: 12
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            example: 1
+                          limit:
+                            type: integer
+                            example: 20
+                          total:
+                            type: integer
+                            example: 2
+                          totalPages:
+                            type: integer
+                            example: 1
+        '400':
+          description: Lỗi validation (Ví dụ categoryId không hợp lệ)
+        '401':
+          description: Không có quyền truy cập (Thiếu hoặc sai Access Token)
+        '422':
+          description: Lỗi xử lý dữ liệu (Unprocessable Entity)
+  /guest/dish-categories:
+    get:
+      summary: Lấy danh sách danh mục món ăn (Guest)
+      description: API lấy danh sách tất cả các category để hiển thị menu (Burger, Chicken, Drink...).
+      tags:
+        - Guest
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lấy danh sách thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get dish categories success"
+                  data:
                     type: array
-                    description: Danh sách các Category kèm theo món ăn
                     items:
                       type: object
                       properties:
                         _id:
                           type: string
-                          description: ID danh mục
+                          description: ID của danh mục
+                          example: "692faffcdab9b8cb472075da"
                         name:
                           type: string
-                          description: Tên danh mục (Ví dụ "Chicken", "Drink")
+                          description: Tên danh mục
+                          example: "Burger"
+                        display_order:
+                          type: integer
+                          description: Thứ tự hiển thị
+                          example: 1
+                        status:
+                          type: string
+                          description: Trạng thái hoạt động
+                          enum: [active, inactive]
+                          example: "active"
                         image:
                           type: string
-                          description: Ảnh đại diện danh mục
+                          format: uri
+                          description: Link ảnh đại diện danh mục
+                          example: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764732923/restaurant-app/img_1764732922471.jpg"
                         description:
                           type: string
-                          description: Mô tả danh mục
-                        dishes:
-                          type: array
-                          description: Danh sách món ăn thuộc danh mục này
-                          items:
-                            type: object
-                            properties:
-                              _id:
-                                type: string
-                              name:
-                                type: string
-                              price:
-                                type: number
-                              description:
-                                type: string
-                              image:
-                                type: string
-                              status:
-                                type: string
-                                enum: [available, unavailable]
-                              isFeatured:
-                                type: boolean
-              example:
-                message: "Get menu successfully"
-                data:
-                  - _id: "692ff130719ee34fa4e8da17"
-                    name: "Pho"
-                    image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764749615/restaurant-app/img_1764749613677.jpg"
-                    description: "Phở việt nam"
-                    dishes:
-                      - _id: "692ff4726474afd721cf2a72"
-                        name: "Phở Bò"
-                        price: 40000
-                        description: "Phở bò ngonn"
-                        image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764750449/restaurant-app/img_1764750447412.jpg"
-                        status: "available"
-                        isFeatured: false
-                  - _id: "692fb10fdab9b8cb472075db"
-                    name: "Chicken"
-                    image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764733198/restaurant-app/img_1764733197450.jpg"
-                    description: "Danh mục gà"
-                    dishes:
-                      - _id: "692fe855d1d14ce2ee11a96e"
-                        name: "Cánh gà BBQ (4 miếng)"
-                        price: 89000
-                        description: "Cánh gà BBQ (4 miếng)"
-                        image: "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764747348/restaurant-app/img_1764747346505.jpg"
-                        status: "available"
-                        isFeatured: false
+                          description: Mô tả ngắn gọn
+                          example: "Danh mục Burger"
         '401':
-          description: Unauthorized (Chưa login vào bàn)
+          description: Không có quyền truy cập (Thiếu hoặc sai Access Token)
   /guest/orders:
     post:
       tags:
@@ -4295,7 +4366,7 @@ paths:
                     example: "Access token is required"
         '500':
           description: Lỗi Server nội bộ
-
+  
 components:
   schemas:
     Table:

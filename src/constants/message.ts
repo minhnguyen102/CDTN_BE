@@ -1,4 +1,7 @@
 const USER_MESSAGES = {
+  GET_DISH_CATEGORIES_SUCCESS: "Get dish categories success",
+  INVALID_CATEGORY_ID: "Invalid category ID",
+  CATEGORY_ID_MUST_BE_A_STRING: "Category ID must be a string",
   ORDER_ID_IS_REQUIRED: "Order ID is required",
   ORDER_ID_MUST_BE_STRING: "Order ID must be a string",
   INVALID_ORDER_ID: "Invalid Order ID type",

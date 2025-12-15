@@ -244,3 +244,25 @@ export const getUrlPaymentValidation = validate(
     }
   })
 )
+
+export const getMenuValidation = validate(
+  checkSchema({
+    categoryId: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.CATEGORY_ID_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGES.CATEGORY_ID_MUST_BE_A_STRING
+      },
+      trim: true,
+      custom: {
+        options: (value) => {
+          if (!ObjectId.isValid(value)) {
+            throw new Error(USER_MESSAGES.INVALID_CATEGORY_ID)
+          }
+          return true
+        }
+      }
+    }
+  })
+)
