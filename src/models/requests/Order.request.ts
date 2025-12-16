@@ -1,4 +1,5 @@
 import { OrderItemStatus } from "../../constants/enums"
+import { DishItemInputFE } from "../../services/guests.services"
 
 export interface CreateOrderReqBody {
   items: {
@@ -6,6 +7,12 @@ export interface CreateOrderReqBody {
     quantity: number
     note: string
   }[]
+}
+
+export interface CreateOrderPayload {
+  tableId: string
+  guestName: string
+  items: DishItemInputFE[]
 }
 
 export interface UpdateStatusItemInOrdersReqBody {

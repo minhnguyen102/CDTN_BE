@@ -14,12 +14,13 @@ export const getDishCategories = async (req: Request, res: Response) => {
 }
 
 export const getGuestMenuController = async (req: Request, res: Response) => {
+  const rating = Number(req.query.rating)
   const { page, limit } = paginationQueryParser(req, {
     defaultLimit: 10,
     allowLimits: [10, 20, 30]
   })
   const { categoryId } = req.params
-  const result = await guestServices.getMenu({ categoryId, page, limit })
+  const result = await guestServices.getMenu({ categoryId, page, limit, rating })
 
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.GET_MENU_SUCCESS,

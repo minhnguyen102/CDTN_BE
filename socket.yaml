@@ -1,0 +1,320 @@
+asyncapi: 2.6.0
+info:
+  title: Kitchen & Order Socket Service
+  version: 1.0.0
+  description: |
+    Tài liệu mô tả giao thức Socket.IO cho hệ thống quản lý nhà hàng (CDTN).
+    
+    ### Hướng dẫn xác thực
+    - **Handshake Auth**: Gửi JWT Access Token qua `auth: { Authorization: "Bearer <token>" }` hoặc Headers.
+    - **Permissions**: Server sẽ tự động decode token để check quyền (Admin/Guest).
+
+    ### Giải thích thuật ngữ
+    - **publish**: Client (FE) gửi sự kiện lên Server (`socket.emit`).
+    - **subscribe**: Client (FE) lắng nghe sự kiện từ Server (`socket.on`).
+    - **ack**: Dữ liệu trả về ngay lập tức trong callback function.
+
+servers:
+  dev:
+    url: http://localhost:3000
+    protocol: socket.io
+    description: Development Server Localhost
+    security:
+      - bearerAuth: []
+
+tags:
+  - name: Admin Actions
+    description: Hành động do Admin/Bếp thực hiện (Gửi lên Server)
+  - name: Guest Actions
+    description: Hành động do Khách hàng thực hiện (Gửi lên Server)
+  - name: Server Notifications
+    description: Sự kiện Server bắn về (FE cần lắng nghe để update UI)
+
+channels:
+  # ==========================================
+  # 1. KHU VỰC ADMIN (Gửi lên)
+  # ==========================================
+  join_kitchen_room:
+    publish:
+      tags:
+        - name: Admin Actions
+      summary: Admin tham gia phòng bếp
+      description: |
+        Admin join vào `admin_room` để nhận thông báo đơn mới/update món.
+        **Quyền:** `socket_join_kitchen`
+      message:
+        payload: 
+          type: object
+          nullable: true
+          description: Không yêu cầu payload
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Phản hồi Join thành công
+      message:
+        $ref: '#/components/messages/JoinSuccess'
+
+  update_order_status:admin:
+    publish:
+      tags:
+        - name: Admin Actions
+      summary: Admin cập nhật trạng thái món ăn
+      description: |
+        Admin chuyển trạng thái món (Pending -> Cooking -> Served).
+        Sử dụng Acknowledgement Callback để xác nhận thành công.
+      message:
+        name: UpdateStatusPayload
+        payload:
+          $ref: '#/components/schemas/UpdateStatusInput'
+      bindings:
+        socketio:
+          ack:
+            $ref: '#/components/schemas/StandardAck'
+
+  create_order:admin:
+    publish:
+      tags:
+        - name: Admin Actions
+      summary: Admin tạo đơn hộ khách
+      description: Admin tạo order mới cho một bàn cụ thể.
+      message:
+        name: CreateOrderAdminPayload
+        payload:
+          $ref: '#/components/schemas/CreateOrderInput'
+      bindings:
+        socketio:
+          ack:
+            $ref: '#/components/schemas/StandardAck'
+
+  # ==========================================
+  # 2. KHU VỰC GUEST (Gửi lên)
+  # ==========================================
+  join_table:
+    publish:
+      tags:
+        - name: Guest Actions
+      summary: Khách join vào bàn ăn
+      description: |
+        Khách (hoặc thiết bị tại bàn) join vào room `table_{tableId}`.
+        **Quyền:** `socket_join_own_table`
+      message:
+        payload:
+          type: object
+          properties:
+            tableId:
+              type: string
+              example: "6578a9b1c2d3e4f5a6b7c8d9"
+
+  create_order:guest:
+    publish:
+      tags:
+        - name: Guest Actions
+      summary: Khách tự gọi món
+      description: Khách gửi danh sách món ăn muốn gọi lên server.
+      message:
+        name: CreateOrderGuestPayload
+        payload:
+          $ref: '#/components/schemas/CreateOrderInput'
+      bindings:
+        socketio:
+          ack:
+            $ref: '#/components/schemas/StandardAck'
+
+  # ==========================================
+  # 3. SERVER NOTIFICATIONS (Lắng nghe về)
+  # ==========================================
+  
+  # Sự kiện: update_order_item
+  # Được bắn ra khi trạng thái món thay đổi (Service: updateItemStatus)
+  update_order_item:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Thông báo món ăn vừa đổi trạng thái
+      description: >
+        Gửi tới `admin_room` và `table_{id}`. 
+        Dùng để cập nhật trạng thái món trên UI realtime.
+      message:
+        name: UpdateItemNotification
+        payload:
+          type: object
+          properties:
+            orderId:
+              type: string
+            itemId:
+              type: string
+            status:
+              type: string
+              enum: [Pending, Cooking, Served, Reject]
+            mamageBy:
+              type: string
+              description: Tên admin thực hiện
+            message:
+              type: string
+              description: Tin nhắn hiển thị Toast
+          example:
+            orderId: "6578a9b1c2d3e4f5a6b7c8d9"
+            itemId: "6578a9b1c2d3e4f5a6b7c999"
+            status: "Served"
+            mamageBy: "Admin Van A"
+            message: "Món Cánh gà (SL: 2) của Khách A đã chuyển sang: Đã phục vụ"
+
+  # Sự kiện: new_order
+  # Được bắn ra khi có đơn mới (Service: createOrder/createOrderForTable)
+  new_order:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Thông báo có đơn hàng MỚI (Cho Admin)
+      description: Gửi tới `admin_room` khi có bàn vừa đặt món xong.
+      message:
+        name: NewOrderNotification
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+              example: "NEW_ORDER_CREATED"
+            message:
+              type: string
+              example: "Bàn 5 vừa đặt món"
+            data:
+              $ref: '#/components/schemas/OrderObject'
+
+  # Sự kiện: refresh_order
+  # Được bắn ra cho KHÁCH khi đơn của họ được cập nhật
+  refresh_order:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Yêu cầu refresh lại đơn hàng (Cho Khách)
+      description: Gửi tới `table_{id}` để client load lại danh sách món.
+      message:
+        name: RefreshOrderNotification
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+              example: "ORDER_UPDATED"
+            message:
+              type: string
+              example: "Khách hàng vừa gọi món mới"
+            data:
+              $ref: '#/components/schemas/OrderObject'
+
+  # Sự kiện lỗi chung
+  error_msg:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Thông báo lỗi quyền hạn/hệ thống
+      message:
+        payload:
+          type: string
+          example: "Bạn không có quyền truy cập thông báo bếp!"
+
+# ==========================================
+# DEFINITIONS (Các định nghĩa dùng chung)
+# ==========================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Cấu trúc trả về của Callback (Ack)
+    StandardAck:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Thao tác thành công"
+    
+    # Input cập nhật trạng thái
+    UpdateStatusInput:
+      type: object
+      required: [orderId, itemId, status]
+      properties:
+        orderId:
+          type: string
+          example: "6578a9b1c2d3e4f5a6b7c8d9"
+        itemId:
+          type: string
+          example: "6578a9b1c2d3e4f5a6b7c999"
+        status:
+          type: string
+          enum: [Pending, Cooking, Served, Reject]
+          example: "Cooking"
+
+    # Input tạo đơn hàng
+    CreateOrderInput:
+      type: object
+      required: [tableId, guestName, items]
+      properties:
+        tableId:
+          type: string
+          example: "6578a9b1c2d3e4f5a6b7c8d9"
+        guestName:
+          type: string
+          example: "Nguyen Van A"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dishId:
+                type: string
+                example: "6578a9b1c2d3e4f5a6b7c001"
+              quantity:
+                type: integer
+                example: 2
+              note:
+                type: string
+                example: "Không cay"
+
+    # Object Order đầy đủ (Trả về trong data)
+    OrderObject:
+      type: object
+      description: Thông tin đầy đủ của đơn hàng từ Database
+      properties:
+        _id:
+          type: string
+        tableNumber:
+          type: integer
+        status:
+          type: string
+        totalAmount:
+          type: number
+        items:
+          type: array
+          items:
+            type: object
+            description: Chi tiết từng món trong đơn
+            properties:
+              dishName:
+                type: string
+                example: "Cơm rang dưa bò"
+              quantity:
+                type: integer
+              status:
+                type: string
+                example: "Pending"
+
+  messages:
+    JoinSuccess:
+      name: join_success
+      payload:
+        type: object
+        properties:
+          message:
+            type: string
+            example: "Bạn đã vào phòng bếp"
+          roomId:
+            type: string
+            example: "admin_room"

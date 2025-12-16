@@ -168,6 +168,7 @@ class OrderServices {
         returnDocument: "after"
       }
     )
+    // console.log(result, orderId, itemId)
 
     if (!result) {
       throw new ErrorWithStatus({
@@ -192,6 +193,7 @@ class OrderServices {
       [OrderItemStatus.Reject]: "Từ chối"
     }
     const statusVN = statusMap[status] || status
+    // Chưa check map chuẩn xác
 
     const socketPayload = {
       orderId,
@@ -211,7 +213,7 @@ class OrderServices {
     if (updateOrder.tableNumber) {
       io.to(`table_${updateOrder.tableId}`).emit("update_order_item", socketPayload)
     }
-    return updateOrder
+    return socketPayload
   }
 
   async createOrderForTable({
@@ -347,7 +349,7 @@ class OrderServices {
       // Nếu socket lỗi, khách vẫn đặt món thành công
       console.error("Socket emit error:", error)
     }
-    return orderResult
+    return orderResult // trả về cho controller, nếu dùng socket thì không cần
   }
 }
 const orderServices = new OrderServices()

@@ -4051,7 +4051,7 @@ paths:
     post:
       tags:
         - Guest
-      summary: 3. Guest Place Order (Đặt món)
+      summary: Guest Place Order (Đặt món)
       description: |
         Khách hàng gửi danh sách món ăn muốn đặt. 
         - Yêu cầu Token Guest (lấy từ API Login).

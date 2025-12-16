@@ -16,7 +16,7 @@ import { ObjectId } from "mongodb"
 import Dish from "../models/schema/Dish.schema"
 import Order from "../models/schema/Order.schema"
 
-interface DishItemInputFE {
+export interface DishItemInputFE {
   dishId: string
   quantity: number
   note: string
@@ -156,12 +156,28 @@ class GuestService {
       .toArray()
     return dishCategories
   }
-  async getMenu({ categoryId, page, limit }: { categoryId: string; page: number; limit: number }) {
+  async getMenu({
+    categoryId,
+    page,
+    limit,
+    rating
+  }: {
+    categoryId: string
+    page: number
+    limit: number
+    rating?: number
+  }) {
     const objectFind: any = {
       deleted: false,
       status: DishStatus.AVAILABLE,
       categoryId: new ObjectId(categoryId)
     }
+    if (rating) {
+      objectFind.rating = {
+        $gt: rating
+      }
+    }
+    // console.log(objectFind)
     const [menu, total] = await Promise.all([
       databaseService.dishes
         .find(objectFind, {
@@ -219,13 +235,6 @@ class GuestService {
     }
 
     await this.checkAndDeductStock(items, dishMap)
-
-    // try {
-    //   await this.checkAndDeductStock(items, dishMap)
-    // } catch (error) {
-    //   // Nếu lỗi kho, dừng ngay lập tức, không tạo Order
-    //   throw error
-    // }
 
     const orderItems: any[] = []
     for (const item of items) {
