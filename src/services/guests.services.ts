@@ -75,20 +75,25 @@ class GuestService {
       for (const [ingredientId, quantity] of ingredientUpdates) {
         // console.log(ingredientId)
         // console.log(quantity)
-        const result = await databaseService.ingredients.updateOne(
-          {
-            _id: new ObjectId(ingredientId),
-            currentStock: { $gte: quantity }
-          },
-          {
-            $inc: { currentStock: -quantity }
-          },
-          { session }
-        )
+        const [result, ingredient] = await Promise.all([
+          databaseService.ingredients.updateOne(
+            {
+              _id: new ObjectId(ingredientId),
+              currentStock: { $gte: quantity }
+            },
+            {
+              $inc: { currentStock: -quantity }
+            },
+            { session }
+          ),
+          databaseService.ingredients.findOne({
+            _id: new ObjectId(ingredientId)
+          })
+        ])
         // console.log(result)
         if (result.matchedCount === 0) {
           throw new ErrorWithStatus({
-            message: `Nguyên liệu ID ${ingredientId} không đủ tồn kho`,
+            message: `Nguyên liệu ID ${ingredient?.name} cho món không đủ tồn kho`,
             status: HTTP_STATUS.BAD_REQUEST
           })
         }

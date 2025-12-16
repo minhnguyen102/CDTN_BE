@@ -38,15 +38,21 @@ class OrderServices {
 
     try {
       for (const [ingredientId, quantity] of ingredientUpdates) {
-        const result = await databaseService.ingredients.updateOne(
-          { _id: new ObjectId(ingredientId), currentStock: { $gte: quantity } },
-          {
-            $inc: { currentStock: -quantity }
-          }
-        )
+        const [result, ingredient] = await Promise.all([
+          databaseService.ingredients.updateOne(
+            { _id: new ObjectId(ingredientId), currentStock: { $gte: quantity } },
+            {
+              $inc: { currentStock: -quantity }
+            },
+            { session }
+          ),
+          databaseService.ingredients.findOne({
+            _id: new ObjectId(ingredientId)
+          })
+        ])
         if (result.matchedCount === 0) {
           throw new ErrorWithStatus({
-            message: `Nguyên liệu ID ${ingredientId} không đủ tồn kho`,
+            message: `Nguyên liệu ${ingredient?.name} cho món ăn không đủ tồn kho`,
             status: HTTP_STATUS.BAD_REQUEST
           })
         }
