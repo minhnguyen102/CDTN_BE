@@ -22,6 +22,38 @@ export interface DishItemInputFE {
   note: string
 }
 class GuestService {
+  private async returnStock(dishId: string, quantity: number) {
+    const dish = await databaseService.dishes.findOne({ _id: new ObjectId(dishId) })
+    if (!dish || !dish.recipe) return
+
+    const ingredientUpdates = new Map<string, number>()
+    for (const recipeItem of dish.recipe) {
+      const ingId = recipeItem.ingredientId.toString()
+      const totalQuantity = recipeItem.quantity * quantity
+      ingredientUpdates.set(ingId, totalQuantity)
+    }
+
+    if (ingredientUpdates.size === 0) return
+
+    const session = databaseService.client.startSession()
+    session.startTransaction()
+
+    try {
+      for (const [ingredientId, qty] of ingredientUpdates) {
+        await databaseService.ingredients.updateOne(
+          { _id: new ObjectId(ingredientId) },
+          { $inc: { currentStock: qty } },
+          { session }
+        )
+      }
+      await session.commitTransaction()
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    } finally {
+      await session.endSession()
+    }
+  }
   private signAccessToken({
     user_id,
     tableNumber,
@@ -142,7 +174,7 @@ class GuestService {
       currentOrderId // Frontend dựa vào đây để biết có cần load lại đơn cũ không
     }
   }
-
+  // Lấy danh sách danh mục
   async getDishCategories() {
     const dishCategories = await databaseService.dish_categories
       .find(
@@ -161,6 +193,7 @@ class GuestService {
       .toArray()
     return dishCategories
   }
+  // Lấy danh sách đơn hàng
   async getMenu({
     categoryId,
     page,
@@ -209,7 +242,7 @@ class GuestService {
       }
     }
   }
-
+  // Khách tạo mới đơn hàng
   async createOrder({ tableId, guestName, items }: { tableId: string; guestName: string; items: DishItemInputFE[] }) {
     // Lấy thông tin Món ăn từ DB (Để lấy giá và recipe chuẩn)
     const dishIds = items.map((item) => new ObjectId(String(item.dishId)))
@@ -319,6 +352,108 @@ class GuestService {
       console.error("Socket emit error:", error)
     }
     return orderResult
+  }
+  // Khách cập nhật trạng thái đơn hàng
+  async cancelItemByGuest({
+    orderId,
+    itemId,
+    tableId,
+    status,
+    guestName
+  }: {
+    orderId: string
+    itemId: string
+    tableId: string
+    status: OrderItemStatus
+    guestName: string
+  }) {
+    // Kiểm tra tính hợp lệ của đơn hàng
+    const originalOrder = await databaseService.orders.findOne({
+      _id: new ObjectId(orderId),
+      "items._id": new ObjectId(itemId)
+    })
+    if (!originalOrder) {
+      throw new ErrorWithStatus({
+        message: "Order not found",
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    if (originalOrder.tableId.toString() !== tableId) {
+      throw new ErrorWithStatus({
+        message: "Bạn không có quyền hủy đơn của bàn khác",
+        status: HTTP_STATUS.FORBIDDEN
+      })
+    }
+    // lấy ra đơn hàng định cập nhật
+    const originalItem = originalOrder.items.find((i) => i._id.toString() === itemId)
+    if (!originalItem) {
+      throw new ErrorWithStatus({ message: "Item not found", status: HTTP_STATUS.NOT_FOUND })
+    }
+    // Chỉ được hủy đơn hàng khi đang ở trạng thái pending
+    if (originalItem.status === OrderItemStatus.Reject) {
+      throw new ErrorWithStatus({
+        message: "Món ăn đã được hủy",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+    // Chỉ được hủy đơn hàng khi đang ở trạng thái pending
+    if (originalItem.status !== OrderItemStatus.Pending) {
+      throw new ErrorWithStatus({
+        message: "Món ăn đang được chế biến hoặc đã phục vụ, không thể hủy!",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    // hoàn kho
+    await this.returnStock(originalItem.dishId.toString(), originalItem.quantity)
+    // hoàn tiền
+    const refundAmount = originalItem.dishPrice * originalItem.quantity
+
+    const targetStatus = status
+    const result = await databaseService.orders.findOneAndUpdate(
+      {
+        _id: new ObjectId(orderId),
+        "items._id": new ObjectId(itemId)
+      },
+      {
+        $set: {
+          "items.$.status": targetStatus,
+          "items.$.updatedAt": new Date()
+          // "items.$.managedBy": guestName // Có thể lưu tên khách hủy nếu muốn
+        },
+        $push: {
+          "items.$.processingHistory": {
+            status: targetStatus,
+            updatedBy: guestName, // Ghi rõ là khách tự hủy
+            updatedAt: new Date()
+          }
+        },
+        // Trừ tiền
+        $inc: { totalAmount: -refundAmount }
+      },
+      {
+        returnDocument: "after"
+      }
+    )
+    if (!result) {
+      throw new ErrorWithStatus({ message: "Cancel failed", status: HTTP_STATUS.BAD_REQUEST })
+    }
+
+    const socketPayload = {
+      newTotalOrderAmount: result.totalAmount, // Trả về tổng tiền mới
+      message: `Khách hàng ${guestName} tại bàn ${result.tableNumber} đã HỦY món: ${originalItem.dishName} số lượng ${originalItem.quantity}`
+    }
+
+    const io = getIO()
+
+    // Gửi cho Admin (để bếp biết mà đừng nấu nữa)
+    io.to("admin_room").emit("update_order_item", socketPayload)
+
+    // Gửi lại cho chính bàn đó (để update UI cho các thành viên khác trong bàn)
+    io.to(`table_${tableId}`).emit("update_order_item", socketPayload)
+
+    return socketPayload
   }
 }
 const guestServices = new GuestService()

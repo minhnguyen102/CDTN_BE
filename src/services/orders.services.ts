@@ -210,7 +210,7 @@ class OrderServices {
         status: HTTP_STATUS.NOT_FOUND
       })
     }
-    /**
+    /** Xử lí riêng nếu reject
      * Nếu ban đầu là Pending và sau đó sang reject
      *  - Hoàn nguyên liệu lại kho
      *  - Trừ tiền cho đơn hàng
@@ -240,7 +240,7 @@ class OrderServices {
             updatedAt: new Date()
           }
         },
-        $inc: { totalAmount: -refundAmount }
+        $inc: { totalAmount: -refundAmount } // xử lí riêng nếu reject. NẾu không reject thì refundAmout = 0
       },
       {
         returnDocument: "after"

@@ -178,6 +178,36 @@ export const initSocket = (httpServer: HttpServer) => {
         }
       }
     })
+    // Server bắt sự kiện khách cập nhật trạng thái đơn hàng (Chỉ được phép từ pending -> reject)
+    socket.on("cancel_order:guest", async (payload, callback) => {
+      const { orderId, itemId, status } = payload
+      const { user_id, guestName } = decoded_access_token
+
+      try {
+        const result = await guestServices.cancelItemByGuest({
+          orderId,
+          itemId,
+          tableId: user_id, // Truyền vào để service check security
+          status,
+          guestName
+        })
+        console.log("chay vao day")
+        if (typeof callback === "function") {
+          callback({
+            success: true,
+            message: "Hủy món thành công",
+            data: result
+          })
+        }
+      } catch (error: any) {
+        if (typeof callback === "function") {
+          callback({
+            success: false,
+            message: error.message || "Lỗi server"
+          })
+        }
+      }
+    })
     // END GUEST
 
     socket.on("disconnect", () => {
