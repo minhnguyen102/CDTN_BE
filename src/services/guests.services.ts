@@ -93,7 +93,7 @@ class GuestService {
         // console.log(result)
         if (result.matchedCount === 0) {
           throw new ErrorWithStatus({
-            message: `Nguyên liệu ID ${ingredient?.name} cho món không đủ tồn kho`,
+            message: `Nguyên liệu ${ingredient?.name} cho món không đủ tồn kho. Vui lòng chọn món khác`,
             status: HTTP_STATUS.BAD_REQUEST
           })
         }
@@ -303,15 +303,15 @@ class GuestService {
     try {
       const io = getIO()
       // gửi thông báo đến cho admin
-      io.to("admin_room").emit("new_order", {
-        type: "NEW_ORDER_CREATED",
+      io.to("admin_room").emit("new_order:admin", {
+        type: "NEW_ORDER_CREATED:ADMIN",
         message: `Bàn ${table?.number} vừa đặt món`,
         data: orderResult
       })
       // Gửi thông báo đến khách trong bàn ăn được đặt
-      io.to(`table_${tableId}`).emit("refresh_order", {
-        type: "ORDER_UPDATED", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
-        message: "Khách hàng vừa gọi món mới",
+      io.to(`table_${tableId}`).emit("new_order:guest", {
+        type: "NEW_ORDER_CREATED:CLIENT", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
+        message: "Khách hàng vừa gọi món mới", // cần đổi
         data: orderResult
       })
     } catch (error) {

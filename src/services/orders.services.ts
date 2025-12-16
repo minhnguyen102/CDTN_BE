@@ -52,7 +52,7 @@ class OrderServices {
         ])
         if (result.matchedCount === 0) {
           throw new ErrorWithStatus({
-            message: `Nguyên liệu ${ingredient?.name} cho món ăn không đủ tồn kho`,
+            message: `Nguyên liệu ${ingredient?.name} cho món ăn không đủ tồn kho. Vui lòng chọn món khác`,
             status: HTTP_STATUS.BAD_REQUEST
           })
         }
@@ -61,6 +61,42 @@ class OrderServices {
     } catch (error) {
       await session.abortTransaction() // Nếu có bất kì 1 lỗi => Hủy toàn bộ các thay đổi trước đó
       throw error
+    } finally {
+      await session.endSession()
+    }
+  }
+
+  // Dùng khi khách hàng hủy món (điều kiện món đang ở trạng thái pending)
+  private async returnStock({ dishId, quantity }: { dishId: string; quantity: number }) {
+    const dish = await databaseService.dishes.findOne({
+      _id: new ObjectId(dishId)
+    })
+    if (!dish || !dish.recipe) return
+
+    const ingredientUpdates = new Map<string, number>()
+    for (const recipeItem of dish.recipe) {
+      const ingId = recipeItem.ingredientId.toString()
+      const totalQuantity = recipeItem.quantity * quantity // số lượng cho 1 phần ăn * số suất đặt
+      ingredientUpdates.set(ingId, totalQuantity)
+    }
+
+    if (ingredientUpdates.size === 0) return
+    const session = databaseService.client.startSession()
+    session.startTransaction()
+
+    try {
+      for (const [ingredientId, quantity] of ingredientUpdates) {
+        await databaseService.ingredients.updateOne(
+          { _id: new ObjectId(ingredientId) },
+          { $inc: { currentStock: quantity } },
+          { session }
+        )
+      }
+      await session.commitTransaction()
+      console.log(`Đã hoàn kho cho món ${dish.name}`)
+    } catch (error) {
+      await session.abortTransaction()
+      console.log("Lỗi hoàn kho", error)
     } finally {
       await session.endSession()
     }
@@ -150,7 +186,42 @@ class OrderServices {
     status: OrderItemStatus
     admin_id: string
   }) {
+    // Validate status gửi lên
+    const statusAccept = Object.values(OrderItemStatus)
+    if (!statusAccept.includes(status)) {
+      throw new ErrorWithStatus({
+        message: "Invalid status",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    // Tìm người cập nhật (ghi lại trong log)
     const account = (await databaseService.accounts.findOne({ _id: new ObjectId(admin_id) })) as Account
+
+    // tìm bản ghi ban đầu để so sánh trạng thái ban đầu với trạng thái người gửi lên
+    const originalOrder = await databaseService.orders.findOne({
+      _id: new ObjectId(orderId),
+      "items._id": new ObjectId(itemId)
+    })
+    const originalItem = originalOrder?.items.find((i) => i._id.toString() === itemId)
+    if (!originalItem) {
+      throw new ErrorWithStatus({
+        message: "Item not found",
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    /**
+     * Nếu ban đầu là Pending và sau đó sang reject
+     *  - Hoàn nguyên liệu lại kho
+     *  - Trừ tiền cho đơn hàng
+     */
+    let refundAmount = 0
+    if (originalItem.status === OrderItemStatus.Pending && status === OrderItemStatus.Reject) {
+      await this.returnStock({ dishId: originalItem.dishId.toString(), quantity: originalItem.quantity })
+      refundAmount = originalItem.dishPrice * originalItem.quantity
+    }
+
+    // Cập nhật trạng thái đơn => trả về kết quả sau trạng thái cập nhật
     const result = await databaseService.orders.findOneAndUpdate(
       {
         _id: new ObjectId(orderId),
@@ -168,14 +239,13 @@ class OrderServices {
             updatedBy: account.name,
             updatedAt: new Date()
           }
-        }
+        },
+        $inc: { totalAmount: -refundAmount }
       },
       {
         returnDocument: "after"
       }
-    )
-    // console.log(result, orderId, itemId)
-
+    ) // trả về nguyên bản ghi gồm tất cả các món có trong bàn. => muốn lấy duy nhất thông tin món đang được cập nhật
     if (!result) {
       throw new ErrorWithStatus({
         message: "Order or Item not found",
@@ -198,14 +268,10 @@ class OrderServices {
       [OrderItemStatus.Served]: "Đã phục vụ",
       [OrderItemStatus.Reject]: "Từ chối"
     }
-    const statusVN = statusMap[status] || status
-    // Chưa check map chuẩn xác
+    const statusVN = statusMap[status]
 
     const socketPayload = {
-      orderId,
-      itemId,
-      status,
-      mamageBy: account.name,
+      newTotalAmount: updateOrder.totalAmount,
       message: `Món ${itemDetail.dishName} (SL: ${itemDetail.quantity}) của ${itemDetail.orderedBy} đã chuyển sang: ${statusVN}`
     }
 
@@ -340,14 +406,14 @@ class OrderServices {
     try {
       const io = getIO()
       // gửi thông báo đến cho admin
-      io.to("admin_room").emit("new_order", {
-        type: "NEW_ORDER_CREATED",
+      io.to("admin_room").emit("new_order:admin", {
+        type: "NEW_ORDER_CREATED:ADMIN",
         message: `Bàn ${table?.number} vừa đặt món`,
         data: orderResult
       })
       // Gửi thông báo đến khách trong bàn ăn được đặt
-      io.to(`table_${tableId}`).emit("refresh_order", {
-        type: "ORDER_UPDATED", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
+      io.to(`table_${tableId}`).emit("new_order:guest", {
+        type: "NEW_ORDER_CREATED:CLIENT", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
         message: "Khách hàng vừa gọi món mới",
         data: orderResult
       })
