@@ -271,6 +271,10 @@ class OrderServices {
     const statusVN = statusMap[status]
 
     const socketPayload = {
+      orderId,
+      itemId,
+      status,
+      mamageBy: account.name,
       newTotalAmount: updateOrder.totalAmount,
       message: `Món ${itemDetail.dishName} (SL: ${itemDetail.quantity}) của ${itemDetail.orderedBy} đã chuyển sang: ${statusVN}`
     }

@@ -441,7 +441,11 @@ class GuestService {
     }
 
     const socketPayload = {
-      newTotalOrderAmount: result.totalAmount, // Trả về tổng tiền mới
+      orderId,
+      itemId,
+      status,
+      mamageBy: guestName,
+      newTotalAmount: result.totalAmount, // Trả về tổng tiền mới
       message: `Khách hàng ${guestName} tại bàn ${result.tableNumber} đã HỦY món: ${originalItem.dishName} số lượng ${originalItem.quantity}`
     }
 
