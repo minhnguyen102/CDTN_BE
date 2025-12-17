@@ -198,12 +198,18 @@ class GuestService {
     categoryId,
     page,
     limit,
-    rating
+    rating,
+    isFeatured,
+    minPrice,
+    maxPrice
   }: {
     categoryId: string
     page: number
     limit: number
     rating?: number
+    isFeatured?: boolean
+    minPrice?: number
+    maxPrice?: number
   }) {
     const objectFind: any = {
       deleted: false,
@@ -211,9 +217,17 @@ class GuestService {
       categoryId: new ObjectId(categoryId)
     }
     if (rating) {
-      objectFind.rating = {
+      objectFind.ratingAverage = {
         $gt: rating
       }
+    }
+    if (isFeatured) {
+      objectFind.isFeatured = isFeatured
+    }
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      objectFind.price = {}
+      if (minPrice !== undefined) objectFind.price.$gte = minPrice // Lớn hơn hoặc bằng
+      if (maxPrice !== undefined) objectFind.price.$lte = maxPrice // Nhỏ hơn hoặc bằng
     }
     // console.log(objectFind)
     const [menu, total] = await Promise.all([
@@ -456,6 +470,7 @@ class GuestService {
 
     // Gửi lại cho chính bàn đó (để update UI cho các thành viên khác trong bàn)
     io.to(`table_${tableId}`).emit("update_order_item", socketPayload)
+    io.to(`table_${tableId}`).emit("order:update", result)
 
     return socketPayload
   }

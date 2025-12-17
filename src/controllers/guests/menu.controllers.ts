@@ -15,12 +15,15 @@ export const getDishCategories = async (req: Request, res: Response) => {
 
 export const getGuestMenuController = async (req: Request, res: Response) => {
   const rating = Number(req.query.rating)
+  const isFeatured = Boolean(req.query.isFeatured)
   const { page, limit } = paginationQueryParser(req, {
     defaultLimit: 10,
     allowLimits: [10, 20, 30]
   })
+  const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
+  const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined
   const { categoryId } = req.params
-  const result = await guestServices.getMenu({ categoryId, page, limit, rating })
+  const result = await guestServices.getMenu({ categoryId, page, limit, rating, isFeatured, maxPrice, minPrice })
 
   return res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.GET_MENU_SUCCESS,

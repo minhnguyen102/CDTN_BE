@@ -334,6 +334,7 @@ class OrderServices {
     io.to("admin_room").emit("update_order_item", socketPayload) // to admin
     if (updateOrder.tableNumber) {
       io.to(`table_${updateOrder.tableId}`).emit("update_order_item", socketPayload)
+      io.to(`table_${updateOrder.tableId}`).emit("order:update", updateOrder)
     }
     return socketPayload
   }

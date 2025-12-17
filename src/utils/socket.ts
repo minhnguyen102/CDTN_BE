@@ -106,7 +106,7 @@ export const initSocket = (httpServer: HttpServer) => {
         if (typeof callback === "function") {
           callback({
             success: true,
-            message: "Update status item success"
+            message: "Cập nhật trạng thái món thành cồng"
           })
         }
       } catch (error: any) {
