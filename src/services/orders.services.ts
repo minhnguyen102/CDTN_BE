@@ -210,6 +210,52 @@ class OrderServices {
         status: HTTP_STATUS.NOT_FOUND
       })
     }
+
+    // xử lí ràng buộc (chỉ cho cập nhật lên)
+    if (originalItem.status === status) return
+
+    // Tạo thứ tự ưu tiên của trạng thái
+    const priority: Record<string, number> = {
+      [OrderItemStatus.Pending]: 0,
+      [OrderItemStatus.Cooking]: 1,
+      [OrderItemStatus.Served]: 2,
+      [OrderItemStatus.Reject]: -1 // Reject là trạng thái đặc biệt
+    }
+    const currentP = priority[originalItem.status]
+    const newP = priority[status]
+
+    // Luật 1: Nếu trạng thái món đã chốt (served hoặc reject) => Không được thay đổi
+    if (originalItem.status === OrderItemStatus.Reject) {
+      throw new ErrorWithStatus({
+        message: "Món ăn đã được hủy, không thể thay đổi trạng thái!",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+    if (originalItem.status === OrderItemStatus.Served) {
+      throw new ErrorWithStatus({
+        message: "Món ăn đã hoàn thành, không thể thay đổi trạng thái!",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    // Chỉ được reject khi pending
+    if (status === OrderItemStatus.Reject) {
+      // Chỉ được Reject khi đang Pending (Cooking cũng không được hủy theo yêu cầu của bạn)
+      if (originalItem.status !== OrderItemStatus.Pending) {
+        throw new ErrorWithStatus({
+          message: "Chỉ có thể hủy món khi đang chờ xử lý (Pending)",
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+    } else {
+      if (newP <= currentP) {
+        throw new ErrorWithStatus({
+          message: "Quy trình không được phép quay ngược trạng thái (VD: Cooking -> Pending)",
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+    }
+
     /** Xử lí riêng nếu reject
      * Nếu ban đầu là Pending và sau đó sang reject
      *  - Hoàn nguyên liệu lại kho
@@ -248,7 +294,7 @@ class OrderServices {
     ) // trả về nguyên bản ghi gồm tất cả các món có trong bàn. => muốn lấy duy nhất thông tin món đang được cập nhật
     if (!result) {
       throw new ErrorWithStatus({
-        message: "Order or Item not found",
+        message: "Update failed",
         status: HTTP_STATUS.NOT_FOUND
       })
     }
