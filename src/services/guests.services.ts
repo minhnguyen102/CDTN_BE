@@ -15,6 +15,7 @@ import { getIO } from "../utils/socket"
 import { ObjectId } from "mongodb"
 import Dish from "../models/schema/Dish.schema"
 import Order from "../models/schema/Order.schema"
+import USER_MESSAGES from "../constants/message"
 
 export interface DishItemInputFE {
   dishId: string
@@ -79,7 +80,6 @@ class GuestService {
       }
     })
   }
-
   private async checkAndDeductStock(items: any[], dishMap: Map<string, any>) {
     // Gom tất cả nguyên liệu cần thiết (Gom hết gà từ các đơn cần gà)
     const ingredientUpdates = new Map<string, number>()
@@ -458,6 +458,46 @@ class GuestService {
     io.to(`table_${tableId}`).emit("update_order_item", socketPayload)
 
     return socketPayload
+  }
+  // Khách lấy danh sách đơn hàng
+  async getOrderList({ tableId }: { tableId: string }) {
+    const table = await databaseService.tables.findOne({ _id: new ObjectId(tableId) })
+    if (!table || !table.currentOrderId) {
+      return {
+        [OrderItemStatus.Pending]: [],
+        [OrderItemStatus.Cooking]: [],
+        [OrderItemStatus.Served]: [],
+        [OrderItemStatus.Reject]: []
+      }
+    }
+
+    const order = await databaseService.orders.findOne({
+      _id: new ObjectId(table.currentOrderId)
+    })
+
+    if (!order) {
+      return {
+        [OrderItemStatus.Pending]: [],
+        [OrderItemStatus.Cooking]: [],
+        [OrderItemStatus.Served]: [],
+        [OrderItemStatus.Reject]: []
+      }
+    }
+
+    const groupItems: Record<string, any[]> = {
+      [OrderItemStatus.Pending]: [],
+      [OrderItemStatus.Cooking]: [],
+      [OrderItemStatus.Served]: [],
+      [OrderItemStatus.Reject]: []
+    }
+
+    order.items.forEach((item) => {
+      if (groupItems[item.status]) {
+        groupItems[item.status].push(item)
+      }
+    })
+
+    return groupItems
   }
 }
 const guestServices = new GuestService()

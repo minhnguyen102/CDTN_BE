@@ -15,6 +15,10 @@ export interface CreateOrderPayload {
   items: DishItemInputFE[]
 }
 
+export interface GetOrderList {
+  tableId: string
+}
+
 export interface UpdateStatusItemInOrdersReqBody {
   status: OrderItemStatus
 }

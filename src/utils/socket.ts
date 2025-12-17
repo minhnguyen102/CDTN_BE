@@ -9,7 +9,7 @@ import { verifyToken } from "./jwt"
 import { JsonWebTokenError } from "jsonwebtoken"
 import { config } from "dotenv"
 import orderServices from "../services/orders.services"
-import { CreateOrderPayload } from "../models/requests/Order.request"
+import { CreateOrderPayload, GetOrderList } from "../models/requests/Order.request"
 import guestServices from "../services/guests.services"
 config()
 
@@ -205,6 +205,24 @@ export const initSocket = (httpServer: HttpServer) => {
             success: false,
             message: error.message || "Lỗi server"
           })
+        }
+      }
+    })
+    // Server bắt sự kiện khách nhấn nút theo dõi trạng thái đơn hàng => trả về toàn bộ danh sách đơn hàng có phân chia theo 4 nhóm
+    socket.on("get_orders:guest", async (payload: GetOrderList, callback) => {
+      const { tableId } = payload
+      try {
+        const groupItems = await guestServices.getOrderList({ tableId })
+        if (typeof callback === "function") {
+          callback({
+            success: true,
+            message: "Lấy danh sách đơn hàng thành công",
+            data: groupItems
+          })
+        }
+      } catch (error) {
+        if (typeof callback === "function") {
+          callback({ success: false, message: "Lỗi lấy đơn hàng" })
         }
       }
     })
