@@ -124,6 +124,60 @@ class ReviewService {
     return review
   }
 
+  async getReviewsByDish({ dishId, page, limit }: { dishId: string; page: number; limit: number }) {
+    const reivews = await databaseService.reviews
+      .aggregate([
+        {
+          $match: {
+            dishId: new ObjectId(dishId),
+            status: ReviewStatus.ACTIVE
+          }
+        },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: "dishes",
+            localField: "dishId",
+            foreignField: "_id",
+            as: "dishInfo"
+          }
+        },
+        {
+          $unwind: {
+            path: "$dishInfo",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            dishId: 1,
+            orderId: 1,
+            authorName: 1,
+            rating: 1,
+            comment: 1,
+            photos: 1,
+            status: 1,
+            reply: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            dishName: "$dishInfo.name",
+            dishImage: "$dishInfo.image"
+          }
+        }
+      ])
+      .toArray()
+
+    if (!reivews) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.REVIEW_NOT_FOUND,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+    return reivews
+  }
+
   // ADMIN
   async getReviewsForAdmin({
     page,

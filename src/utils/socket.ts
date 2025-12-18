@@ -132,7 +132,7 @@ export const initSocket = (httpServer: HttpServer) => {
         if (typeof callback === "function") {
           callback({
             success: true,
-            message: "Order created/updated successfully"
+            message: "Tạo mới đơn hàng cho khách thành công"
           })
         }
       } catch (error: any) {

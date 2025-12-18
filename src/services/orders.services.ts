@@ -9,6 +9,7 @@ import Account from "../models/schema/Account.schema"
 import USER_MESSAGES from "../constants/message"
 import Dish from "../models/schema/Dish.schema"
 import Order from "../models/schema/Order.schema"
+import guestServices from "./guests.services"
 
 interface DishItemInputFE {
   dishId: string
@@ -198,10 +199,10 @@ class OrderServices {
     const account = (await databaseService.accounts.findOne({ _id: new ObjectId(admin_id) })) as Account
 
     // tìm bản ghi ban đầu để so sánh trạng thái ban đầu với trạng thái người gửi lên
-    const originalOrder = await databaseService.orders.findOne({
+    const originalOrder = (await databaseService.orders.findOne({
       _id: new ObjectId(orderId),
       "items._id": new ObjectId(itemId)
-    })
+    })) as Order
     const originalItem = originalOrder?.items.find((i) => i._id.toString() === itemId)
     if (!originalItem) {
       throw new ErrorWithStatus({
@@ -330,7 +331,12 @@ class OrderServices {
      *  - Gửi thông báo về toàn bộ trang admin
      */
     const io = getIO()
-    io.to("admin_room").emit("update_order_item", socketPayload) // to admin
+    // to admin
+    io.to("admin_room").emit("update_order_item", socketPayload)
+    const tableId = originalOrder.tableId
+    const groupItems = await guestServices.getOrderList({ tableId: tableId.toString() })
+    io.to("admin_room").emit("order_update:admin", groupItems)
+    // to guest
     if (updateOrder.tableNumber) {
       io.to(`table_${updateOrder.tableId}`).emit("update_order_item", socketPayload)
       io.to(`table_${updateOrder.tableId}`).emit("order:update", updateOrder)
@@ -456,11 +462,9 @@ class OrderServices {
     try {
       const io = getIO()
       // gửi thông báo đến cho admin
-      io.to("admin_room").emit("new_order:admin", {
-        type: "NEW_ORDER_CREATED:ADMIN",
-        message: `Bàn ${table?.number} vừa đặt món`,
-        data: orderResult
-      })
+      const groupItems = await guestServices.getOrderList({ tableId })
+      io.to("admin_room").emit("order_update:admin", groupItems)
+
       // Gửi thông báo đến khách trong bàn ăn được đặt
       io.to(`table_${tableId}`).emit("new_order:guest", {
         type: "NEW_ORDER_CREATED:CLIENT", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'

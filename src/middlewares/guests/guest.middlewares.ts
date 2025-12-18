@@ -1,5 +1,5 @@
 import { validate } from "../../utils/validation"
-import { checkSchema, ParamSchema } from "express-validator"
+import { check, checkSchema, ParamSchema } from "express-validator"
 import USER_MESSAGES from "../../constants/message"
 import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
@@ -220,6 +220,23 @@ export const createReviewValidation = validate(
       }
     },
     ["body"]
+  )
+)
+
+export const getReviewValidation = validate(
+  checkSchema(
+    {
+      dishId: {
+        notEmpty: true,
+        isMongoId: {
+          errorMessage: new ErrorWithStatus({
+            message: USER_MESSAGES.INVALID_DISH_ID,
+            status: HTTP_STATUS.BAD_REQUEST
+          })
+        }
+      }
+    },
+    ["params"]
   )
 )
 
