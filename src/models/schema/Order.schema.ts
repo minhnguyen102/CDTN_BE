@@ -44,15 +44,13 @@ interface OrderType {
   _id?: ObjectId
   tableId: ObjectId
   tableNumber: number
-
   items: OrderItemInput[]
+  guestName: string
 
   // Thông tin thanh toán
   totalAmount?: number
   discount?: number
   finalAmount?: number
-
-  status?: OrderStatus // Cân nhắc bỏ
 
   paymentStatus?: PaymentStatus
   paymentMethod?: PaymentMethod
@@ -68,8 +66,8 @@ export default class Order {
   tableId: ObjectId
   tableNumber: number
   items: OrderItem[]
+  guestName: string
   totalAmount: number
-  status: OrderStatus
   createdAt: Date
   paymentStatus?: PaymentStatus
   paymentMethod?: PaymentMethod
@@ -81,7 +79,6 @@ export default class Order {
     this._id = order._id || new ObjectId()
     this.tableId = new ObjectId(order.tableId)
     this.tableNumber = order.tableNumber
-    this.status = order.status || OrderStatus.PENDING
 
     // Map dữ liệu items để đảm bảo tính đúng đắn
     this.items = order.items.map((item) => ({
@@ -94,6 +91,8 @@ export default class Order {
       managedBy: (item as any).managedBy || "",
       processingHistory: (item as any).processingHistory || []
     }))
+
+    this.guestName = order.guestName
 
     // Tự động tính tổng tiền nếu không truyền vào
     this.totalAmount =

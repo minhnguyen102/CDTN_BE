@@ -436,7 +436,7 @@ class OrderServices {
         tableId: tableObjectId,
         tableNumber: table.number,
         items: orderItems,
-        status: OrderStatus.PENDING
+        guestName: guestName
       })
       const insertResult = await databaseService.orders.insertOne(newOrder)
       orderResult = { ...newOrder, _id: insertResult.insertedId }

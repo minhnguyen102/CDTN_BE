@@ -313,7 +313,6 @@ class GuestService {
     if (table?.currentOrderId) {
       // Bàn Đang Ăn -> Cập nhật đơn cũ
       const currentOrderId = table.currentOrderId
-      // console.log(currentOrderId)
       const additionalAmount = orderItems.reduce((acc, item) => acc + item.dishPrice * item.quantity, 0)
 
       await databaseService.orders.updateOne(
@@ -331,7 +330,7 @@ class GuestService {
         tableId: tableObjectId,
         tableNumber: table?.number || 0,
         items: orderItems,
-        status: OrderStatus.PENDING
+        guestName: guestName
       })
 
       const insertResult = await databaseService.orders.insertOne(newOrder)
