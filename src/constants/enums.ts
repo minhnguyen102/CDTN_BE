@@ -99,3 +99,8 @@ export enum PaymentMethod {
 }
 
 export const ROLE_GUEST = "Guest"
+
+export enum ReviewStatus {
+  ACTIVE = "Active",
+  HIDDEN = "Hidden"
+}

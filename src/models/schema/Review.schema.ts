@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb"
+import { ReviewStatus } from "../../constants/enums"
 
 interface reviewType {
   // Input từ fe
@@ -8,7 +9,13 @@ interface reviewType {
   authorName: string
   rating: number
   comment: string
-  photos?: string // có thể gửi ảnh lên, nếu khôngg thì lưu string rỗng (upload 1 ảnh)
+  photos?: string[] // có thể gửi ảnh lên, nếu khôngg thì lưu string rỗng (upload 1 ảnh)
+  status: ReviewStatus
+  reply?: {
+    content: string
+    adminId: string // dữ liệu gửi lên
+    createdAt: Date
+  }
   createdAt?: Date
 }
 
@@ -19,7 +26,13 @@ export default class Review {
   authorName: string
   rating: number
   comment: string
-  photos: string
+  photos: string[]
+  status: ReviewStatus
+  reply?: {
+    content: string
+    adminId: ObjectId // lưu trong db
+    createdAt: Date
+  }
   createdAt: Date
 
   constructor(review: reviewType) {
@@ -30,7 +43,15 @@ export default class Review {
     this.authorName = review.authorName || "Khách ẩn danh"
     this.rating = review.rating || 5
     this.comment = review.comment || ""
-    this.photos = review.photos || ""
+    this.photos = review.photos || []
+    this.status = review.status || ReviewStatus.ACTIVE
+    if (review.reply) {
+      this.reply = {
+        content: review.reply.content,
+        adminId: new ObjectId(review.reply.adminId),
+        createdAt: review.reply.createdAt || date
+      }
+    }
     this.createdAt = date
   }
 }
