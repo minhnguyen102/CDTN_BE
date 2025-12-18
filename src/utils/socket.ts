@@ -191,7 +191,6 @@ export const initSocket = (httpServer: HttpServer) => {
           status,
           guestName
         })
-        console.log("chay vao day")
         if (typeof callback === "function") {
           callback({
             success: true,

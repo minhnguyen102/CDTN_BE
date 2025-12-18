@@ -352,13 +352,13 @@ class GuestService {
       // gửi thông báo đến cho admin
       io.to("admin_room").emit("new_order:admin", {
         type: "NEW_ORDER_CREATED:ADMIN",
-        message: `Bàn ${table?.number} vừa đặt món`,
+        message: `Bàn ${table?.number} vừa đặt món mới`,
         data: orderResult
       })
       // Gửi thông báo đến khách trong bàn ăn được đặt
       io.to(`table_${tableId}`).emit("new_order:guest", {
         type: "NEW_ORDER_CREATED:CLIENT", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
-        message: "Khách hàng vừa gọi món mới", // cần đổi
+        message: "Đặt món thành công", // cần đổi
         data: orderResult
       })
     } catch (error) {
@@ -459,18 +459,20 @@ class GuestService {
       itemId,
       status,
       mamageBy: guestName,
-      newTotalAmount: result.totalAmount, // Trả về tổng tiền mới
-      message: `Khách hàng ${guestName} tại bàn ${result.tableNumber} đã HỦY món: ${originalItem.dishName} số lượng ${originalItem.quantity}`
+      newTotalAmount: result.totalAmount // Trả về tổng tiền mới
     }
 
     const io = getIO()
 
     // Gửi cho Admin (để bếp biết mà đừng nấu nữa)
-    io.to("admin_room").emit("update_order_item", socketPayload)
+    io.to("admin_room").emit("update_order_item", {
+      ...socketPayload,
+      message: `Khách hàng ${guestName} tại bàn ${result.tableNumber} đã HỦY món: ${originalItem.dishName} số lượng ${originalItem.quantity}`
+    })
 
     // Gửi lại cho chính bàn đó (để update UI cho các thành viên khác trong bàn)
-    io.to(`table_${tableId}`).emit("update_order_item", socketPayload)
-    io.to(`table_${tableId}`).emit("order:update", result)
+    // io.to(`table_${tableId}`).emit("update_order_item", socketPayload)
+    io.to(`table_${tableId}`).emit("order:update", result) // trả về toàn bộ đơn hàng để cập nhật đồng thời các tab
 
     return socketPayload
   }

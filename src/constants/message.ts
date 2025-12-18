@@ -29,7 +29,7 @@ const USER_MESSAGES = {
   TABLE_ID_IS_REQUIRED: "Table ID is required",
   TABLE_ID_IS_INVALID: "Invalid Table ID format",
   GET_MENU_SUCCESS: "Get menu successfully",
-  CREATE_ORDER_SUCCESS: "Order placed successfully",
+  CREATE_ORDER_SUCCESS: "Đặt món thành công",
   LOGIN_GUEST_SUCCESS: "Login success",
   // --- Order Validation ---
   ORDER_ITEMS_REQUIRED: "Order items are required",

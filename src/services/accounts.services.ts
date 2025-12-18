@@ -414,9 +414,7 @@ class AccountsServices {
     const { name } = payload
     if (name) {
       _payload.key_search = removeAccents(name + " " + email)
-      // console.log("Chay vao day")
     }
-    // console.log(_payload)
     const account = await databaseService.accounts.findOneAndUpdate(
       { _id: new ObjectId(user_id) },
       {
