@@ -151,9 +151,43 @@ class ReviewService {
 
     const [reviews, totalReview] = await Promise.all([
       databaseService.reviews
-        .find(match)
-        .skip((page - 1) * limit)
-        .limit(limit)
+        .aggregate([
+          { $match: match },
+          { $sort: { createdAt: -1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          {
+            $lookup: {
+              from: "dishes",
+              localField: "dishId",
+              foreignField: "_id",
+              as: "dishInfo"
+            }
+          },
+          {
+            $unwind: {
+              path: "$dishInfo",
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              dishId: 1,
+              orderId: 1,
+              authorName: 1,
+              rating: 1,
+              comment: 1,
+              photos: 1,
+              status: 1,
+              reply: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              dishName: "$dishInfo.name", // Lấy tên món
+              dishImage: "$dishInfo.image"
+            }
+          }
+        ])
         .toArray(),
       databaseService.reviews.countDocuments(match)
     ])
