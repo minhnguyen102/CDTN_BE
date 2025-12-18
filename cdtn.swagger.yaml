@@ -205,10 +205,16 @@ tags:
     description: Các logic liên quan đến Dish Category
   - name: Orders
     description: Quản lý đơn hàng (Admin)
+  - name: Admin Reviews
+    description: Quản lý đánh giá (Admin)
+
   - name: Guest Auth
     description: Đăng nhập bên khách hàng
   - name: Guest 
     description: Logic bên khách hàng
+  - name: Guest Reviews
+    description: API đánh giá cho khách hàng
+  
   
     
 
@@ -4367,6 +4373,241 @@ paths:
         '500':
           description: Lỗi Server nội bộ
   
+  # --- GUEST REVIEWS ---
+  /guest/reviews/{dishId}:
+    get:
+      tags:
+        - Guest Reviews
+      summary: Lấy danh sách đánh giá của món ăn
+      description: >
+        Lấy danh sách review của một món ăn cụ thể để hiển thị bên Client.
+        Chỉ trả về các review có trạng thái là 'Active'.
+      operationId: getDishReviews
+      parameters:
+        - name: dishId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của món ăn
+          example: "692fe855d1d14ce2ee11a96e"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get reviews successfully"
+                  data:
+                    type: object
+                    properties:
+                      reviews:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ReviewObject'
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                          limit:
+                            type: integer
+                          total:
+                            type: integer
+                          totalPages:
+                            type: integer
+
+  # /guest/reviews:
+  #   post:
+  #     tags:
+  #       - Guest Reviews
+  #     summary: Viết đánh giá mới
+  #     description: >
+  #       Khách hàng viết đánh giá cho món ăn sau khi đã mua.
+  #       Yêu cầu Token Guest.
+  #     operationId: createReview
+  #     security:
+  #       - BearerAuth: []
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/CreateReviewReqBody'
+  #     responses:
+  #       '200':
+  #         description: Đánh giá thành công
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 message:
+  #                   type: string
+  #                   example: "Review posted successfully"
+  #                 result:
+  #                   $ref: '#/components/schemas/ReviewObject'
+  #       '400':
+  #         description: Lỗi logic (Chưa mua, đã đánh giá rồi,...)
+  #       '401':
+  #         description: Unauthorized
+
+  # --- ADMIN REVIEWS ---
+  /reviews:
+    get:
+      tags:
+        - Admin Reviews
+      summary: Lấy danh sách đánh giá (Admin)
+      description: >
+        Lấy tất cả đánh giá trong hệ thống. Hỗ trợ lọc theo món ăn, số sao, trạng thái.
+        Kết quả trả về bao gồm cả thông tin món ăn (tên, ảnh) để Admin dễ theo dõi.
+      operationId: getAllReviewsAdmin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: dishId
+          in: query
+          schema:
+            type: string
+          description: Lọc theo món ăn
+        - name: rating
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          description: | 
+            Lọc theo số sao (VD: Lọc các bài 1 sao để xử lý)
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Active, Hidden]
+          description: Lọc theo trạng thái
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get admin reviews successfully"
+                  data:
+                    type: object
+                    properties:
+                      reviews:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ReviewAdminObject'
+                      total:
+                        type: integer
+                      totalPages:
+                        type: integer
+  /reviews/{reviewId}/reply:
+    post:
+      tags:
+        - Admin Reviews
+      summary: Trả lời đánh giá
+      description: Admin trả lời comment của khách.
+      operationId: replyReview
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  example: "Cảm ơn bạn đã ủng hộ quán!"
+      responses:
+        '200':
+          description: Trả lời thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reply submitted successfully"
+  /reviews/{reviewId}/status:
+    patch:
+      tags:
+        - Admin Reviews
+      summary: Ẩn/Hiện đánh giá
+      description: Admin ẩn đánh giá vi phạm hoặc hiện lại đánh giá.
+      operationId: updateReviewStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [Active, Hidden]
+                  example: "Hidden"
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Review status updated successfully"
+
 components:
   schemas:
     Table:
@@ -4999,6 +5240,100 @@ components:
           $ref: '#/components/schemas/OrderItemStatus'
       example:
         status: "Cooking"
+
+    # --- REVIEW SCHEMAS ---
+    CreateReviewReqBody:
+      type: object
+      required:
+        - dishId
+        - orderId
+        - rating
+      properties:
+        dishId:
+          type: string
+          example: "692fe855d1d14ce2ee11a96e"
+        orderId:
+          type: string
+          example: "693f7a63e7455fa6893e7080"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        comment:
+          type: string
+          example: "Món ăn rất ngon, phục vụ tốt!"
+        photos:
+          type: array
+          items:
+            type: string
+          example: ["https://res.cloudinary.com/.../img1.jpg"]
+    ReviewReply:
+      type: object
+      properties:
+        content:
+          type: string
+          example: "Cảm ơn quý khách đã ủng hộ!"
+        adminId:
+          type: string
+          description: ID của admin trả lời
+        createdAt:
+          type: string
+          format: date-time
+    ReviewObject:
+      type: object
+      description: Object review trả về cho Guest
+      properties:
+        _id:
+          type: string
+        authorName:
+          type: string
+          example: "Minh Nguyen"
+        rating:
+          type: integer
+          example: 5
+        comment:
+          type: string
+          example: "Tuyệt vời!"
+        photos:
+          type: array
+          items:
+            type: string
+        reply:
+          $ref: '#/components/schemas/ReviewReply'
+        createdAt:
+          type: string
+          format: date-time
+    ReviewAdminObject:
+      type: object
+      description: Object review chi tiết trả về cho Admin (Kèm thông tin món)
+      properties:
+        _id:
+          type: string
+        dishId:
+          type: string
+        dishName:
+          type: string
+          description: Tên món ăn (được lookup từ bảng Dish)
+          example: "Cánh gà chiên mắm"
+        dishImage:
+          type: string
+          example: "https://res.cloudinary.com/..."
+        authorName:
+          type: string
+        rating:
+          type: integer
+        comment:
+          type: string
+        status:
+          type: string
+          enum: [Active, Hidden]
+          example: "Active"
+        reply:
+          $ref: '#/components/schemas/ReviewReply'
+        createdAt:
+          type: string
+          format: date-time
   securitySchemes:
     BearerAuth:
       type: http
