@@ -17,3 +17,12 @@ export const getAllReviewForAdminController = async (req: Request, res: Response
     data: result
   })
 }
+
+export const changeReviewStatusController = async (req: Request, res: Response) => {
+  const { reviewId, status } = req.params
+  const result = await reviewService.changeReviewStatus({ reviewId, status })
+  res.json({
+    message: "Change review status success",
+    result
+  })
+}

@@ -1,4 +1,6 @@
 const USER_MESSAGES = {
+  REVIEW_NOT_FOUND: "Review not found",
+  REVIEW_ID_IS_REQUIRED: "Review ID is required",
   RATING_MUST_BE_BETWEEN_1_AND_5: "Rating must be an integer between 1 and 5",
   INVALID_REVIEW_STATUS: "Invalid review status",
   GET_ALL_REVIEW_SUCCESS: "Get all review success",

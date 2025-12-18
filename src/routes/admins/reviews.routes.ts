@@ -2,8 +2,14 @@ import { Router } from "express"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { checkPermission } from "../../middlewares/admins/auth.middlewares"
-import { getAllReviewForAdminController } from "../../controllers/admins/reviews.controllers"
-import { getAllReviewForAdminValidation } from "../../middlewares/admins/reviews.middlewares"
+import {
+  changeReviewStatusController,
+  getAllReviewForAdminController
+} from "../../controllers/admins/reviews.controllers"
+import {
+  changeReviewStatusValidation,
+  getAllReviewForAdminValidation
+} from "../../middlewares/admins/reviews.middlewares"
 
 const adminReviewsRoutes = Router()
 
@@ -41,11 +47,13 @@ adminReviewsRoutes.get(
  * Path: /admin/reviews/:reviewId/status
  * Body: { status: "Hidden" }
  */
-// adminReviewsRoutes.patch(
-//   "/:reviewId/status",
-//   accessTokenValidator,
-//   adminValidator,
-//   wrapRequestHandler(reviewsController.toggleReviewStatus)
-// )
+adminReviewsRoutes.patch(
+  "/:reviewId/:status",
+  accessTokenValidation,
+  verifiedUserValidation,
+  // checkPermission("active_hidden_review"), // Chưa tạo mơi
+  changeReviewStatusValidation,
+  wrapHandlerFunction(changeReviewStatusController)
+)
 
 export default adminReviewsRoutes

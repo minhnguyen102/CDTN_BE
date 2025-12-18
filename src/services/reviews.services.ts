@@ -138,16 +138,6 @@ class ReviewService {
     dishId: string
     rating: number
   }) {
-    // Kiểm tra giá trị status
-    // Check bên validate
-    // const validStatus = Object.values(ReviewStatus).some((item) => item === status)
-    // if (!validStatus) {
-    //   throw new ErrorWithStatus({
-    //     message: USER_MESSAGES.INVALID_REVIEW_STATUS,
-    //     status: HTTP_STATUS.BAD_REQUEST
-    //   })
-    // }
-
     const match: any = {}
     if (status) {
       match.status = status
@@ -175,6 +165,29 @@ class ReviewService {
       limit,
       totalPages: Math.ceil(totalReview / limit)
     }
+  }
+
+  async changeReviewStatus({ reviewId, status }: { reviewId: string; status: string }) {
+    const review = await databaseService.reviews.findOneAndUpdate(
+      {
+        _id: new ObjectId(reviewId)
+      },
+      {
+        $set: {
+          status: status as ReviewStatus
+        }
+      },
+      {
+        returnDocument: "after"
+      }
+    )
+    if (!review) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.REVIEW_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    return review
   }
 }
 

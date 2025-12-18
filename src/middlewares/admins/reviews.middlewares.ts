@@ -6,7 +6,7 @@ import HTTP_STATUS from "../../constants/httpStatus"
 import { ObjectId } from "mongodb"
 import { ReviewStatus } from "../../constants/enums"
 
-const dishIdSchema: ParamSchema = {
+const IdSchema: ParamSchema = {
   optional: true,
   isMongoId: {
     errorMessage: new ErrorWithStatus({
@@ -46,10 +46,28 @@ const statusSchema: ParamSchema = {
 export const getAllReviewForAdminValidation = validate(
   checkSchema(
     {
-      dishId: dishIdSchema,
+      dishId: IdSchema,
       rating: ratingSchema,
       status: statusSchema
     },
     ["query"]
   )
+)
+
+export const changeReviewStatusValidation = validate(
+  checkSchema({
+    reviewId: {
+      ...IdSchema,
+      optional: false,
+      notEmpty: {
+        errorMessage: USER_MESSAGES.REVIEW_ID_IS_REQUIRED
+      }
+    },
+    status: {
+      ...statusSchema,
+      notEmpty: {
+        errorMessage: USER_MESSAGES.STATUS_IS_REQUIRED
+      }
+    }
+  })
 )
