@@ -1,17 +1,13 @@
 asyncapi: 2.6.0
 info:
   title: Kitchen & Order Socket Service (CDTN)
-  version: 1.0.2
+  version: 1.0.3
   description: |
     Tài liệu mô tả giao thức Socket.IO cho hệ thống quản lý nhà hàng.
     
     ### 🔐 Hướng dẫn xác thực (Auth)
     - **Handshake**: Gửi Token qua `auth: { Authorization: "Bearer <token>" }` hoặc Headers.
     - **Permissions**: Server tự động decode token để check quyền (Admin/Guest).
-
-    ### 🔄 Cơ chế hoạt động
-    1. **Request-Response (Ack)**: Client `emit` sự kiện và nhận kết quả ngay lập tức trong `callback` function.
-    2. **Realtime Notification**: Client `on` (lắng nghe) sự kiện thụ động từ Server để cập nhật UI.
 
 servers:
   dev:
@@ -23,11 +19,11 @@ servers:
 
 tags:
   - name: Admin Actions
-    description: Hành động do Admin/Bếp thực hiện (Gửi lên Server)
+    description: Hành động do Admin/Bếp thực hiện (Client -> Server)
   - name: Guest Actions
-    description: Hành động do Khách hàng thực hiện (Gửi lên Server)
+    description: Hành động do Khách hàng thực hiện (Client -> Server)
   - name: Server Notifications
-    description: Sự kiện Server bắn về (FE cần lắng nghe để update UI)
+    description: Sự kiện Server bắn về (Server -> Client)
 
 channels:
   # ==========================================
@@ -59,7 +55,7 @@ channels:
       summary: Admin cập nhật trạng thái món
       description: |
         Chuyển trạng thái: Pending -> Cooking -> Served -> Reject.
-        Server sẽ bắn `update_order_item` và `order:update` về cho client.
+        Server sẽ bắn `update_order_item` và `order_update:admin` về cho client.
       message:
         payload:
           $ref: '#/components/schemas/UpdateStatusInput'
@@ -166,7 +162,7 @@ channels:
                     type: string
                     description: Thông báo chi tiết
 
-  # [NEW] Sự kiện lấy danh sách món theo nhóm
+  # Sự kiện lấy danh sách món theo nhóm
   get_orders:guest:
     publish:
       tags:
@@ -181,7 +177,6 @@ channels:
           properties:
             tableId:
               type: string
-              description: Có thể gửi hoặc không (nếu server lấy từ token)
       bindings:
         socketio:
           ack:
@@ -232,14 +227,27 @@ channels:
               type: string
               description: Nội dung hiển thị Toast
 
+  # [NEW] Notification: order_update:admin
+  # Mục đích: Đồng bộ danh sách đơn hàng cho Admin
+  order_update:admin:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Cập nhật danh sách đơn hàng (Admin)
+      description: >
+        Gửi tới `admin_room` mỗi khi có thay đổi (Tạo đơn, Hủy, Cập nhật).
+        Payload trả về danh sách items đã được gom nhóm (Grouped) của bàn đó để Admin cập nhật UI.
+      message:
+        payload:
+          $ref: '#/components/schemas/GroupedOrderItems'
+
   # [NEW] Notification: order:update
-  # Mục đích: Đồng bộ dữ liệu (Nặng)
-  # Sự kiện này được bắn kèm với update_order_item trong code service
+  # Mục đích: Đồng bộ dữ liệu cho Guest (Nặng)
   order:update:
     subscribe:
       tags:
         - name: Server Notifications
-      summary: Gửi về TOÀN BỘ object đơn hàng mới
+      summary: Gửi về TOÀN BỘ object đơn hàng mới (Guest)
       description: >
         Gửi tới `table_{id}` sau khi Admin hoặc Khách cập nhật đơn.
         Payload chứa full thông tin đơn hàng từ DB.
@@ -388,7 +396,7 @@ components:
           items:
             $ref: '#/components/schemas/DishItemObject'
 
-    # [NEW] Cấu trúc trả về của get_orders:guest
+    # Cấu trúc trả về của get_orders:guest và order_update:admin
     GroupedOrderItems:
       type: object
       description: Danh sách items đã được phân loại theo trạng thái

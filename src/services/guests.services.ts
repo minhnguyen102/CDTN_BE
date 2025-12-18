@@ -353,8 +353,10 @@ class GuestService {
         type: "NEW_ORDER_CREATED:ADMIN",
         message: `Bàn ${table?.number} vừa đặt món mới`
       })
-      const groupItems = await guestServices.getOrderList({ tableId })
-      io.to("admin_room").emit("order_update:admin", groupItems)
+
+      const orderId = orderResult?._id as ObjectId
+      const items = await databaseService.orders.find({ _id: new ObjectId(orderId) }).toArray()
+      io.to("admin_room").emit("order_update:admin", { order: items })
       // Gửi thông báo đến khách trong bàn ăn được đặt
       io.to(`table_${tableId}`).emit("new_order:guest", {
         type: "NEW_ORDER_CREATED:CLIENT", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
@@ -469,8 +471,8 @@ class GuestService {
       ...socketPayload,
       message: `Khách hàng ${guestName} tại bàn ${result.tableNumber} đã HỦY món: ${originalItem.dishName} số lượng ${originalItem.quantity}`
     })
-    const groupItems = await guestServices.getOrderList({ tableId })
-    io.to("admin_room").emit("order_update:admin", groupItems)
+    const items = await databaseService.orders.find({ _id: new ObjectId(orderId) }).toArray()
+    io.to("admin_room").emit("order_update:admin", { orders: items })
 
     // Gửi lại cho chính bàn đó (để update UI cho các thành viên khác trong bàn)
     // io.to(`table_${tableId}`).emit("update_order_item", socketPayload)

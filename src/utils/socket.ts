@@ -88,13 +88,6 @@ export const initSocket = (httpServer: HttpServer) => {
     // server bắt sự kiện admin cập nhật đơn hàng
     socket.on("update_order_status:admin", async (payload, callback) => {
       const { orderId, itemId, status } = payload
-      // check permission
-      // if (!permissions.includes("update_order_status")) {
-      //   if (typeof callback === "function") {
-      //     return callback({ success: false, message: "Bạn không có quyền thực hiện!" })
-      //   }
-      //   return
-      // }
 
       try {
         await orderServices.updateItemStatus({

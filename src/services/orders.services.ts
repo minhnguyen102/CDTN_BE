@@ -333,9 +333,8 @@ class OrderServices {
     const io = getIO()
     // to admin
     io.to("admin_room").emit("update_order_item", socketPayload)
-    const tableId = originalOrder.tableId
-    const groupItems = await guestServices.getOrderList({ tableId: tableId.toString() })
-    io.to("admin_room").emit("order_update:admin", groupItems)
+    const items = await databaseService.orders.find({ _id: new ObjectId(orderId) }).toArray()
+    io.to("admin_room").emit("order_update:admin", { order: items })
     // to guest
     if (updateOrder.tableNumber) {
       io.to(`table_${updateOrder.tableId}`).emit("update_order_item", socketPayload)
@@ -462,8 +461,9 @@ class OrderServices {
     try {
       const io = getIO()
       // gửi thông báo đến cho admin
-      const groupItems = await guestServices.getOrderList({ tableId })
-      io.to("admin_room").emit("order_update:admin", groupItems)
+      const orderId = orderResult?._id as ObjectId
+      const items = await databaseService.orders.find({ _id: new ObjectId(orderId) }).toArray()
+      io.to("admin_room").emit("order_update:admin", { order: items })
 
       // Gửi thông báo đến khách trong bàn ăn được đặt
       io.to(`table_${tableId}`).emit("new_order:guest", {
