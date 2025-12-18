@@ -4,10 +4,51 @@ import databaseService from "./database.servies"
 import { ErrorWithStatus } from "../models/Errors"
 import USER_MESSAGES from "../constants/message"
 import HTTP_STATUS from "../constants/httpStatus"
-import { PaymentStatus } from "../constants/enums"
+import { PaymentStatus, ReviewStatus } from "../constants/enums"
 import Review from "../models/schema/Review.schema"
 
 class ReviewService {
+  private async updateDishRating({ dishId }: { dishId: string }) {
+    const result = await databaseService.reviews
+      .aggregate([
+        {
+          $match: {
+            dishId: new ObjectId(dishId),
+            status: ReviewStatus.ACTIVE
+          }
+        },
+        {
+          $group: {
+            _id: "$dishId",
+            averageRating: { $avg: "$rating" },
+            totalReviews: { $sum: 1 }
+          }
+        }
+      ])
+      .toArray()
+    console.log("result: ", result)
+
+    if (result.length > 0) {
+      const { averageRating, totalReviews } = result[0]
+
+      await databaseService.dishes.updateOne(
+        { _id: new ObjectId(dishId) },
+        {
+          $set: {
+            ratingAverage: Math.round(averageRating * 10) / 10,
+            reviewCount: totalReviews
+          }
+        }
+      )
+    } else {
+      await databaseService.dishes.updateOne(
+        { _id: new ObjectId(dishId) },
+        { $set: { ratingAverage: 0, reviewCount: 0 } }
+      )
+    }
+  }
+
+  // GUEST
   async createReview({
     user_id,
     user_name,
@@ -78,36 +119,62 @@ class ReviewService {
         rating: rating
       })
     )
-    // Cập nhật lại 2 trường ratingAverage, reviewCount
-    const stats = await databaseService.reviews
-      .aggregate([
-        { $match: { dishId: dishObjectId } },
-        {
-          $group: {
-            _id: "$dishId",
-            avgRating: { $avg: "$rating" }, // Tính trung bình
-            count: { $sum: 1 } // Đếm tổng số
-          }
-        }
-      ])
-      .toArray()
-
-    // console.log("stats: ", stats)
-
-    if (stats.length > 0) {
-      const { avgRating, count } = stats[0]
-
-      await databaseService.dishes.updateOne(
-        { _id: dishObjectId },
-        {
-          $set: {
-            ratingAverage: Math.round(avgRating * 10) / 10,
-            reviewCount: count
-          }
-        }
-      )
-    }
+    // Cập nhật lại avgRating và totalReview
+    await this.updateDishRating({ dishId })
     return review
+  }
+
+  // ADMIN
+  async getReviewsForAdmin({
+    page,
+    limit,
+    status,
+    dishId,
+    rating
+  }: {
+    page: number
+    limit: number
+    status: string
+    dishId: string
+    rating: number
+  }) {
+    // Kiểm tra giá trị status
+    // Check bên validate
+    // const validStatus = Object.values(ReviewStatus).some((item) => item === status)
+    // if (!validStatus) {
+    //   throw new ErrorWithStatus({
+    //     message: USER_MESSAGES.INVALID_REVIEW_STATUS,
+    //     status: HTTP_STATUS.BAD_REQUEST
+    //   })
+    // }
+
+    const match: any = {}
+    if (status) {
+      match.status = status
+    }
+    if (dishId) {
+      match.dishId = new ObjectId(dishId)
+    }
+    if (rating) {
+      match.rating = rating
+    }
+
+    const [reviews, totalReview] = await Promise.all([
+      databaseService.reviews
+        .find(match)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .toArray(),
+      databaseService.reviews.countDocuments(match)
+    ])
+
+    return {
+      reviews,
+      totalReview,
+      page,
+      limit,
+      totalPages: Math.ceil(totalReview / limit)
+    }
   }
 }
 

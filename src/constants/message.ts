@@ -1,4 +1,7 @@
 const USER_MESSAGES = {
+  RATING_MUST_BE_BETWEEN_1_AND_5: "Rating must be an integer between 1 and 5",
+  INVALID_REVIEW_STATUS: "Invalid review status",
+  GET_ALL_REVIEW_SUCCESS: "Get all review success",
   GET_DISH_CATEGORIES_SUCCESS: "Get dish categories success",
   INVALID_CATEGORY_ID: "Invalid category ID",
   CATEGORY_ID_MUST_BE_A_STRING: "Category ID must be a string",

@@ -10,7 +10,7 @@ interface reviewType {
   rating: number
   comment: string
   photos?: string[] // có thể gửi ảnh lên, nếu khôngg thì lưu string rỗng (upload 1 ảnh)
-  status: ReviewStatus
+  status?: ReviewStatus
   reply?: {
     content: string
     adminId: string // dữ liệu gửi lên
