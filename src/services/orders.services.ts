@@ -166,6 +166,15 @@ class OrderServices {
       databaseService.orders.aggregate(queryPipeline).toArray(),
       databaseService.orders.countDocuments(match)
     ])
+
+    // lấy totalAmount theo trạng thái đơn hàng
+    if (status) {
+      orders.forEach((order) => {
+        const items = order.items
+        const totalAmount = items.reduce((total: number, item: any) => total + item.dishPrice * item.quantity, 0)
+        order.totalAmount = totalAmount
+      })
+    }
     return {
       orders,
       total,

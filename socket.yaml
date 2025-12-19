@@ -1,7 +1,7 @@
 asyncapi: 2.6.0
 info:
   title: Kitchen & Order Socket Service (CDTN)
-  version: 1.0.3
+  version: 1.0.4
   description: |
     Tài liệu mô tả giao thức Socket.IO cho hệ thống quản lý nhà hàng.
     
@@ -233,13 +233,19 @@ channels:
     subscribe:
       tags:
         - name: Server Notifications
-      summary: Cập nhật danh sách đơn hàng (Admin)
+      summary: Cập nhật chi tiết đơn hàng (Admin)
       description: >
         Gửi tới `admin_room` mỗi khi có thay đổi (Tạo đơn, Hủy, Cập nhật).
-        Payload trả về danh sách items đã được gom nhóm (Grouped) của bàn đó để Admin cập nhật UI.
+        Payload trả về mảng chứa thông tin đơn hàng vừa thay đổi để Admin update vào danh sách.
       message:
         payload:
-          $ref: '#/components/schemas/GroupedOrderItems'
+          type: object
+          properties:
+            order:
+              type: array
+              description: Mảng chứa thông tin đơn hàng (thường có 1 phần tử)
+              items:
+                $ref: '#/components/schemas/OrderObject'
 
   # [NEW] Notification: order:update
   # Mục đích: Đồng bộ dữ liệu cho Guest (Nặng)
@@ -396,7 +402,7 @@ components:
           items:
             $ref: '#/components/schemas/DishItemObject'
 
-    # Cấu trúc trả về của get_orders:guest và order_update:admin
+    # Cấu trúc trả về của get_orders:guest
     GroupedOrderItems:
       type: object
       description: Danh sách items đã được phân loại theo trạng thái
