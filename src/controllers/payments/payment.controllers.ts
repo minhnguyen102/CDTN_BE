@@ -23,6 +23,11 @@ export const getPaymentUrlController = async (req: Request, res: Response) => {
 
   return res.json({
     message: USER_MESSAGES.GET_PAYMENT_QR_SUCCESSFULLY,
-    result: qrUrl
+    result: {
+      qrUrl: qrUrl,
+      bankName: process.env.BANK_NAME,
+      bankAccountNo: process.env.BANK_ACCOUNT_NO,
+      bankAccount: "NGUYEN KHAC MINH"
+    }
   })
 }
