@@ -5,7 +5,6 @@ import { ErrorWithStatus } from "../models/Errors"
 import USER_MESSAGES from "../constants/message"
 import HTTP_STATUS from "../constants/httpStatus"
 import { PaymentStatus, ReviewStatus } from "../constants/enums"
-import Review from "../models/schema/Review.schema"
 
 class ReviewService {
   private async updateDishRating({ dishId }: { dishId: string }) {
@@ -59,15 +58,15 @@ class ReviewService {
     payload: CreateReviewReqBody
   }) {
     // Kiểm tra điều kiện đánh giá
-    const { orderId, dishId, comment, rating } = payload
-    const dishObjectId = new ObjectId(dishId)
+    const { orderId, reviews } = payload
+    const objectOrderId = new ObjectId(orderId)
     const order = await databaseService.orders.findOne({
-      _id: new ObjectId(orderId)
+      _id: objectOrderId
     })
 
-    if (!order) {
+    if (!order || order.paymentStatus !== PaymentStatus.PAID) {
       throw new ErrorWithStatus({
-        message: USER_MESSAGES.ORDER_NOT_FOUND,
+        message: USER_MESSAGES.ORDER_NOT_FOUND_OR_ORDER_NOT_PAID,
         status: HTTP_STATUS.NOT_FOUND
       })
     }
@@ -80,48 +79,36 @@ class ReviewService {
       })
     }
 
-    if (order.paymentStatus !== PaymentStatus.PAID) {
-      throw new ErrorWithStatus({
-        message: USER_MESSAGES.ORDER_NOT_PAID,
-        status: HTTP_STATUS.BAD_REQUEST
-      })
-    }
-
-    // Tìm kiếm có món đó trong items của order không => some
-    const existDishId = order.items.some((dish) => dish.dishId.toString() === payload.dishId)
-    if (!existDishId) {
-      throw new ErrorWithStatus({
-        message: USER_MESSAGES.DISH_NOT_FOUND,
-        status: HTTP_STATUS.NOT_FOUND
-      })
-    }
-
-    const existingReview = await databaseService.reviews.findOne({
-      orderId: new ObjectId(orderId),
-      dishId: dishObjectId
-    })
+    const existingReview = await databaseService.reviews.findOne({ orderId: objectOrderId })
 
     if (existingReview) {
-      // Món đã được đánh giá
       throw new ErrorWithStatus({
-        message: USER_MESSAGES.THIS_ITEMS_ALREADY_REVIEWED,
+        message: "Đơn hàng này đã được đánh giá. Cảm ơn bạn!",
         status: HTTP_STATUS.BAD_REQUEST
       })
     }
 
-    // Lưu đánh giá + chỉnh sửa lại rating
-    const review = await databaseService.reviews.insertOne(
-      new Review({
-        dishId: dishId,
-        orderId: orderId,
+    // Chỉ lọc ra những review có rating được gửi lên
+    const reviewDocs = reviews
+      .filter((review) => review.rating > 0)
+      .map((r) => ({
+        dishId: new ObjectId(r.dishId),
+        orderId: objectOrderId,
         authorName: user_name,
-        comment: comment || "",
-        rating: rating
-      })
-    )
-    // Cập nhật lại avgRating và totalReview
-    await this.updateDishRating({ dishId })
-    return review
+        rating: r.rating,
+        comment: r.comment || "",
+        status: ReviewStatus.ACTIVE,
+        createdAt: new Date()
+      }))
+
+    if (reviewDocs.length === 0) return { message: "Không có đánh giá nào được ghi nhận" }
+
+    await databaseService.reviews.insertMany(reviewDocs)
+
+    // Đánh giá lại sao đồng thời
+    const uniqueDishIds = [...new Set(reviews.map((item) => item.dishId))]
+    await Promise.all(uniqueDishIds.map((dishId) => this.updateDishRating({ dishId })))
+    // return { count: reviewDocs.length }
   }
 
   async getReviewsByDish({ dishId, page, limit }: { dishId: string; page: number; limit: number }) {

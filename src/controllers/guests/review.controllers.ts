@@ -13,13 +13,12 @@ export const createReviewController = async (
   res: Response
 ) => {
   const { user_id, guestName } = req.decoded_access_token as TokenPayload
-  const payload = pick(req.body, ["comment", "dishId", "orderId", "rating"])
+  const payload = pick(req.body, ["orderId", "reviews"])
 
-  const result = await reviewService.createReview({ user_id, user_name: guestName, payload })
+  await reviewService.createReview({ user_id, user_name: guestName, payload })
 
   return res.json({
-    message: USER_MESSAGES.REVIEW_POSTED_SUCCESSFULLY,
-    result
+    message: "Gửi đánh giá thành công. Cảm ơn quý khách đã ủng hộ !"
   })
 }
 

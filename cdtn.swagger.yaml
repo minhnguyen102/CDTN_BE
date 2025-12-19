@@ -3989,148 +3989,6 @@ paths:
                     message: "Validation error"
                     errors:
                       "items[0].dishId": "Invalid Dish ID format"
-  /guest/reviews:
-    post:
-      tags:
-        - Guest
-      summary: Gửi đánh giá món ăn (Guest)
-      description: |
-        Khách hàng gửi đánh giá cho một món ăn trong đơn hàng đã thanh toán.
-        
-        **Quy tắc nghiệp vụ:**
-        1. Đơn hàng phải có trạng thái thanh toán là **PAID**.
-        2. Khách hàng chỉ được đánh giá đơn của chính bàn mình 
-        3. Món ăn phải tồn tại trong đơn hàng đó.
-        4. Mỗi món trong một đơn chỉ được đánh giá **1 lần**.
-        5. Sau khi đánh giá, hệ thống tự động tính lại `ratingAverage` và `reviewCount` cho món ăn.
-      operationId: createGuestReview
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - orderId
-                - dishId
-                - rating
-              properties:
-                orderId:
-                  type: string
-                  description: ID của đơn hàng (MongoDB ObjectId)
-                  example: "693f7a63e7455fa6893e7080"
-                dishId:
-                  type: string
-                  description: ID của món ăn cần đánh giá (MongoDB ObjectId)
-                  example: "692fe055d1d14ce2ee11a96e"
-                rating:
-                  type: integer
-                  description: Điểm đánh giá (từ 1 đến 5 sao)
-                  minimum: 1
-                  maximum: 5
-                  example: 5
-                comment:
-                  type: string
-                  description: Nội dung nhận xét (Tối đa 500 ký tự). Có thể để trống.
-                  maxLength: 500
-                  example: "Món này rất ngon, nước dùng đậm đà!"
-      responses:
-        '200':
-          description: Đánh giá thành công
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Review posted successfully"
-                  result:
-                    type: object
-                    properties:
-                      acknowledged:
-                        type: boolean
-                        example: true
-                      insertedId:
-                        type: string
-                        description: ID của bản ghi Review vừa tạo
-                        example: "693f8ae7886d2e99e4cb6e25"
-        '400':
-          description: Lỗi Logic (Chưa thanh toán hoặc Đã đánh giá rồi)
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  status:
-                    type: integer
-                    example: 400
-              examples:
-                OrderNotPaid:
-                  summary: Đơn hàng chưa thanh toán
-                  value:
-                    message: "Order is not paid yet"
-                    status: 400
-                AlreadyReviewed:
-                  summary: Món này đã được đánh giá trước đó
-                  value:
-                    message: "You have already reviewed this item in this order"
-                    status: 400
-        '401':
-          description: Unauthorized (Chưa đăng nhập)
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Access token is required"
-        '403':
-          description: Forbidden (Không có quyền đánh giá đơn này)
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "You are not allowed to review this order"
-                  status:
-                    type: integer
-                    example: 403
-        '404':
-          description: Không tìm thấy Đơn hàng hoặc Món ăn
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Order not found" # Hoặc "Dish not found in this order"
-                  status:
-                    type: integer
-                    example: 404
-        '422':
-          description: Lỗi Validation (Dữ liệu đầu vào sai)
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Validation error"
-                  errors:
-                    type: object
-                    example:
-                      rating: "Rating must be an integer from 1 to 5"
-                      dishId: "Invalid Dish ID"
   /payment/qr/{orderId}:
     get:
       tags:
@@ -4283,36 +4141,31 @@ paths:
                     type: string
                     example: "Invalid content format (Order ID not found)"
   # --- GUEST REVIEWS ---
-  /guest/reviews/{dishId}:
-    get:
+  /guest/reviews:
+    post:
       tags:
         - Guest
-      summary: Lấy danh sách đánh giá của món ăn
-      description: >
-        Lấy danh sách review của một món ăn cụ thể để hiển thị bên Client.
-        Chỉ trả về các review có trạng thái là 'Active'.
-      operationId: getDishReviews
-      parameters:
-        - name: dishId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID của món ăn
-          example: "692fe855d1d14ce2ee11a96e"
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 5
+      summary: Gửi đánh giá đơn hàng
+      description: |
+        Khách hàng gửi đánh giá cho các món ăn trong đơn hàng sau khi thanh toán.
+        
+        **Quy tắc:**
+        1. Đơn hàng phải có trạng thái **PAID**.
+        2. Khách chỉ được đánh giá đơn của chính bàn mình.
+        3. Mỗi đơn hàng chỉ được đánh giá **1 lần duy nhất**.
+        4. Gửi `rating: 0` nếu muốn bỏ qua không đánh giá món đó.
+      operationId: createGuestReview
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewReqBody'
       responses:
         '200':
-          description: Thành công
+          description: Đánh giá thành công
           content:
             application/json:
               schema:
@@ -4320,25 +4173,53 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Get reviews successfully"
-                  data:
-                    type: object
-                    properties:
-                      reviews:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/ReviewObject'
-                      pagination:
-                        type: object
-                        properties:
-                          page:
-                            type: integer
-                          limit:
-                            type: integer
-                          total:
-                            type: integer
-                          totalPages:
-                            type: integer
+                    example: "Gửi đánh giá thành công. Cảm ơn quý khách đã ủng hộ !"
+        '400':
+          description: Lỗi Logic (Đã đánh giá rồi, chưa thanh toán, hoặc Validation sai)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: integer
+                    example: 400
+              examples:
+                AlreadyReviewed:
+                  summary: Đơn hàng đã được đánh giá
+                  value:
+                    message: "Đơn hàng này đã được đánh giá rồi. Cảm ơn bạn!"
+                    status: 400
+                OrderNotPaid:
+                  summary: Đơn hàng chưa thanh toán
+                  value:
+                    message: "Đơn hàng không tồn tại hoặc chưa thanh toán"
+                    status: 400
+                ValidationError:
+                  summary: Lỗi dữ liệu đầu vào
+                  value:
+                    message: "Validation error"
+                    errors:
+                      "reviews[0].rating": "Rating must be from 0 to 5"
+        '401':
+          description: Chưa đăng nhập (Thiếu Token)
+        '403':
+          description: Không có quyền (Đánh giá đơn của bàn khác)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Bạn không có quyền đánh giá đơn hàng này"
+                  status:
+                    type: integer
+                    example: 403
+        '404':
+          description: Không tìm thấy đơn hàng
 
   # /guest/reviews:
   #   post:
@@ -5154,29 +5035,47 @@ components:
     CreateReviewReqBody:
       type: object
       required:
-        - dishId
         - orderId
-        - rating
+        - reviews
       properties:
-        dishId:
-          type: string
-          example: "692fe855d1d14ce2ee11a96e"
         orderId:
           type: string
-          example: "693f7a63e7455fa6893e7080"
-        rating:
-          type: integer
-          minimum: 1
-          maximum: 5
-          example: 5
-        comment:
-          type: string
-          example: "Món ăn rất ngon, phục vụ tốt!"
-        photos:
+          description: ID của đơn hàng (MongoDB ObjectId)
+          example: "694586247c1fa2c85610bcd2"
+        reviews:
           type: array
+          description: Danh sách các món muốn đánh giá (Hoặc bỏ qua)
+          minItems: 1
           items:
-            type: string
-          example: ["https://res.cloudinary.com/.../img1.jpg"]
+            type: object
+            required:
+              - dishId
+              - rating
+            properties:
+              dishId:
+                type: string
+                description: ID của món ăn
+                example: "694586247c1fa2c85610bcd2"
+              rating:
+                type: integer
+                minimum: 0
+                maximum: 5
+                description: Điểm đánh giá (1-5). Gửi 0 nếu muốn bỏ qua món này.
+                example: 5
+              comment:
+                type: string
+                description: Nội dung đánh giá (Tùy chọn)
+                maxLength: 500
+                example: "Món này rất ngon!"
+      example:
+        orderId: "694586247c1fa2c85610bcd2"
+        reviews:
+          - dishId: "692fea21d1d14ce2ee11a972"
+            rating: 5
+            comment: "Tuyệt vời"
+          - dishId: "692fea21d1d14ce2ee11a973"
+            rating: 0
+            comment: ""
     ReviewReply:
       type: object
       properties:

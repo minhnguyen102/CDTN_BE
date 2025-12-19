@@ -9,7 +9,6 @@ interface reviewType {
   authorName: string
   rating: number
   comment: string
-  photos?: string[] // có thể gửi ảnh lên, nếu khôngg thì lưu string rỗng (upload 1 ảnh)
   status?: ReviewStatus
   reply?: {
     content: string
@@ -26,7 +25,6 @@ export default class Review {
   authorName: string
   rating: number
   comment: string
-  photos: string[]
   status: ReviewStatus
   reply?: {
     content: string
@@ -43,7 +41,6 @@ export default class Review {
     this.authorName = review.authorName || "Khách ẩn danh"
     this.rating = review.rating || 5
     this.comment = review.comment || ""
-    this.photos = review.photos || []
     this.status = review.status || ReviewStatus.ACTIVE
     if (review.reply) {
       this.reply = {

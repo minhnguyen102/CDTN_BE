@@ -1,4 +1,5 @@
 const USER_MESSAGES = {
+  ORDER_NOT_FOUND_OR_ORDER_NOT_PAID: "Order not found or Order not pay",
   REVIEW_NOT_FOUND: "Review not found",
   REVIEW_ID_IS_REQUIRED: "Review ID is required",
   RATING_MUST_BE_BETWEEN_1_AND_5: "Rating must be an integer between 1 and 5",

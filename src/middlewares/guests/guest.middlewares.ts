@@ -181,7 +181,15 @@ export const createReviewValidation = validate(
           }
         }
       },
-      dishId: {
+      // Validate field 'reviews' phải là Array và không được rỗng
+      reviews: {
+        isArray: {
+          errorMessage: "Reviews must be an array", // Bạn có thể thêm vào USER_MESSAGES
+          options: { min: 1 } // Ít nhất 1 item
+        }
+      },
+      // Validate từng item trong mảng reviews
+      "reviews.*.dishId": {
         notEmpty: {
           errorMessage: USER_MESSAGES.DISH_ID_IS_REQUIRED
         },
@@ -198,23 +206,24 @@ export const createReviewValidation = validate(
           }
         }
       },
-      rating: {
+      "reviews.*.rating": {
         notEmpty: {
           errorMessage: USER_MESSAGES.RATING_IS_REQUIRED
         },
         isInt: {
-          options: { min: 1, max: 5 },
-          errorMessage: USER_MESSAGES.RATING_MUST_BE_FROM_1_TO_5
-        }
+          options: { min: 0, max: 5 }, // Cho phép 0 để người dùng bỏ qua đánh giá món đó
+          errorMessage: USER_MESSAGES.RATING_MUST_BE_FROM_1_TO_5 // Bạn có thể sửa message này nếu cho phép 0
+        },
+        toInt: true
       },
-      comment: {
-        optional: true, // Comment có thể để trống
+      "reviews.*.comment": {
+        optional: true,
         isString: {
           errorMessage: USER_MESSAGES.COMMENT_MUST_BE_STRING
         },
         trim: true,
         isLength: {
-          options: { max: 500 }, // Giới hạn độ dài để tránh spam văn văn
+          options: { max: 500 },
           errorMessage: USER_MESSAGES.COMMENT_LENGTH_MUST_BE_LESS_THAN_500
         }
       }

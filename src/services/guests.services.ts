@@ -308,9 +308,15 @@ class GuestService {
     const tableObjectId = new ObjectId(tableId)
     // console.log(tableId)
     const table = await databaseService.tables.findOne({ _id: tableObjectId })
+    if (!table) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.TABLE_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
     let orderResult
 
-    if (table?.currentOrderId) {
+    if (table.currentOrderId) {
       // Bàn Đang Ăn -> Cập nhật đơn cũ
       const currentOrderId = table.currentOrderId
       const additionalAmount = orderItems.reduce((acc, item) => acc + item.dishPrice * item.quantity, 0)
@@ -328,20 +334,20 @@ class GuestService {
       // Bàn Mới -> Tạo đơn mới
       const newOrder = new Order({
         tableId: tableObjectId,
-        tableNumber: table?.number || 0,
+        tableNumber: table.number,
         items: orderItems,
         guestName: guestName
       })
 
-      const insertResult = await databaseService.orders.insertOne(newOrder)
-      orderResult = { ...newOrder, _id: insertResult.insertedId }
+      const insertNewOrder = await databaseService.orders.insertOne(newOrder)
+      orderResult = { ...newOrder, _id: insertNewOrder.insertedId }
 
       await databaseService.tables.updateOne(
         { _id: tableObjectId },
         {
           $set: {
             status: TableStatus.OCCUPIED,
-            currentOrderId: insertResult.insertedId
+            currentOrderId: insertNewOrder.insertedId
           }
         }
       )
@@ -354,15 +360,16 @@ class GuestService {
         message: `Bàn ${table?.number} vừa đặt món mới`
       })
 
-      const orderId = orderResult?._id as ObjectId
-      const items = await databaseService.orders.find({ _id: new ObjectId(orderId) }).toArray()
-      io.to("admin_room").emit("order_update:admin", { order: items })
+      // const orderId = orderResult?._id as ObjectId
+      // const items = await databaseService.orders.find({ _id: new ObjectId(orderId) }).toArray()
+      io.to("admin_room").emit("order_update:admin", { order: orderResult?.items })
       // Gửi thông báo đến khách trong bàn ăn được đặt
       io.to(`table_${tableId}`).emit("new_order:guest", {
-        type: "NEW_ORDER_CREATED:CLIENT", // Hoặc 'NEW_ITEM', 'PAYMENT_SUCCESS'
-        message: "Đặt món thành công", // cần đổi
+        type: "NEW_ORDER_CREATED:CLIENT",
+        message: "Đặt món thành công",
         data: orderResult
       })
+      // console.log("orderResult: ", orderResult)
     } catch (error) {
       // Nếu socket lỗi, khách vẫn đặt món thành công
       console.error("Socket emit error:", error)
