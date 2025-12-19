@@ -2,171 +2,7 @@ openapi: 3.0.4
 info:
   title: Chuyên đề tốt nghiệp quản lí quán ăn
   description: |-
-    ## 🔌 Hướng dẫn tích hợp Socket.IO (Real-time)
-    
-    Hệ thống sử dụng cơ chế Hybrid: **HTTP** để thao tác dữ liệu và **Socket.IO** để nhận thông báo thời gian thực.
-    
-    ### 1. Kết nối (Chung)
-    * **URL**: `ws://domain.com` (hoặc `http://localhost:3000`)
-    * **Auth**: Gửi Token qua `headers`.
-    ```javascript
-    const socket = io("http://localhost:3000", {
-      headers: { authorization: "Bearer <ACCESS_TOKEN>" }
-    });
-    ```
-    
-    ### 2. Luồng Khách Hàng (Guest)
-    Dành cho màn hình đặt món tại bàn.
-    * **Sự kiện Gửi đi (Emit)**: 
-      * `join_table`: Gửi ngay sau khi connect. Data: `{ tableId: "..." }`.
-    * **Sự kiện Lắng nghe (On)**:
-      * `refresh_order`: Nhận khi có đơn mới hoặc cập nhật đơn (để reload list bill).
-        data `
-          {
-            "type": "ORDER_UPDATED",
-            "message": "Khách hàng vừa gọi món mới",
-            "data": {
-                "_id": "693f7a63e7455fa6893e7080",
-                "tableId": "6937e6e480646d49c4d56e9d",
-                "tableNumber": 2,
-                "items": [
-                    {
-                        "_id": "693f7a63e7455fa6893e7081",
-                        "dishId": "692fe855d1d14ce2ee11a96e",
-                        "dishName": "Cánh gà BBQ (4 miếng)",
-                        "dishPrice": 89000,
-                        "dishImage": "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764747348/restaurant-app/img_1764747346505.jpg",
-                        "quantity": 2,
-                        "note": "Không lấy tương ớt",
-                        "orderedBy": "Minh Nguyen",
-                        "status": "Pending",
-                        "createdAt": "2025-12-15T03:02:59.341Z",
-                        "managedBy": "",
-                        "processingHistory": []
-                    },
-                    {
-                        "_id": "693f7a63e7455fa6893e7082",
-                        "dishId": "692feb30d1d14ce2ee11a974",
-                        "dishName": "Coca cola",
-                        "dishPrice": 30000,
-                        "dishImage": "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764748078/restaurant-app/img_1764748078007.jpg",
-                        "quantity": 1,
-                        "note": "",
-                        "orderedBy": "Minh Nguyen",
-                        "status": "Pending",
-                        "createdAt": "2025-12-15T03:02:59.341Z",
-                        "managedBy": "",
-                        "processingHistory": []
-                    }
-                ],
-                "totalAmount": 208000,
-                "status": "Pending",
-                "createdAt": "2025-12-15T03:02:59.612Z",
-                "paymentStatus": "Unpaid",
-                "paymentMethod": "Cash",
-                "updatedAt": "2025-12-15T03:02:59.612Z"
-            }
-          }`
-      * `update_order_item`: Nhận khi Bếp chuyển trạng thái từng món (ví dụ: Đang nấu).
-        Data 
-          `
-            {
-              "orderId": "693f7a63e7455fa6893e7080",
-              "itemId": "693f7a63e7455fa6893e7081",
-              "status": "Cooking",
-              "mamageBy": "Van Thu",
-              "message": "Món Cánh gà BBQ (4 miếng) (SL: 2) của Minh Nguyen đã chuyển sang: Đang nấu"
-            }
-          `
-      * `payment_success`: Nhận về khi khách hàng thanh toán thành công
-        Data
-        `
-        {
-            "orderId": "693f7a63e7455fa6893e7080",
-            "amount": 266000,
-            "message": "Thanh toán thành công!"
-        }
-        `
-    ### 3. Luồng Quản Trị / Bếp (Admin)
-    Dành cho màn hình Dashboard, Bếp, Thu ngân.
-    * **Sự kiện Gửi đi (Emit)**:
-      * `join_kitchen_room`: Gửi ngay sau khi connect. 
-        * **Yêu cầu**: Token của User phải có quyền `socket_join_kitchen` (Admin mặc định có).
-        * **Data**: Không cần gửi tham số.
-    * **Sự kiện Lắng nghe (On)**:
-      * `join_success`: Nhận phản hồi xác nhận đã vào phòng thành công.
-          Data 
-          `
-            { message: "Bạn đã vào phòng bếp", roomId: "admin_room" }
-          `
-      * `new_order`: Nhận thông báo khi Khách vừa tạo đơn mới (Ting ting!).
-        * **Data**: `{
-          "type": "NEW_ORDER_CREATED",
-          "message": "Bàn 2 vừa đặt món",
-          "data": {
-              "_id": "693f7a63e7455fa6893e7080",
-              "tableId": "6937e6e480646d49c4d56e9d",
-              "tableNumber": 2,
-              "items": [
-                  {
-                      "_id": "693f7a63e7455fa6893e7081",
-                      "dishId": "692fe855d1d14ce2ee11a96e",
-                      "dishName": "Cánh gà BBQ (4 miếng)",
-                      "dishPrice": 89000,
-                      "dishImage": "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764747348/restaurant-app/img_1764747346505.jpg",
-                      "quantity": 2,
-                      "note": "Không lấy tương ớt",
-                      "orderedBy": "Minh Nguyen",
-                      "status": "Pending",
-                      "createdAt": "2025-12-15T03:02:59.341Z",
-                      "managedBy": "",
-                      "processingHistory": []
-                  },
-                  {
-                      "_id": "693f7a63e7455fa6893e7082",
-                      "dishId": "692feb30d1d14ce2ee11a974",
-                      "dishName": "Coca cola",
-                      "dishPrice": 30000,
-                      "dishImage": "https://res.cloudinary.com/dpmbhsbcg/image/upload/v1764748078/restaurant-app/img_1764748078007.jpg",
-                      "quantity": 1,
-                      "note": "",
-                      "orderedBy": "Minh Nguyen",
-                      "status": "Pending",
-                      "createdAt": "2025-12-15T03:02:59.341Z",
-                      "managedBy": "",
-                      "processingHistory": []
-                  }
-              ],
-              "totalAmount": 208000,
-              "status": "Pending",
-              "createdAt": "2025-12-15T03:02:59.612Z",
-              "paymentStatus": "Unpaid",
-              "paymentMethod": "Cash",
-              "updatedAt": "2025-12-15T03:02:59.612Z"
-          }
-        }`.
-      * `update_order_item`: Nhận thông báo khi một Admin khác vừa cập nhật trạng thái món (để đồng bộ giao diện giữa các máy Admin).
-        Data 
-        `
-          {
-            "orderId": "693f7a63e7455fa6893e7080",
-            "itemId": "693f7a63e7455fa6893e7081",
-            "status": "Cooking",
-            "mamageBy": "Van Thu",
-            "message": "Món Cánh gà BBQ (4 miếng) (SL: 2) của Minh Nguyen đã chuyển sang: Đang nấu"
-          }
-        `
-      
-      * `payment_received`: Nhận khi khách thanh toán thành công
-        Data 
-          `
-          {
-              "orderId": "693f7a63e7455fa6893e7080",
-              "tableNumber": 2,
-              "amount": 266000,
-              "message": "Bàn 2 vừa thanh toán 266,000đ"
-          }
-          `
+
   termsOfService: https://swagger.io/terms/
   contact:
     email: apiteam@swagger.io
@@ -212,12 +48,6 @@ tags:
     description: Đăng nhập bên khách hàng
   - name: Guest 
     description: Logic bên khách hàng
-  - name: Guest Reviews
-    description: API đánh giá cho khách hàng
-  
-  
-    
-
 paths:
   /accounts/login:
     post:
@@ -4305,11 +4135,13 @@ paths:
     get:
       tags:
         - Payment
-      summary: Lấy mã QR thanh toán (Sepay/VietQR)
+      summary: Lấy mã QR thanh toán
       description: |
         Tạo và trả về đường dẫn ảnh QR Code để khách hàng chuyển khoản.
-        - Dựa trên `totalAmount` của đơn hàng.
-        - Nội dung chuyển khoản: "DH {orderId}".
+        
+        **Quy tắc nghiệp vụ:**
+        1. Đơn hàng phải tồn tại.
+        2. **Quan trọng:** Tất cả các món ăn trong đơn phải hoàn thành (Status không được là `Pending` hoặc `Cooking`) thì mới được phép thanh toán.
       operationId: getPaymentQr
       security:
         - BearerAuth: []
@@ -4332,23 +4164,45 @@ paths:
                   message:
                     type: string
                     example: "Get payment QR successfully"
-                  data:
-                    type: object
-                    properties:
-                      orderId:
-                        type: string
-                        description: ID đơn hàng
-                        example: "693f7a63e7455fa6893e7080"
-                      totalAmount:
-                        type: number
-                        description: Tổng tiền cần thanh toán
-                        example: 266000
-                      paymentUrl:
-                        type: string
-                        description: Đường dẫn ảnh QR code (được tạo từ bên thứ 3 như Sepay)
-                        example: "https://qr.sepay.vn/img?acc=0327593620&bank=MB&amount=266000&des=DH693f7a63e7455fa6893e7080"
+                  result:
+                    type: string
+                    description: Đường dẫn ảnh QR code
+                    example: "https://qr.sepay.vn/img?acc=0327593620&bank=MB&amount=266000&des=DH693f7a63e7455fa6893e7080"
+        '400':
+          description: Lỗi Logic hoặc Validation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: integer
+                    example: 400
+              examples:
+                UnfinishedOrder:
+                  summary: Đơn hàng chưa phục vụ xong (Business Logic)
+                  value:
+                    message: "Tồn tại đơn hàng chưa phục vụ. Chưa thể thanh toán"
+                    status: 400
+                InvalidId:
+                  summary: ID không đúng định dạng (Validation)
+                  value:
+                    message: "Invalid Order ID"
+                    status: 400
+        '401':
+          description: Unauthorized (Chưa đăng nhập hoặc Token hết hạn)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access token is required"
         '404':
-          description: Không tìm thấy đơn hàng (Order Not Found)
+          description: Không tìm thấy đơn hàng
           content:
             application/json:
               schema:
@@ -4360,24 +4214,79 @@ paths:
                   status:
                     type: integer
                     example: 404
-        '401':
-          description: Unauthorized (Chưa đăng nhập hoặc Token hết hạn)
+  /payment/sepay-webhook:
+    post:
+      tags:
+        - Payment
+      summary: Webhook nhận thông báo thanh toán (Simulate SePay)
+      description: |
+        API này dùng để nhận dữ liệu từ SePay khi có giao dịch ngân hàng mới.
+        **Dùng cho Testing:** Bạn có thể gọi API này thủ công để giả lập việc khách hàng đã chuyển khoản thành công, giúp server cập nhật trạng thái đơn hàng và bắn socket.
+      operationId: paymentWebhook
+      # Webhook thường là Public, không cần BearerAuth, nhưng tùy vào config server của bạn
+      security: [] 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+                - transferAmount
+              properties:
+                gateway:
+                  type: string
+                  example: "MBBank"
+                transactionDate:
+                  type: string
+                  example: "2025-12-10 10:00:00"
+                accountNumber:
+                  type: string
+                  example: "0327593620"
+                content:
+                  type: string
+                  description: "Nội dung chuyển khoản. Bắt buộc phải có cú pháp: DH {OrderID}"
+                  example: "DH 6943cf1d0d93d0d4529c1f3e"
+                transferAmount:
+                  type: number
+                  description: "Số tiền chuyển khoản (Phải >= tổng tiền đơn hàng)"
+                  example: 283000
+                transferType:
+                  type: string
+                  example: "in"
+      responses:
+        '200':
+          description: Xử lý thanh toán thành công
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  success:
+                    type: boolean
+                    example: true
                   message:
                     type: string
-                    example: "Access token is required"
-        '500':
-          description: Lỗi Server nội bộ
-  
+                    example: "Payment processed successfully"
+        '400':
+          description: Lỗi xử lý (Sai cú pháp content, thiếu tiền, hoặc không tìm thấy đơn)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid content format (Order ID not found)"
   # --- GUEST REVIEWS ---
   /guest/reviews/{dishId}:
     get:
       tags:
-        - Guest Reviews
+        - Guest
       summary: Lấy danh sách đánh giá của món ăn
       description: >
         Lấy danh sách review của một món ăn cụ thể để hiển thị bên Client.

@@ -1,10 +1,5 @@
 import { Request, Response } from "express"
 import paymentService from "../../services/payment.services"
-import { ObjectId } from "mongodb"
-import HTTP_STATUS from "../../constants/httpStatus"
-import databaseService from "../../services/database.servies"
-import { ErrorWithStatus } from "../../models/Errors"
-import { generatePaymentQR } from "../../utils/sepay"
 import USER_MESSAGES from "../../constants/message"
 
 export const sepayWebhookController = async (req: Request, res: Response) => {
@@ -24,23 +19,10 @@ export const sepayWebhookController = async (req: Request, res: Response) => {
 
 export const getPaymentUrlController = async (req: Request, res: Response) => {
   const { orderId } = req.params
-  const order = await databaseService.orders.findOne({ _id: new ObjectId(orderId) })
-
-  if (!order) {
-    throw new ErrorWithStatus({ message: USER_MESSAGES.ORDER_NOT_FOUND, status: HTTP_STATUS.NOT_FOUND })
-  }
-
-  const qrUrl = generatePaymentQR({
-    amount: order.totalAmount,
-    des: `DH ${order._id.toString()}`
-  })
+  const qrUrl = await paymentService.getPaymentUrl({ orderId })
 
   return res.json({
     message: USER_MESSAGES.GET_PAYMENT_QR_SUCCESSFULLY,
-    data: {
-      orderId: order._id,
-      totalAmount: order.totalAmount,
-      paymentUrl: qrUrl // Link QR mới nhất
-    }
+    result: qrUrl
   })
 }

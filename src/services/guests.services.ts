@@ -426,7 +426,6 @@ class GuestService {
     // hoàn tiền
     const refundAmount = originalItem.dishPrice * originalItem.quantity
 
-    const targetStatus = status
     const result = await databaseService.orders.findOneAndUpdate(
       {
         _id: new ObjectId(orderId),
@@ -434,14 +433,13 @@ class GuestService {
       },
       {
         $set: {
-          "items.$.status": targetStatus,
+          "items.$.status": status,
           "items.$.updatedAt": new Date()
-          // "items.$.managedBy": guestName // Có thể lưu tên khách hủy nếu muốn
         },
         $push: {
           "items.$.processingHistory": {
-            status: targetStatus,
-            updatedBy: guestName, // Ghi rõ là khách tự hủy
+            status: status,
+            updatedBy: guestName,
             updatedAt: new Date()
           }
         },
@@ -471,8 +469,7 @@ class GuestService {
       ...socketPayload,
       message: `Khách hàng ${guestName} tại bàn ${result.tableNumber} đã HỦY món: ${originalItem.dishName} số lượng ${originalItem.quantity}`
     })
-    const items = await databaseService.orders.find({ _id: new ObjectId(orderId) }).toArray()
-    io.to("admin_room").emit("order_update:admin", { orders: items })
+    io.to("admin_room").emit("order_update:admin", { orders: result })
 
     // Gửi lại cho chính bàn đó (để update UI cho các thành viên khác trong bàn)
     // io.to(`table_${tableId}`).emit("update_order_item", socketPayload)

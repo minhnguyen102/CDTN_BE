@@ -1,7 +1,12 @@
 import { ObjectId } from "mongodb"
 import databaseService from "./database.servies" // Chú ý đường dẫn import database của bạn
 import { PaymentMethod, PaymentStatus, TableStatus } from "../constants/enums"
+import { ErrorWithStatus } from "../models/Errors"
+import HTTP_STATUS from "../constants/httpStatus"
+import USER_MESSAGES from "../constants/message"
 import { getIO } from "../utils/socket"
+import { OrderItemStatus } from "../constants/enums"
+import { generatePaymentQR } from "../utils/sepay"
 
 class PaymentService {
   async handleSePayWebhook(data: any) {
@@ -100,6 +105,30 @@ class PaymentService {
     })
 
     return { success: true, message: "Payment processed successfully" }
+  }
+
+  async getPaymentUrl({ orderId }: { orderId: string }) {
+    const order = await databaseService.orders.findOne({ _id: new ObjectId(orderId) })
+
+    if (!order) {
+      throw new ErrorWithStatus({ message: USER_MESSAGES.ORDER_NOT_FOUND, status: HTTP_STATUS.NOT_FOUND })
+    }
+    const flag = order.items.some(
+      (item) => item.status === OrderItemStatus.Pending || item.status === OrderItemStatus.Cooking
+    )
+    if (flag) {
+      throw new ErrorWithStatus({
+        message: "Tồn tại đơn hàng chưa phục vụ. Chưa thể thanh toán",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    const qrUrl = generatePaymentQR({
+      amount: order.totalAmount,
+      des: `DH ${order._id.toString()}`
+    })
+
+    return qrUrl
   }
 }
 

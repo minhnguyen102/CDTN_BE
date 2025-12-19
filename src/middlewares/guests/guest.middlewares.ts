@@ -283,3 +283,25 @@ export const getMenuValidation = validate(
     }
   })
 )
+
+export const orderIdvalidation = validate(
+  checkSchema({
+    orderId: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.ORDER_DISH_ID_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGES.ORDER_ID_MUST_BE_STRING
+      },
+      trim: true,
+      custom: {
+        options: (value) => {
+          if (!ObjectId.isValid(value)) {
+            throw new Error(USER_MESSAGES.INVALID_ORDER_ID)
+          }
+          return true
+        }
+      }
+    }
+  })
+)

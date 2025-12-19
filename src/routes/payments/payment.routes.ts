@@ -1,7 +1,11 @@
 import { Router } from "express"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { getPaymentUrlController, sepayWebhookController } from "../../controllers/payments/payment.controllers"
-import { accessTokenValidation, getUrlPaymentValidation } from "../../middlewares/guests/guest.middlewares"
+import {
+  accessTokenValidation,
+  getUrlPaymentValidation,
+  orderIdvalidation
+} from "../../middlewares/guests/guest.middlewares"
 
 const paymentRouter = Router()
 
@@ -22,7 +26,8 @@ paymentRouter.get(
   "/qr/:orderId",
   accessTokenValidation,
   getUrlPaymentValidation,
+  orderIdvalidation,
   wrapHandlerFunction(getPaymentUrlController)
-) // nên validate orderId
+)
 
 export default paymentRouter

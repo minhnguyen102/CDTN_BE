@@ -1,7 +1,7 @@
 asyncapi: 2.6.0
 info:
   title: Kitchen & Order Socket Service (CDTN)
-  version: 1.0.4
+  version: 1.0.5
   description: |
     Tài liệu mô tả giao thức Socket.IO cho hệ thống quản lý nhà hàng.
     
@@ -162,7 +162,6 @@ channels:
                     type: string
                     description: Thông báo chi tiết
 
-  # Sự kiện lấy danh sách món theo nhóm
   get_orders:guest:
     publish:
       tags:
@@ -196,7 +195,6 @@ channels:
   # ==========================================
   
   # Notification: update_order_item
-  # Mục đích: Hiển thị Toast thông báo + Cập nhật tiền (Nhẹ)
   update_order_item:
     subscribe:
       tags:
@@ -204,8 +202,7 @@ channels:
       summary: Thông báo trạng thái món thay đổi (Toast)
       description: >
         Gửi tới `admin_room` và `table_{id}`.
-        Dùng để hiện Toast: "Món X đã chuyển sang Y" và update số tiền tổng.
-        FE dùng `itemId` và `status` trong này để tự cập nhật UI cục bộ (Optimistic UI).
+        Dùng để hiện Toast: "Món X đã chuyển sang Y".
       message:
         payload:
           type: object
@@ -219,45 +216,34 @@ channels:
               enum: [Pending, Cooking, Served, Reject]
             mamageBy:
               type: string
-              description: Tên người thực hiện (Admin hoặc Guest)
             newTotalAmount:
               type: number
-              description: Tổng tiền mới của đơn hàng
             message:
               type: string
-              description: Nội dung hiển thị Toast
 
-  # [NEW] Notification: order_update:admin
-  # Mục đích: Đồng bộ danh sách đơn hàng cho Admin
+  # Notification: order_update:admin
   order_update:admin:
     subscribe:
       tags:
         - name: Server Notifications
       summary: Cập nhật chi tiết đơn hàng (Admin)
-      description: >
-        Gửi tới `admin_room` mỗi khi có thay đổi (Tạo đơn, Hủy, Cập nhật).
-        Payload trả về mảng chứa thông tin đơn hàng vừa thay đổi để Admin update vào danh sách.
+      description: Gửi tới `admin_room` mỗi khi có thay đổi để reload danh sách.
       message:
         payload:
           type: object
           properties:
             order:
               type: array
-              description: Mảng chứa thông tin đơn hàng (thường có 1 phần tử)
               items:
                 $ref: '#/components/schemas/OrderObject'
 
-  # [NEW] Notification: order:update
-  # Mục đích: Đồng bộ dữ liệu cho Guest (Nặng)
+  # Notification: order:update
   order:update:
     subscribe:
       tags:
         - name: Server Notifications
       summary: Gửi về TOÀN BỘ object đơn hàng mới (Guest)
-      description: >
-        Gửi tới `table_{id}` sau khi Admin hoặc Khách cập nhật đơn.
-        Payload chứa full thông tin đơn hàng từ DB.
-        **FE có thể dùng sự kiện này để set lại toàn bộ state đơn hàng cho chắc chắn.**
+      description: Gửi tới `table_{id}` để đồng bộ full data.
       message:
         payload:
           $ref: '#/components/schemas/OrderObject'
@@ -297,6 +283,32 @@ channels:
               type: string
             data:
               $ref: '#/components/schemas/OrderObject'
+
+  # [NEW] Notification: Thanh toán thành công (Cho Khách)
+  payment_success:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Thông báo thanh toán thành công (Guest)
+      description: |
+        Gửi tới `table_{id}` khi Webhook SePay xác nhận tiền đã về.
+        FE dùng sự kiện này để đóng modal QR và hiện màn hình cảm ơn.
+      message:
+        payload:
+          $ref: '#/components/schemas/PaymentSuccessGuestPayload'
+
+  # [NEW] Notification: Thanh toán thành công (Cho Admin)
+  payment_received:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Thông báo nhận tiền (Admin)
+      description: |
+        Gửi tới `admin_room` khi có bàn thanh toán.
+        Giúp thu ngân biết tiền đã về mà không cần check app ngân hàng.
+      message:
+        payload:
+          $ref: '#/components/schemas/PaymentReceivedAdminPayload'
 
   error_msg:
     subscribe:
@@ -358,7 +370,6 @@ components:
               note: 
                 type: string
 
-    # Object chi tiết 1 món ăn trong đơn
     DishItemObject:
       type: object
       properties:
@@ -385,7 +396,6 @@ components:
           type: string
           format: date-time
 
-    # Object Order đầy đủ
     OrderObject:
       type: object
       properties:
@@ -402,10 +412,8 @@ components:
           items:
             $ref: '#/components/schemas/DishItemObject'
 
-    # Cấu trúc trả về của get_orders:guest
     GroupedOrderItems:
       type: object
-      description: Danh sách items đã được phân loại theo trạng thái
       properties:
         Pending:
           type: array
@@ -423,6 +431,37 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DishItemObject'
+
+    # [NEW] Payload cho sự kiện payment_success (Guest)
+    PaymentSuccessGuestPayload:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: "693f7a63e7455fa6893e7080"
+        amount:
+          type: number
+          example: 266000
+        message:
+          type: string
+          example: "Thanh toán thành công!"
+
+    # [NEW] Payload cho sự kiện payment_received (Admin)
+    PaymentReceivedAdminPayload:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: "693f7a63e7455fa6893e7080"
+        tableNumber:
+          type: integer
+          example: 5
+        amount:
+          type: number
+          example: 266000
+        message:
+          type: string
+          example: "Bàn 5 vừa thanh toán 266,000đ"
 
   messages:
     JoinSuccess:
