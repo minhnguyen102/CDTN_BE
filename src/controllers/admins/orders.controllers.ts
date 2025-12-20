@@ -24,6 +24,21 @@ export const getAllOrdersController = async (req: Request, res: Response) => {
   })
 }
 
+export const getAllOrdersHistoryController = async (req: Request, res: Response) => {
+  const { limit, page } = paginationQueryParser(req, { defaultLimit: 15, allowLimits: [15, 20, 25] })
+
+  const search = (req.query.search as string) || undefined
+  const dateFrom = (req.query.dateFrom as string) || undefined
+  const dateTo = (req.query.dateTo as string) || undefined
+
+  const result = await orderServices.getAllOrdersHistory({ limit, page, search, dateFrom, dateTo })
+
+  return res.json({
+    message: "Get all orders history successfully",
+    data: result
+  })
+}
+
 export const updateStatusItemInOrdersController = async (
   req: Request<ParamsDictionary, any, UpdateStatusItemInOrdersReqBody>,
   res: Response

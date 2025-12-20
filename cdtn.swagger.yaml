@@ -4321,7 +4321,51 @@ paths:
                   status:
                     type: integer
                     example: 400
-  
+  /guest/recommendations:
+    post:
+      tags:
+        - Guest
+      summary: Gợi ý món ăn thông minh (AI Powered)
+      description: |
+        API này sử dụng Google Gemini AI để phân tích các món đang có trong giỏ hàng (dishIds) và đề xuất 3 món ăn kèm phù hợp nhất từ Menu.
+        - Nếu giỏ hàng rỗng hoặc không gửi `dishIds`: Trả về 3 món Nổi bật (Featured).
+        - Nếu AI bị lỗi hoặc Timeout (2.5s): Fallback về 5 món Nổi bật.
+        - Có sử dụng Caching (Recommendation Collection) để tối ưu tốc độ cho các tổ hợp món lặp lại.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartRecommendationRequest'
+      responses:
+        '200':
+          description: Lấy danh sách gợi ý thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get cart recommendations success"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DishRecommendationItem'
+        '400':
+          description: Lỗi validation (dishIds không phải mảng hoặc ID sai định dạng)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập (Thiếu/Sai Token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   # --- ADMIN REVIEWS ---
   /reviews:
     get:
@@ -5287,6 +5331,53 @@ components:
         createdAt:
           type: string
           format: date-time
+    # Schema Input
+    CartRecommendationRequest:
+      type: object
+      properties:
+        dishIds:
+          type: array
+          description: Danh sách _id các món đang có trong giỏ hàng để AI phân tích.
+          items:
+            type: string
+            description: MongoDB ObjectId
+          example: 
+            - "65f2ea21d1d14ce2ee11a972"
+            - "65f2ea21d1d14ce2ee11a973"
+
+    # Schema Output Item
+    DishRecommendationItem:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "65f2ea21d1d14ce2ee11a999"
+        name:
+          type: string
+          example: "Pepsi không đường"
+        price:
+          type: number
+          example: 15000
+        image:
+          type: string
+          example: "https://res.cloudinary.com/.../pepsi.jpg"
+        ratingAverage:
+          type: number
+          example: 4.5
+        reviewCount:
+          type: number
+          example: 120
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Validation error"
+        errors:
+          type: object
+          example: 
+            dishIds: 
+              msg: "dishIds must be an array"
   securitySchemes:
     BearerAuth:
       type: http

@@ -5,6 +5,7 @@ import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import {
   adminCreateOrderForTableController,
   getAllOrdersController,
+  getAllOrdersHistoryController,
   updateStatusItemInOrdersController
 } from "../../controllers/admins/orders.controllers"
 import { adminCreateOrderValidation } from "../../middlewares/admins/orders.middlewares"
@@ -23,6 +24,20 @@ ordersRouter.get(
   verifiedUserValidation,
   checkPermission("view_orders"),
   wrapHandlerFunction(getAllOrdersController)
+)
+/**
+ * Description: Get all orders (Dành cho trang admin)
+ * Path: /orders
+ * Method: GET
+ * Headers: { Authorization: Bearer <access_token> }
+ * Query Params: ?page=1&limit=10&status=Pending
+ */
+ordersRouter.get(
+  "/history",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("view_orders"),
+  wrapHandlerFunction(getAllOrdersHistoryController)
 )
 
 /**

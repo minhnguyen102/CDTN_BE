@@ -186,6 +186,113 @@ class OrderServices {
     }
   }
 
+  async getAllOrdersHistory({
+    limit,
+    page,
+    search,
+    dateFrom,
+    dateTo
+  }: {
+    limit: number
+    page: number
+    search?: string
+    dateFrom?: string
+    dateTo?: string
+  }) {
+    const match: any = {
+      paymentStatus: PaymentStatus.PAID
+    }
+    const skip = (page - 1) * limit
+    if (search) {
+      match.tableNumber = Number(search)
+    }
+    if (dateFrom || dateTo) {
+      match.createdAt = {}
+      if (dateFrom) {
+        match.createdAt.$gte = new Date(dateFrom)
+      }
+      if (dateTo) {
+        match.createdAt.$lte = new Date(dateTo)
+      }
+    }
+
+    const queryPipeline: any[] = [
+      { $match: match },
+      { $sort: { createdAt: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          tableId: 0,
+          paymentStatus: 0,
+          updatedAt: 0,
+
+          "items._id": 0,
+          "items.dishImage": 0,
+          "items.note": 0,
+          "items.orderedBy": 0,
+          "items.managedBy": 0,
+          "items.processingHistory": 0,
+          "items.updatedAt": 0,
+          "items.createdAt": 0
+          // "items.status": 0 Phải trả về status thì bên dưới mới làm sạch dữ liệu được
+        }
+      }
+    ]
+    const [rawOrders, total] = await Promise.all([
+      databaseService.orders.aggregate(queryPipeline).toArray(),
+      databaseService.orders.countDocuments(match)
+    ])
+
+    const processedOrders = rawOrders.map((order: any) => {
+      if (!order.items || order.items.length === 0) return order
+      // Làm sạch dữ liệu => Không lấy những item có trạng thái đơn là Reject
+      const validItems = order.items.filter((item: any) => {
+        return item.status !== OrderItemStatus.Reject
+      })
+      if (validItems.length === 0) {
+        return { ...order, items: [] }
+      }
+
+      // Map dùng để gom nhóm: Key là dishId, Value là item object
+      const itemsMap = new Map<string, any>()
+
+      validItems.forEach((item: any) => {
+        const idKey = item.dishId.toString()
+
+        if (itemsMap.has(idKey)) {
+          const existingItem = itemsMap.get(idKey)
+          existingItem.quantity += item.quantity
+        } else {
+          itemsMap.set(idKey, { ...item })
+        }
+      })
+      Array.from(itemsMap.values()).forEach((item) => {
+        item.subTotal = item.dishPrice * item.quantity
+      })
+      // Mỗi order là 1 object => Cần trả về một object khi map, chỉ xử lí gom item giống nhau vào thôi
+      return {
+        ...order,
+        items: Array.from(itemsMap.values())
+      }
+    })
+
+    const totalRevenue = processedOrders.reduce((total, order) => total + order.totalAmount, 0)
+
+    return {
+      orders: processedOrders,
+      meta: {
+        totalRevenue,
+        count: total
+      },
+      pagination: {
+        page: page,
+        limit: limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    }
+  }
+
   async updateItemStatus({
     orderId,
     itemId,
