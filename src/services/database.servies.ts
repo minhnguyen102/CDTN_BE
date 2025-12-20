@@ -13,6 +13,7 @@ import DishCategory from "../models/schema/DishCategory.schema"
 import Dish from "../models/schema/Dish.schema"
 import Order from "../models/schema/Order.schema"
 import Review from "../models/schema/Review.schema"
+import Recommendation from "../models/schema/Recomendation.schema"
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.sqjfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -83,6 +84,9 @@ class DatabaseService {
   }
   get reviews(): Collection<Review> {
     return this.db.collection("reviews")
+  }
+  get recommendations(): Collection<Recommendation> {
+    return this.db.collection("recommendations")
   }
 }
 

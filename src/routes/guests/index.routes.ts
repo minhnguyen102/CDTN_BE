@@ -3,6 +3,7 @@ import guestRoutes from "./auth.routes"
 import menuGuestRoutes from "./menu.routes"
 import orderGuestRoutes from "./order.routes"
 import guestReviewsRouter from "./review.routes"
+import recommnentdationsRouter from "./recommendation.routes"
 
 export const routesGuest = (app: Express) => {
   const PATH = "/guest"
@@ -10,4 +11,5 @@ export const routesGuest = (app: Express) => {
   app.use(PATH + "/menu", menuGuestRoutes)
   app.use(PATH + "/orders", orderGuestRoutes)
   app.use(PATH + "/reviews", guestReviewsRouter)
+  app.use(PATH + "/recommendations", recommnentdationsRouter)
 }

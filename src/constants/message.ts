@@ -1,4 +1,6 @@
 const USER_MESSAGES = {
+  DISH_IDS_MUST_BE_ARRAY: "dishIds must be an array",
+  DISH_ID_MUST_BE_MONGO_ID: "Each item in dishIds must be a valid ObjectId",
   CONTENT_REPLY_IS_REQUIRED: "Content reply is required",
   CONTENT_MUST_BE_STRING: "Content reply must be a string",
   ORDER_NOT_FOUND_OR_ORDER_NOT_PAID: "Order not found or Order not pay",

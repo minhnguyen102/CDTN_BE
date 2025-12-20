@@ -314,3 +314,22 @@ export const orderIdvalidation = validate(
     }
   })
 )
+
+export const cartRecommendationValidation = validate(
+  checkSchema(
+    {
+      dishIds: {
+        optional: true,
+        isArray: {
+          errorMessage: USER_MESSAGES.DISH_IDS_MUST_BE_ARRAY
+        }
+      },
+      "dishIds.*": {
+        isMongoId: {
+          errorMessage: USER_MESSAGES.DISH_ID_MUST_BE_MONGO_ID
+        }
+      }
+    },
+    ["body"]
+  )
+)
