@@ -6,9 +6,13 @@ import {
   adminCreateOrderForTableController,
   getAllOrdersController,
   getAllOrdersHistoryController,
+  getDetailOrdersHistoryController,
   updateStatusItemInOrdersController
 } from "../../controllers/admins/orders.controllers"
-import { adminCreateOrderValidation } from "../../middlewares/admins/orders.middlewares"
+import {
+  adminCreateOrderValidation,
+  getDetailOrderHistoryValidation
+} from "../../middlewares/admins/orders.middlewares"
 const ordersRouter = Router()
 
 /**
@@ -26,8 +30,8 @@ ordersRouter.get(
   wrapHandlerFunction(getAllOrdersController)
 )
 /**
- * Description: Get all orders (Dành cho trang admin)
- * Path: /orders
+ * Description: Get all orders history (Dành cho trang admin)
+ * Path: /orders/history
  * Method: GET
  * Headers: { Authorization: Bearer <access_token> }
  * Query Params: ?page=1&limit=10&status=Pending
@@ -38,6 +42,22 @@ ordersRouter.get(
   verifiedUserValidation,
   checkPermission("view_orders"),
   wrapHandlerFunction(getAllOrdersHistoryController)
+)
+
+/**
+ * Description: Get all orders history (Dành cho trang admin)
+ * Path: /orders/history
+ * Method: GET
+ * Headers: { Authorization: Bearer <access_token> }
+ * Query Params: ?page=1&limit=10&status=Pending
+ */
+ordersRouter.get(
+  "/history/:order_id",
+  accessTokenValidation,
+  verifiedUserValidation,
+  checkPermission("view_orders"),
+  getDetailOrderHistoryValidation,
+  wrapHandlerFunction(getDetailOrdersHistoryController)
 )
 
 /**

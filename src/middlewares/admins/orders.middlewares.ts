@@ -96,3 +96,26 @@ export const createOrderForTableValidation = validate(
 )
 
 export const adminCreateOrderValidation = validate(checkSchema({}))
+export const getDetailOrderHistoryValidation = validate(
+  checkSchema(
+    {
+      order_id: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.ORDER_ID_IS_REQUIRED
+        },
+        custom: {
+          options: (value: string) => {
+            if (!ObjectId.isValid(value)) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.ORDER_DISH_ID_INVALID,
+                status: HTTP_STATUS.BAD_REQUEST
+              })
+            }
+            return true
+          }
+        }
+      }
+    },
+    ["params"]
+  )
+)

@@ -293,6 +293,38 @@ class OrderServices {
     }
   }
 
+  async getDetailOrderHistory({ order_id }: { order_id: string }) {
+    const orderDetail = await databaseService.orders.findOne(
+      {
+        _id: new ObjectId(order_id),
+        paymentStatus: PaymentStatus.PAID
+      },
+      {
+        projection: {
+          "items.dishId": 0,
+          _id: 0,
+          tableId: 0,
+          tableNumber: 0,
+          guestName: 0,
+          totalAmount: 0,
+          createdAt: 0,
+          paymentStatus: 0,
+          paymentMethod: 0,
+          updatedAt: 0,
+          finishedAt: 0
+        }
+      }
+    )
+
+    if (!orderDetail) {
+      throw new ErrorWithStatus({
+        message: "",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+    return orderDetail
+  }
+
   async updateItemStatus({
     orderId,
     itemId,

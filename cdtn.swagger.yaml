@@ -18,6 +18,7 @@ servers:
   - url: https://cdtn-be-one.vercel.app/guest
   - url: http://localhost:3000/admin
   - url: http://localhost:3000/guest
+  - url: https://api.snackio.io.vn/admin
 tags:
   - name: Account
     description: Các logic liên quan đến account
@@ -3611,7 +3612,59 @@ paths:
                     example: "Invalid status"
         '401':
           description: Unauthorized
-
+  /orders/history:
+      get:
+        tags:
+          - Orders
+        summary: Lấy lịch sử đơn hàng (Đã thanh toán)
+        description: |
+          API lấy danh sách các đơn hàng có trạng thái `PAID`.
+          - Hỗ trợ phân trang, lọc theo ngày.
+          - **Search:** Tìm kiếm chính xác theo **Số bàn** (tableNumber).
+          - **Dữ liệu Items:** Đã được làm sạch (bỏ món Reject), gom nhóm các món giống nhau và tính `subTotal`.
+        security:
+          - bearerAuth: []
+        parameters:
+          - in: query
+            name: page
+            schema:
+              type: integer
+              default: 1
+            description: Trang hiện tại
+          - in: query
+            name: limit
+            schema:
+              type: integer
+              default: 10
+            description: Số lượng item trên mỗi trang
+          - in: query
+            name: search
+            schema:
+              type: string
+            description: Tìm kiếm theo **Số bàn** (Ví dụ nhập "5" để tìm bàn 5)
+          - in: query
+            name: dateFrom
+            schema:
+              type: string
+              format: date-time
+            description: Lọc từ ngày (ISO String)
+          - in: query
+            name: dateTo
+            schema:
+              type: string
+              format: date-time
+            description: Lọc đến ngày (ISO String)
+        responses:
+          '200':
+            description: Lấy lịch sử thành công
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/HistoryOrderResponse'
+          '401':
+            description: Unauthorized
+          '500':
+            description: Server Error
   # order bên khách, lưu ý không dùng path của admin
   /guest/auth/login:
     post:
@@ -4591,6 +4644,7 @@ paths:
           description: Forbidden (Không có quyền Admin)
         '404':
           description: Không tìm thấy đánh giá (Review Not Found)
+
 components:
   schemas:
     Table:
@@ -5224,6 +5278,7 @@ components:
       example:
         status: "Cooking"
 
+    
     # --- REVIEW SCHEMAS ---
     CreateReviewReqBody:
       type: object
@@ -5367,6 +5422,79 @@ components:
         reviewCount:
           type: number
           example: 120
+    HistoryOrderResponse:
+      type: object
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryOrderObject'
+        meta:
+          type: object
+          properties:
+            totalRevenue:
+              type: number
+              description: Tổng doanh thu của danh sách trả về (đã tính tổng totalAmount của các order)
+              example: 5000000
+            count:
+              type: integer
+              description: Tổng số lượng đơn hàng tìm thấy trong DB (dùng cho phân trang)
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            totalPages:
+              type: integer
+    HistoryOrderObject:
+      type: object
+      properties:
+        _id:
+          type: string
+        tableNumber:
+          type: integer
+          description: Số bàn
+        guestName:
+          type: string
+          description: Tên khách hàng (nếu có)
+        totalAmount:
+          type: number
+          description: Tổng tiền của cả đơn
+        paymentMethod:
+          type: string
+          enum: [CASH, BANK]
+        createdAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          description: Danh sách món ăn đã được gom nhóm và làm sạch
+          items:
+            $ref: '#/components/schemas/HistoryOrderItem'
+    HistoryOrderItem:
+      type: object
+      properties:
+        dishId:
+          type: string
+        dishName:
+          type: string
+        dishPrice:
+          type: number
+        quantity:
+          type: integer
+          description: Số lượng đã được cộng dồn từ các lần gọi
+        subTotal:
+          type: number
+          description: Thành tiền (dishPrice * quantity)
+        status:
+          type: string
+          enum: [Served, Cooking, Pending]
+          description: Trạng thái (Reject đã bị lọc bỏ)
     ErrorResponse:
       type: object
       properties:

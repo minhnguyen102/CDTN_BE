@@ -39,6 +39,15 @@ export const getAllOrdersHistoryController = async (req: Request, res: Response)
   })
 }
 
+export const getDetailOrdersHistoryController = async (req: Request, res: Response) => {
+  const { order_id } = req.params
+  const result = await orderServices.getDetailOrderHistory({ order_id })
+  return res.json({
+    message: "Get all orders history successfully",
+    data: result
+  })
+}
+
 export const updateStatusItemInOrdersController = async (
   req: Request<ParamsDictionary, any, UpdateStatusItemInOrdersReqBody>,
   res: Response
