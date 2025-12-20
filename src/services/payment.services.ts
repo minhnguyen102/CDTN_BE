@@ -63,37 +63,58 @@ class PaymentService {
           }
         }
       ),
-      await databaseService.orders.updateOne(
-        { _id: orderId },
+      await databaseService.tables.updateOne(
+        { _id: new ObjectId(order.tableId) },
         {
           $set: {
-            paymentStatus: PaymentStatus.PAID,
-            paymentMethod: PaymentMethod.BANK,
-            updatedAt: new Date(),
-            finishedAt: new Date()
+            currentOrderId: null,
+            status: TableStatus.AVAILABLE
           }
         }
       )
     ])
 
-    await databaseService.tables.updateOne(
-      { _id: new ObjectId(order.tableId) },
-      {
-        $set: {
-          currentOrderId: null,
-          status: TableStatus.AVAILABLE
-        }
-      }
-    )
+    const itemQuantityMap = new Map<string, number>()
+    const uniqueDishIds: ObjectId[] = []
 
-    // 7. [REAL-TIME] Bắn Socket thông báo
+    if (order.items && order.items.length > 0) {
+      order.items.forEach((item: any) => {
+        const idStr = item.dishId.toString()
+        if (itemQuantityMap.has(idStr)) {
+          // Nếu đã có, cộng dồn số lượng
+          itemQuantityMap.set(idStr, itemQuantityMap.get(idStr)! + item.quantity)
+        } else {
+          // Nếu chưa có, set số lượng ban đầu và push vào mảng ID để query DB
+          itemQuantityMap.set(idStr, item.quantity)
+          uniqueDishIds.push(item.dishId)
+        }
+      })
+    }
+
+    // Query DB để lấy tên và ảnh món ăn
+    // Chỉ lấy các trường cần thiết: _id, name, image
+    const dishesInfo = await databaseService.dishes
+      .find({ _id: { $in: uniqueDishIds } })
+      .project({ name: 1, image: 1 })
+      .toArray()
+
+    // Map dữ liệu để ra đúng format yêu cầu
+    const formattedItems = dishesInfo.map((dish) => ({
+      dishId: dish._id.toString(),
+      dishName: dish.name,
+      quantity: itemQuantityMap.get(dish._id.toString()) || 0,
+      image: dish.image // Giả sử trong DB bạn lưu field là 'image'
+    }))
+
+    // [REAL-TIME] Bắn Socket thông báo
     const io = getIO()
 
     // a. Báo cho khách (Tại bàn đó) -> Để màn hình QR chuyển sang "Thành công"
     io.to(`table_${order.tableId}`).emit("payment_success", {
       orderId: orderIdRaw,
       amount: transferAmount,
-      message: "Thanh toán thành công!"
+      message: "Thanh toán thành công!",
+      items: formattedItems
     })
 
     // b. Báo cho Admin/Bếp (Để biết đơn đã trả tiền)
