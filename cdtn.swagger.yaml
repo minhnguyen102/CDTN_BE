@@ -4290,8 +4290,9 @@ paths:
                             content:
                               type: string
                               example: "Cảm ơn bạn đã ủng hộ!"
-                            adminId:
+                            adminName:
                               type: string
+                              example: "Van Thu"
                             createdAt:
                               type: string
                               format: date-time
@@ -4385,21 +4386,25 @@ paths:
                         type: integer
                       totalPages:
                         type: integer
-  /reviews/{reviewId}/reply:
+  /admin/reviews/{reviewId}/reply:
     post:
       tags:
         - Admin Reviews
-      summary: Trả lời đánh giá
-      description: Admin trả lời comment của khách.
+      summary: Admin trả lời đánh giá
+      description: |
+        Admin gửi nội dung phản hồi cho một review cụ thể.
+        Hệ thống sẽ lưu nội dung, ID admin thực hiện và thời gian trả lời vào database.
       operationId: replyReview
       security:
         - BearerAuth: []
       parameters:
-        - name: reviewId
-          in: path
-          required: true
+        - in: path
+          name: reviewId
           schema:
             type: string
+          required: true
+          description: ID của bài đánh giá cần trả lời (MongoDB ObjectId)
+          example: "6945677b4f023c8c85fe044e"
       requestBody:
         required: true
         content:
@@ -4411,7 +4416,9 @@ paths:
               properties:
                 content:
                   type: string
-                  example: "Cảm ơn bạn đã ủng hộ quán!"
+                  description: Nội dung câu trả lời của Admin
+                  minLength: 1
+                  example: "Cảm ơn bạn đã ghé thăm. Chúng tôi sẽ cố gắng cải thiện hơn nữa!"
       responses:
         '200':
           description: Trả lời thành công
@@ -4422,7 +4429,37 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Reply submitted successfully"
+                    example: "Reply review success"
+                  data:
+                    $ref: '#/components/schemas/ReviewObject'
+        '400':
+          description: Lỗi Validation (Thiếu content hoặc ID sai định dạng)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Content reply is required"
+                  status:
+                    type: integer
+                    example: 400
+        '401':
+          description: Unauthorized (Chưa đăng nhập)
+        '404':
+          description: Không tìm thấy bài đánh giá
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Review not found"
+                  status:
+                    type: integer
+                    example: 404
   /admin/reviews/{reviewId}/{status}:
     patch:
       tags:
@@ -5215,10 +5252,6 @@ components:
         comment:
           type: string
           example: "Tuyệt vời!"
-        photos:
-          type: array
-          items:
-            type: string
         reply:
           $ref: '#/components/schemas/ReviewReply'
         createdAt:
