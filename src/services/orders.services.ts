@@ -318,7 +318,7 @@ class OrderServices {
 
     if (!orderDetail) {
       throw new ErrorWithStatus({
-        message: "",
+        message: USER_MESSAGES.ORDER_NOT_FOUND_OR_NOT_PAID,
         status: HTTP_STATUS.BAD_REQUEST
       })
     }

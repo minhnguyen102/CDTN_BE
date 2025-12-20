@@ -3665,6 +3665,40 @@ paths:
             description: Unauthorized
           '500':
             description: Server Error
+  /orders/history/{order_id}:
+    get:
+      tags:
+        - Orders
+      summary: Lấy danh sách món ăn của đơn hàng (Chi tiết)
+      description: |
+        API chỉ trả về danh sách **items** của một đơn hàng đã thanh toán.
+        - Các thông tin chung (bàn, tổng tiền, khách...) đã có ở API danh sách nên không trả về ở đây.
+        - Item trả về bao gồm cả món **Served** (đã ăn) và **Reject** (đã hủy) để xem lại lịch sử gọi món.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+          description: ID của đơn hàng
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get order history detail successfully"
+                  data:
+                    $ref: '#/components/schemas/HistoryOrderDetailResponse'
+        '400':
+          description: Không tìm thấy đơn hoặc Order ID không hợp lệ
+          
   # order bên khách, lưu ý không dùng path của admin
   /guest/auth/login:
     post:
@@ -5399,7 +5433,6 @@ components:
           example: 
             - "65f2ea21d1d14ce2ee11a972"
             - "65f2ea21d1d14ce2ee11a973"
-
     # Schema Output Item
     DishRecommendationItem:
       type: object
@@ -5422,6 +5455,7 @@ components:
         reviewCount:
           type: number
           example: 120
+    
     HistoryOrderResponse:
       type: object
       properties:
@@ -5506,6 +5540,117 @@ components:
           example: 
             dishIds: 
               msg: "dishIds must be an array"
+
+    OrderDetailHistoryResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Danh sách các món trong đơn hàng
+          items:
+            $ref: '#/components/schemas/HistoryDetailItem'
+
+    # Schema chi tiết từng món (Theo đúng projection code của bạn)
+    HistoryDetailItem:
+      type: object
+      properties:
+        dishName:
+          type: string
+          example: "Bò Lúc Lắc"
+        dishPrice:
+          type: number
+          example: 150000
+        dishImage:
+          type: string
+          example: "https://cloudinary..."
+        quantity:
+          type: integer
+          example: 2
+        note:
+          type: string
+          example: "Ít tiêu"
+        status:
+          type: string
+          enum: [Served, Reject, Processing, Pending]
+          description: "Trạng thái món. Reject: Món đã bị hủy/trả."
+        orderedBy:
+          type: string
+          description: Tên người gọi món (nếu có)
+        # Các trường khác như managedBy, processingHistory vẫn có vì bạn không ẩn trong projection
+        processingHistory:
+          type: array
+          items:
+            type: object
+            properties:
+              status: 
+                type: string
+              updatedAt:
+                type: string
+                format: date-time
+              updatedBy: 
+                type: string
+    HistoryOrderDetailResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Danh sách chi tiết các món
+          items:
+            $ref: '#/components/schemas/HistoryItemDetail'
+
+    # Schema chi tiết từng món ăn (Khớp với hình ảnh Postman)
+    HistoryItemDetail:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID của item (OrderItem ID)
+          example: "6945217b7c1fa2c05610bd00"
+        dishName:
+          type: string
+          example: "Xúc xích nướng"
+        dishPrice:
+          type: number
+          example: 12000
+        dishImage:
+          type: string
+          example: "https://res.cloudinary.com/..."
+        quantity:
+          type: integer
+          example: 2
+        note:
+          type: string
+          example: "Không cay"
+        orderedBy:
+          type: string
+          example: "Minh Nguyen"
+        status:
+          type: string
+          enum: [Pending, Cooking, Served, Reject]
+          example: "Served"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-12-19T09:57:15.053Z"
+        managedBy:
+          type: string
+          example: "Van Thu"
+        processingHistory:
+          type: array
+          description: Lịch sử thay đổi trạng thái của món
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "Cooking"
+              updatedBy:
+                type: string
+                example: "Van Thu"
+              updatedAt:
+                type: string
+                format: date-time
+                example: "2025-12-19T09:58:05.712Z"
   securitySchemes:
     BearerAuth:
       type: http

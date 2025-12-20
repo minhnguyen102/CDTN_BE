@@ -1,4 +1,5 @@
 const USER_MESSAGES = {
+  ORDER_NOT_FOUND_OR_NOT_PAID: "Order not found or is not paid",
   DISH_IDS_MUST_BE_ARRAY: "dishIds must be an array",
   DISH_ID_MUST_BE_MONGO_ID: "Each item in dishIds must be a valid ObjectId",
   CONTENT_REPLY_IS_REQUIRED: "Content reply is required",
