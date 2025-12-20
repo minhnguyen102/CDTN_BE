@@ -139,11 +139,35 @@ class ReviewService {
           }
         },
         {
+          $lookup: {
+            from: "accounts",
+            localField: "reply.adminId",
+            foreignField: "_id",
+            as: "adminInfo"
+          }
+        },
+        {
+          $unwind: {
+            path: "$adminInfo",
+            preserveNullAndEmptyArrays: true // Quan trọng: Để review nào chưa có reply/admin thì không bị mất
+          }
+        },
+        {
           $project: {
             authorName: 1,
             rating: 1,
             comment: 1,
-            reply: 1,
+            reply: {
+              $cond: {
+                if: { $ifNull: ["$reply", false] },
+                then: {
+                  content: "$reply.content",
+                  createdAt: "$reply.createdAt",
+                  adminName: "$adminInfo.name"
+                },
+                else: "$$REMOVE"
+              }
+            },
             createdAt: 1,
             dishName: "$dishInfo.name",
             dishImage: "$dishInfo.image"
