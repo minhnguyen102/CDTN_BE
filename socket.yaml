@@ -1,7 +1,7 @@
 asyncapi: 2.6.0
 info:
   title: Kitchen & Order Socket Service (CDTN)
-  version: 1.0.5
+  version: 1.0.6
   description: |
     Tài liệu mô tả giao thức Socket.IO cho hệ thống quản lý nhà hàng.
     
@@ -284,7 +284,7 @@ channels:
             data:
               $ref: '#/components/schemas/OrderObject'
 
-  # [NEW] Notification: Thanh toán thành công (Cho Khách)
+  # [UPDATED] Notification: Thanh toán thành công (Cho Khách)
   payment_success:
     subscribe:
       tags:
@@ -292,12 +292,12 @@ channels:
       summary: Thông báo thanh toán thành công (Guest)
       description: |
         Gửi tới `table_{id}` khi Webhook SePay xác nhận tiền đã về.
-        FE dùng sự kiện này để đóng modal QR và hiện màn hình cảm ơn.
+        FE dùng sự kiện này để đóng modal QR và hiện màn hình cảm ơn kèm danh sách món đã ăn.
       message:
         payload:
           $ref: '#/components/schemas/PaymentSuccessGuestPayload'
 
-  # [NEW] Notification: Thanh toán thành công (Cho Admin)
+  # [UPDATED] Notification: Thanh toán thành công (Cho Admin)
   payment_received:
     subscribe:
       tags:
@@ -396,6 +396,23 @@ components:
           type: string
           format: date-time
 
+    # [NEW] Object rút gọn cho màn hình thanh toán
+    PaymentItemSummary:
+      type: object
+      properties:
+        dishId:
+          type: string
+          example: "dish-1"
+        dishName:
+          type: string
+          example: "Phở Bò Đặc Biệt"
+        quantity:
+          type: integer
+          example: 2
+        image:
+          type: string
+          example: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43"
+
     OrderObject:
       type: object
       properties:
@@ -432,7 +449,7 @@ components:
           items:
             $ref: '#/components/schemas/DishItemObject'
 
-    # [NEW] Payload cho sự kiện payment_success (Guest)
+    # [UPDATED] Payload cho sự kiện payment_success (Guest)
     PaymentSuccessGuestPayload:
       type: object
       properties:
@@ -445,8 +462,12 @@ components:
         message:
           type: string
           example: "Thanh toán thành công!"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentItemSummary'
 
-    # [NEW] Payload cho sự kiện payment_received (Admin)
+    # [UPDATED] Payload cho sự kiện payment_received (Admin)
     PaymentReceivedAdminPayload:
       type: object
       properties:
@@ -462,6 +483,10 @@ components:
         message:
           type: string
           example: "Bàn 5 vừa thanh toán 266,000đ"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentItemSummary'
 
   messages:
     JoinSuccess:
