@@ -4,11 +4,13 @@ import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 import {
   changeReviewStatusController,
-  getAllReviewForAdminController
+  getAllReviewForAdminController,
+  replyReviewController
 } from "../../controllers/admins/reviews.controllers"
 import {
   changeReviewStatusValidation,
-  getAllReviewForAdminValidation
+  getAllReviewForAdminValidation,
+  replyReviewValidation
 } from "../../middlewares/admins/reviews.middlewares"
 
 const adminReviewsRoutes = Router()
@@ -34,12 +36,14 @@ adminReviewsRoutes.get(
  * Path: /admin/reviews/:reviewId/reply
  * Body: { content: "Cảm ơn bạn..." }
  */
-// adminReviewsRoutes.post(
-//   "/:reviewId/reply",
-//   accessTokenValidator,
-//   adminValidator,
-//   wrapRequestHandler(reviewsController.replyReview)
-// )
+adminReviewsRoutes.post(
+  "/:reviewId/reply",
+  accessTokenValidation,
+  verifiedUserValidation,
+  replyReviewValidation,
+  // checkPermission("active_hidden_review"), // Chưa tạo mơi
+  wrapHandlerFunction(replyReviewController)
+)
 
 /**
  * Description: Ẩn/Hiện đánh giá (Xử lý vi phạm)

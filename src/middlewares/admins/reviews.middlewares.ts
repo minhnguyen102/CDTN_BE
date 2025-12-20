@@ -71,3 +71,22 @@ export const changeReviewStatusValidation = validate(
     }
   })
 )
+
+export const replyReviewValidation = validate(
+  checkSchema({
+    reviewId: {
+      ...IdSchema,
+      notEmpty: {
+        errorMessage: USER_MESSAGES.REVIEW_ID_IS_REQUIRED
+      }
+    },
+    content: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.CONTENT_REPLY_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGES.CONTENT_MUST_BE_STRING
+      }
+    }
+  })
+)

@@ -5,6 +5,8 @@ import { pick } from "lodash"
 import HTTP_STATUS from "../../constants/httpStatus"
 import { paginationQueryParser } from "../../utils/helpers"
 import reviewService from "../../services/reviews.services"
+import { ReplyReviewReqBody } from "../../models/requests/Review.request"
+import { TokenPayload } from "../../models/requests/Account.request"
 
 export const getAllReviewForAdminController = async (req: Request, res: Response) => {
   const { limit, page } = paginationQueryParser(req, { defaultLimit: 15, allowLimits: [15, 20, 25] })
@@ -24,5 +26,17 @@ export const changeReviewStatusController = async (req: Request, res: Response) 
   res.json({
     message: "Change review status success",
     result
+  })
+}
+
+export const replyReviewController = async (req: Request<ParamsDictionary, any, ReplyReviewReqBody>, res: Response) => {
+  const { reviewId } = req.params
+  const { content } = req.body
+  const { user_id } = req.decoded_access_token as TokenPayload
+  const review = await reviewService.replyReview({ review_id: reviewId, content, admin_id: user_id })
+
+  res.status(HTTP_STATUS.OK).json({
+    message: "Reply review success",
+    data: review
   })
 }

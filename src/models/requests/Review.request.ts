@@ -6,3 +6,7 @@ export interface CreateReviewReqBody {
     comment?: string
   }[]
 }
+
+export interface ReplyReviewReqBody {
+  content: string
+}

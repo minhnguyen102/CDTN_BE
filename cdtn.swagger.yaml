@@ -4140,6 +4140,7 @@ paths:
                   message:
                     type: string
                     example: "Invalid content format (Order ID not found)"
+  
   # --- GUEST REVIEWS ---
   /guest/reviews:
     post:
@@ -4220,42 +4221,106 @@ paths:
                     example: 403
         '404':
           description: Không tìm thấy đơn hàng
-
-  # /guest/reviews:
-  #   post:
-  #     tags:
-  #       - Guest Reviews
-  #     summary: Viết đánh giá mới
-  #     description: >
-  #       Khách hàng viết đánh giá cho món ăn sau khi đã mua.
-  #       Yêu cầu Token Guest.
-  #     operationId: createReview
-  #     security:
-  #       - BearerAuth: []
-  #     requestBody:
-  #       required: true
-  #       content:
-  #         application/json:
-  #           schema:
-  #             $ref: '#/components/schemas/CreateReviewReqBody'
-  #     responses:
-  #       '200':
-  #         description: Đánh giá thành công
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: object
-  #               properties:
-  #                 message:
-  #                   type: string
-  #                   example: "Review posted successfully"
-  #                 result:
-  #                   $ref: '#/components/schemas/ReviewObject'
-  #       '400':
-  #         description: Lỗi logic (Chưa mua, đã đánh giá rồi,...)
-  #       '401':
-  #         description: Unauthorized
-
+  /guest/reviews/{dishId}:
+    get:
+      tags:
+        - Guest
+      summary: Lấy danh sách đánh giá theo món ăn
+      description: |
+        Xem danh sách các review của một món ăn cụ thể.
+        Hỗ trợ phân trang (Pagination).
+      operationId: getReviewsByDish
+      security: [] # Thường là public, nếu cần auth thì thêm vào
+      parameters:
+        - in: path
+          name: dishId
+          schema:
+            type: string
+          required: true
+          description: ID của món ăn cần xem review (MongoDB ObjectId)
+          example: "694586247c1fa2c85610bcd2"
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Trang hiện tại
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            enum: [10, 20, 30]
+          description: Số lượng review trên mỗi trang
+      responses:
+        '200':
+          description: Lấy danh sách thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Get all reviews by dish success"
+                  result:
+                    type: array
+                    description: Danh sách các bài đánh giá
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          example: "695a12..."
+                        authorName:
+                          type: string
+                          example: "Nguyễn Văn A"
+                        rating:
+                          type: integer
+                          example: 5
+                        comment:
+                          type: string
+                          example: "Món này rất ngon, nước dùng đậm đà"
+                        reply:
+                          type: object
+                          nullable: true
+                          description: Phản hồi của nhà hàng (nếu có)
+                          properties:
+                            content:
+                              type: string
+                              example: "Cảm ơn bạn đã ủng hộ!"
+                            adminId:
+                              type: string
+                            createdAt:
+                              type: string
+                              format: date-time
+                        createdAt:
+                          type: string
+                          format: date-time
+                          example: "2025-12-20T10:00:00.000Z"
+                        dishName:
+                          type: string
+                          description: Tên món ăn (Lookup từ bảng dishes)
+                          example: "Phở Bò Tái"
+                        dishImage:
+                          type: string
+                          description: URL ảnh món ăn (Lookup từ bảng dishes)
+                          example: "https://example.com/pho-bo.jpg"
+        '400':
+          description: Lỗi ID không hợp lệ hoặc không tìm thấy review
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid Dish ID"
+                  status:
+                    type: integer
+                    example: 400
+  
   # --- ADMIN REVIEWS ---
   /reviews:
     get:
@@ -4358,37 +4423,36 @@ paths:
                   message:
                     type: string
                     example: "Reply submitted successfully"
-  /reviews/{reviewId}/status:
+  /admin/reviews/{reviewId}/{status}:
     patch:
       tags:
         - Admin Reviews
-      summary: Ẩn/Hiện đánh giá
-      description: Admin ẩn đánh giá vi phạm hoặc hiện lại đánh giá.
-      operationId: updateReviewStatus
+      summary: Thay đổi trạng thái đánh giá (Duyệt/Ẩn)
+      description: |
+        API dành cho Admin để cập nhật trạng thái hiển thị của một đánh giá.
+        Thường dùng để chuyển từ `Hidden` (do Spam filter chặn) sang `Active` (nếu bắt nhầm), hoặc ngược lại.
+      operationId: changeReviewStatus
       security:
         - BearerAuth: []
       parameters:
-        - name: reviewId
-          in: path
-          required: true
+        - in: path
+          name: reviewId
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - status
-              properties:
-                status:
-                  type: string
-                  enum: [Active, Hidden]
-                  example: "Hidden"
+          required: true
+          description: ID của đánh giá (MongoDB ObjectId)
+          example: "6945677b4f023c8c85fe044e"
+        - in: path
+          name: status
+          schema:
+            type: string
+            enum: [Active, Hidden]
+          required: true
+          description: Trạng thái mới cần cập nhật
+          example: "Active"
       responses:
         '200':
-          description: Cập nhật thành công
+          description: Cập nhật trạng thái thành công
           content:
             application/json:
               schema:
@@ -4396,8 +4460,56 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Review status updated successfully"
-
+                    example: "Change review status success"
+                  result:
+                    type: object
+                    description: Thông tin đánh giá sau khi cập nhật
+                    properties:
+                      _id:
+                        type: string
+                        example: "6945677b4f023c8c85fe044e"
+                      dishId:
+                        type: string
+                        example: "694506247c1fa2c05610bcd2"
+                      orderId:
+                        type: string
+                        example: "694528157c1fa2c05610bd1a"
+                      authorName:
+                        type: string
+                        example: "Hieu Bui"
+                      rating:
+                        type: integer
+                        example: 5
+                      comment:
+                        type: string
+                        example: "Ngon"
+                      status:
+                        type: string
+                        enum: [Active, Hidden]
+                        example: "Active"
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2025-12-19T14:55:55.111Z"
+        '400':
+          description: Lỗi Validation (ID sai định dạng hoặc Status không nằm trong Enum)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid Review Status"
+                  status:
+                    type: integer
+                    example: 400
+        '401':
+          description: Unauthorized (Chưa đăng nhập)
+        '403':
+          description: Forbidden (Không có quyền Admin)
+        '404':
+          description: Không tìm thấy đánh giá (Review Not Found)
 components:
   schemas:
     Table:

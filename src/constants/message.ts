@@ -1,4 +1,6 @@
 const USER_MESSAGES = {
+  CONTENT_REPLY_IS_REQUIRED: "Content reply is required",
+  CONTENT_MUST_BE_STRING: "Content reply must be a string",
   ORDER_NOT_FOUND_OR_ORDER_NOT_PAID: "Order not found or Order not pay",
   REVIEW_NOT_FOUND: "Review not found",
   REVIEW_ID_IS_REQUIRED: "Review ID is required",

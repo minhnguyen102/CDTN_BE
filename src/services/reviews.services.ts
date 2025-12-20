@@ -5,6 +5,7 @@ import { ErrorWithStatus } from "../models/Errors"
 import USER_MESSAGES from "../constants/message"
 import HTTP_STATUS from "../constants/httpStatus"
 import { PaymentStatus, ReviewStatus } from "../constants/enums"
+import Account from "../models/schema/Account.schema"
 
 class ReviewService {
   private async updateDishRating({ dishId }: { dishId: string }) {
@@ -98,7 +99,8 @@ class ReviewService {
         rating: r.rating,
         comment: r.comment || "",
         status: ReviewStatus.ACTIVE,
-        createdAt: new Date()
+        createdAt: new Date(),
+        reply: undefined
       }))
 
     if (reviewDocs.length === 0) return { message: "Không có đánh giá nào được ghi nhận" }
@@ -138,17 +140,11 @@ class ReviewService {
         },
         {
           $project: {
-            _id: 1,
-            dishId: 1,
-            orderId: 1,
             authorName: 1,
             rating: 1,
             comment: 1,
-            photos: 1,
-            status: 1,
             reply: 1,
             createdAt: 1,
-            updatedAt: 1,
             dishName: "$dishInfo.name",
             dishImage: "$dishInfo.image"
           }
@@ -262,6 +258,35 @@ class ReviewService {
         status: HTTP_STATUS.NOT_FOUND
       })
     }
+    return review
+  }
+
+  async replyReview({ review_id, content, admin_id }: { review_id: string; content: string; admin_id: string }) {
+    const review = await databaseService.reviews.findOneAndUpdate(
+      {
+        _id: new ObjectId(review_id)
+      },
+      {
+        $set: {
+          reply: {
+            content: content,
+            adminId: new ObjectId(admin_id),
+            createdAt: new Date()
+          }
+        }
+      },
+      {
+        returnDocument: "after"
+      }
+    )
+
+    if (!review) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.REVIEW_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
     return review
   }
 }
