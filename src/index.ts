@@ -11,6 +11,7 @@ import { routesGuest } from "./routes/guests/index.routes"
 import { createServer } from "http"
 import { initSocket } from "./utils/socket"
 import paymentRouter from "./routes/payments/payment.routes"
+import { initScheduledJobs } from "./utils/scheduler"
 
 export const WHILELIST_DOMAINS: string[] = [
   // Môi trường Local
@@ -70,6 +71,9 @@ const startServer = async () => {
   try {
     await databaseService.connect()
     console.log("Database connected successfully")
+
+    // Khởi tạo cron 1 lần duy nhất
+    initScheduledJobs()
 
     httpServer.listen(port, () => {
       console.log(`Example app listening on port ${port}`)
