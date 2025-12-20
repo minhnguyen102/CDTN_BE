@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb"
-import { DishStatus, OrderItemStatus, OrderStatus, TableStatus } from "../constants/enums"
+import { DishStatus, OrderItemStatus, OrderStatus, PaymentStatus, TableStatus } from "../constants/enums"
 import databaseService from "./database.servies"
 import { getIO } from "../utils/socket"
 import { ErrorWithStatus } from "../models/Errors"
@@ -117,7 +117,9 @@ class OrderServices {
     dateFrom?: string
     dateTo?: string
   }) {
-    const match: any = {}
+    const match: any = {
+      paymentStatus: PaymentStatus.UNPAID
+    }
 
     // Lọc theo trạng thái của món ăn, chứ không phải trạng thái đơn hàng
     // Ví dụ: ?status=Pending -> Chỉ lấy đơn đang chờ
