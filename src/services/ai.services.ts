@@ -9,6 +9,7 @@ config()
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string)
 
 class AIService {
+  // Gợi ý món ăn khu vực giỏ hàng
   async getCartRecomendations({ dishIds }: { dishIds: string[] }) {
     // Nếu giỏ hàng chưa có gì => Đề xuất các món nổi bật
     if (!dishIds || dishIds.length === 0) {
@@ -152,6 +153,64 @@ class AIService {
         )
         .limit(5)
         .toArray()
+    }
+  }
+
+  // Gửi báo cáo hàng tuần
+  async generateWeeklyReport(data: any) {
+    const prompt = `
+      Bạn là "Trợ lý Quản lý Nhà hàng" (AI Manager).
+      Hãy phân tích dữ liệu kinh doanh tuần qua (${data.range.from} - ${data.range.to}) và viết email báo cáo gửi cho Chủ quán.
+
+      DỮ LIỆU THỐNG KÊ:
+      ${JSON.stringify(data)}
+
+      YÊU CẦU OUTPUT (HTML BODY):
+      - Trả về mã HTML (không cần thẻ <html>, <head>, chỉ cần nội dung body).
+      - Style gọn gàng, dùng các thẻ <h2>, <ul>, <li>, <b>, <p>.
+      - Tone giọng: Chuyên nghiệp, khách quan, đóng vai trò người cố vấn.
+
+      CẤU TRÚC BÁO CÁO:
+      1. <h2>📊 Tổng quan tài chính</h2>:
+         - Báo cáo Doanh thu (${data.summary.totalRevenue}đ) và Số đơn (${data.summary.totalOrders}).
+         - Nhận xét ngắn về hiệu suất (Tốt/Trung bình/Cần cải thiện).
+
+      2. <h2>🏆 Hiệu suất Menu</h2>:
+         - **Ngôi sao:** Khen ngợi Top 1 bán chạy (${data.performance.bestSellers[0]?.dishName || "N/A"}).
+         - **Cảnh báo (Zero Sales):** Phân tích kỹ danh sách 'zeroSales'. Tại sao các món này (đặc biệt món giá cao) lại không bán được? Đặt câu hỏi nghi vấn về giá cả hoặc hiển thị.
+
+      3. <h2>⭐ Trải nghiệm Khách hàng</h2>:
+         - Dựa vào Rating (${data.customerFeedback.averageRating}/5).
+         - Nếu ít review (< 5): Cảnh báo cần tăng tương tác khách hàng.
+         - Nếu Rating thấp (< 4.0): Cảnh báo khẩn cấp về chất lượng.
+
+      4. <h2>💡 Đề xuất tuần tới (Action Items)</h2>:
+         - Đưa ra 3 hành động cụ thể. Ví dụ: Chạy khuyến mãi xả hàng cho món Zero Sales, Upsell món kèm theo, v.v.
+
+      Lưu ý: Chỉ phân tích dựa trên số liệu thật. Không bịa đặt.
+    `
+
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash-lite",
+        generationConfig: {
+          temperature: 0.7
+        }
+      })
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+
+      // Làm sạch markdown nếu AI trả về dính ```html
+      return text.replace(/```html|```/g, "").trim()
+    } catch (error) {
+      console.error("❌ Lỗi AI Weekly Report:", error)
+      return `
+        <h2>Báo cáo tuần</h2>
+        <p>Hệ thống AI đang bận. Dưới đây là dữ liệu thô:</p>
+        <pre>${JSON.stringify(data, null, 2)}</pre>
+      `
     }
   }
 }

@@ -1,41 +1,41 @@
 import cron from "node-cron"
+import orderServices from "../services/orders.services"
+import aiService from "../services/ai.services"
+import { sendWeeklyReportToManager } from "./mailer"
 
-const handleWeeklyReport = async () => {
-  console.log("[CRON] Bắt đầu tác vụ: Gửi báo cáo doanh thu tuần...")
-
+const handleWeeklyReport = async ({ toEmail = "minhkhac1002@gmail.com" }: { toEmail?: string }) => {
   try {
-    // 1. Fetch Data (Gom số liệu từ MongoDB)
-    console.log("   - Đang tổng hợp dữ liệu đơn hàng...")
+    // Fetch Data (Gom số liệu từ MongoDB)
+    const data = await orderServices.getWeeklyStatistics()
+    // console.log("   -> Dữ liệu thu được:", JSON.stringify(data, null, 2))
 
-    // 2. Call AI (Gửi cho Gemini phân tích)
+    // Gửi cho AI phân tích
     console.log("   - Đang gửi dữ liệu cho AI phân tích...")
-
-    // 3. Send Email (Gửi kết quả cho Admin)
+    const result = await aiService.generateWeeklyReport(data)
+    // Gửi kết quả cho admin
     console.log("   - Đang gửi email cho Admin...")
-
-    console.log("✅ [CRON] Tác vụ hoàn tất thành công!")
+    await sendWeeklyReportToManager({
+      toEmail,
+      subject: "Báo cáo doanh thu và đề xuất kinh doanh",
+      html: result
+    })
   } catch (error) {
     console.error("❌ [CRON] Lỗi khi chạy báo cáo tuần:", error)
   }
 }
 
-// Hàm khởi tạo các Cron Job
 export const initScheduledJobs = () => {
   // Cấu hình thời gian gửi
-  // const scheduleExpression = "0 8 * * 1"
-  const scheduleExpression = "*/10 * * * * *" // test
-
-  // const scheduleExpression = "* * * * *" // nếu muốn test là gửi ngay lập tưc
+  const scheduleExpression = "0 8 * * 1"
+  // const scheduleExpression = "*/10 * * * * *" // test
 
   cron.schedule(
     scheduleExpression,
     () => {
-      handleWeeklyReport()
+      handleWeeklyReport({})
     },
     {
       timezone: "Asia/Ho_Chi_Minh" // Cấu hình chuẩn múi giờ VN
     }
   )
-
-  console.log("🕒 Hệ thống Scheduler đã được kích hoạt")
 }

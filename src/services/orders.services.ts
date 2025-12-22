@@ -627,6 +627,175 @@ class OrderServices {
     }
     return orderResult // trả về cho controller, nếu dùng socket thì không cần
   }
+
+  async getWeeklyStatistics() {
+    const end = new Date()
+    const start = new Date()
+    start.setDate(start.getDate() - 7)
+
+    console.log(`📊 Lấy thống kê từ ${start.toISOString()} đến ${end.toISOString()}`)
+    const [revenueStats, topDishes, badDishes, deadDishes, reviewStats] = await Promise.all([
+      databaseService.orders
+        .aggregate([
+          {
+            $match: {
+              paymentStatus: PaymentStatus.PAID,
+              finishedAt: { $gte: start, $lte: end }
+            }
+          },
+          {
+            $group: {
+              _id: null, // Không nhóm theo gì cả
+              totalRevenue: { $sum: "$totalAmount" },
+              totalOrders: { $count: {} }
+            }
+          }
+        ])
+        .toArray(),
+      databaseService.orders
+        .aggregate([
+          {
+            $match: {
+              paymentStatus: PaymentStatus.PAID,
+              finishedAt: { $gte: start, $lte: end }
+            }
+          },
+          {
+            $unwind: "$items"
+          },
+          {
+            $match: {
+              "items.status": { $ne: OrderItemStatus.Reject }
+            }
+          },
+          {
+            $group: {
+              _id: "$items.dishId",
+              dishName: { $first: "$items.dishName" },
+              totalSold: { $sum: "$items.quantity" },
+              revenue: { $sum: { $multiply: ["$items.dishPrice", "$items.quantity"] } }
+            }
+          },
+          { $sort: { totalSold: -1 } },
+          { $limit: 5 }
+        ])
+        .toArray(),
+      databaseService.orders
+        .aggregate([
+          {
+            $match: {
+              paymentStatus: PaymentStatus.PAID,
+              finishedAt: { $gte: start, $lte: end }
+            }
+          },
+          { $unwind: "$items" },
+          {
+            $match: {
+              "items.status": { $ne: OrderItemStatus.Reject }
+            }
+          },
+          {
+            $group: {
+              _id: "$items.dishId",
+              dishName: { $first: "$items.dishName" },
+              totalSold: { $sum: "$items.quantity" }
+            }
+          },
+          { $sort: { totalSold: 1 } },
+          { $limit: 3 }
+        ])
+        .toArray(),
+      databaseService.dishes
+        .aggregate([
+          {
+            $match: {
+              status: DishStatus.AVAILABLE
+            }
+          },
+
+          {
+            $lookup: {
+              from: "orders",
+              let: { dishId: "$_id" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $in: ["$$dishId", "$items.dishId"] },
+                        { $gte: ["$finishedAt", start] },
+                        { $lte: ["$finishedAt", end] },
+                        { $eq: ["$paymentStatus", PaymentStatus.PAID] }
+                      ]
+                    }
+                  }
+                },
+
+                { $limit: 1 }
+              ],
+              as: "salesData"
+            }
+          },
+
+          {
+            $match: {
+              salesData: { $eq: [] }
+            }
+          },
+
+          {
+            $project: {
+              _id: 1,
+              name: 1,
+              price: 1
+            }
+          },
+
+          { $limit: 3 }
+        ])
+        .toArray(),
+      databaseService.reviews
+        .aggregate([
+          {
+            $match: {
+              createdAt: { $gte: start, $lte: end }
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              averageRating: { $avg: "$rating" },
+              totalReviews: { $sum: 1 }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              averageRating: { $round: ["$averageRating", 1] },
+              totalReviews: 1
+            }
+          }
+        ])
+        .toArray()
+    ])
+    const reviewData = reviewStats[0] || { averageRating: 0, totalReviews: 0 }
+    return {
+      range: {
+        from: start.toLocaleDateString("vi-VN"),
+        to: end.toLocaleDateString("vi-VN")
+      },
+      summary: revenueStats[0] || { totalRevenue: 0, totalOrders: 0 },
+      performance: {
+        bestSellers: topDishes,
+        worstSellers: badDishes,
+        zeroSales: deadDishes
+      },
+      customerFeedback: {
+        averageRating: reviewData.averageRating,
+        totalReviews: reviewData.totalReviews
+      }
+    }
+  }
 }
 const orderServices = new OrderServices()
 export default orderServices

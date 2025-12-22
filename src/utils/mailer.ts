@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer"
 import dotenv from "dotenv"
+import { stubObject } from "lodash"
 
 dotenv.config()
 
@@ -28,6 +29,31 @@ export const sendVerificationEmail = async ({
     from: '"Nhà hàng QR" <no-reply@restaurant.com>',
     to: toEmail,
     subject,
+    html
+  }
+
+  try {
+    await transporter.sendMail(mailOptions)
+    console.log("Email sent successfully to:", toEmail)
+  } catch (error) {
+    console.error("Error sending email:", error)
+    throw error // Ném lỗi ra ngoài để Controller bắt
+  }
+}
+
+// Gửi email cho chủ quản lí nhà hàng thứ 2 hàng tuần thông qua trợ lí AI
+export const sendWeeklyReportToManager = async ({
+  toEmail,
+  subject,
+  html
+}: {
+  toEmail: string
+  subject: string
+  html: string
+}) => {
+  const mailOptions = {
+    to: toEmail,
+    subject: subject,
     html
   }
 
