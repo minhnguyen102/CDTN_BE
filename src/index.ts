@@ -29,7 +29,8 @@ export const WHILELIST_DOMAINS: string[] = [
 
   // Dùng cho Swagger
   "https://api.snackio.io.vn",
-  "https://www.api.snackio.io.vn"
+  "https://www.api.snackio.io.vn",
+  "https://snackio-ten.vercel.app"
 ]
 const app = express()
 const httpServer = createServer(app)
