@@ -32,3 +32,7 @@ export interface CreateOrderForTableController {
     note: string
   }[]
 }
+
+export interface PayByCash {
+  orderId: string
+}

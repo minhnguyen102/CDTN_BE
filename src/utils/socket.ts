@@ -4,13 +4,16 @@ import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { WHILELIST_DOMAINS } from "../index"
 import USER_MESSAGES from "../constants/message"
-import { ROLE_GUEST } from "../constants/enums"
+import { OrderItemStatus, PaymentMethod, PaymentStatus, ROLE_GUEST, TableStatus } from "../constants/enums"
 import { verifyToken } from "./jwt"
 import { JsonWebTokenError } from "jsonwebtoken"
 import { config } from "dotenv"
 import orderServices from "../services/orders.services"
-import { CreateOrderPayload, GetOrderList } from "../models/requests/Order.request"
+import { CreateOrderPayload, GetOrderList, PayByCash } from "../models/requests/Order.request"
 import guestServices from "../services/guests.services"
+import databaseService from "../services/database.servies"
+import { ObjectId } from "mongodb"
+import Order from "../models/schema/Order.schema"
 config()
 
 let io: Server
@@ -137,6 +140,95 @@ export const initSocket = (httpServer: HttpServer) => {
         }
       }
     })
+    // server bắt sự kiện admin xác nhận thanh toán bằng tiềt mặt cho bàn ăn (đã nhận tiền mặt)
+    socket.on("confirmed_pay_by_cash:admin", async (payload: PayByCash, callback) => {
+      const orderId = new ObjectId(payload.orderId)
+      const order = (await databaseService.orders.findOne({
+        _id: orderId
+      })) as Order
+      // Kiểm tra Idempotency (Tránh xử lý lại đơn đã thanh toán)
+      if (order.paymentStatus === PaymentStatus.PAID) {
+        return { success: true, message: "Order already paid" }
+      }
+      // Update Database (Chuyển trạng thái thành PAID, chuyển trạng thái, currentOrderId của bàn)
+      await Promise.all([
+        await databaseService.orders.updateOne(
+          { _id: orderId },
+          {
+            $set: {
+              paymentStatus: PaymentStatus.PAID,
+              paymentMethod: PaymentMethod.CASH,
+              updatedAt: new Date(),
+              finishedAt: new Date()
+            }
+          }
+        ),
+        await databaseService.tables.updateOne(
+          { _id: new ObjectId(order.tableId) },
+          {
+            $set: {
+              currentOrderId: null,
+              status: TableStatus.AVAILABLE
+            }
+          }
+        )
+      ])
+      // lọc dữ liệu từ order
+
+      const itemQuantityMap = new Map<string, number>()
+      const uniqueDishIds: ObjectId[] = []
+
+      if (order.items && order.items.length > 0) {
+        order.items.forEach((item: any) => {
+          if (item.status !== OrderItemStatus.Reject) {
+            const idStr = item.dishId.toString()
+            if (itemQuantityMap.has(idStr)) {
+              // Nếu đã có, cộng dồn số lượng
+              itemQuantityMap.set(idStr, itemQuantityMap.get(idStr)! + item.quantity)
+            } else {
+              // Nếu chưa có, set số lượng ban đầu và push vào mảng ID để query DB
+              itemQuantityMap.set(idStr, item.quantity)
+              uniqueDishIds.push(item.dishId)
+            }
+          }
+        })
+      }
+
+      // Query DB để lấy tên và ảnh món ăn
+      // Chỉ lấy các trường cần thiết: _id, name, image
+      const dishesInfo = await databaseService.dishes
+        .find({ _id: { $in: uniqueDishIds } })
+        .project({ name: 1, image: 1 })
+        .toArray()
+
+      // Map dữ liệu để ra đúng format yêu cầu
+      const formattedItems = dishesInfo.map((dish) => ({
+        dishId: dish._id.toString(),
+        dishName: dish.name,
+        quantity: itemQuantityMap.get(dish._id.toString()) || 0,
+        image: dish.image
+      }))
+
+      // console.log("formattedItems: ", formattedItems) // đã lọc
+      // [REAL-TIME] Bắn Socket thông báo
+      const io = getIO()
+
+      // a. Báo cho khách (Tại bàn đó) -> Để màn hình QR chuyển sang "Thành công"
+      io.to(`table_${order.tableId}`).emit("payment_success", {
+        orderId: payload.orderId,
+        amount: order.totalAmount,
+        message: "Thanh toán thành công!",
+        items: formattedItems
+      })
+
+      // b. Báo cho Admin/Bếp (Để biết đơn đã trả tiền)
+      io.to("admin_room").emit("payment_received", {
+        orderId: payload.orderId,
+        tableNumber: order.tableNumber,
+        amount: order.totalAmount,
+        message: `Bàn ${order.tableNumber} vừa thanh toán ${order.totalAmount.toLocaleString()}đ bằng tiền mặt`
+      })
+    })
     // END ADMIN
 
     // GUEST
@@ -215,6 +307,29 @@ export const initSocket = (httpServer: HttpServer) => {
       } catch (error) {
         if (typeof callback === "function") {
           callback({ success: false, message: "Lỗi lấy đơn hàng" })
+        }
+      }
+    })
+    // server bắt sự kiện khách muốn thanh toán bằng tiền mặt
+    socket.on("pay_by_cash:guest", async (payload: PayByCash, callback) => {
+      const { orderId } = payload
+      try {
+        const order = (await databaseService.orders.findOne({
+          _id: new ObjectId(orderId)
+        })) as Order
+        const { tableNumber } = order
+        io.to("admin_room").emit("pay_by_cash_notification", {
+          message: `Bàn ${tableNumber} muốn thanh toán bằng tiền mặt.`
+        })
+        if (typeof callback === "function") {
+          callback({
+            success: true,
+            message: "Vui lòng đợi tại bàn, nhân viên sẽ đến thu tiền"
+          })
+        }
+      } catch (error) {
+        if (typeof callback === "function") {
+          callback({ success: false, message: "Lỗi thanh toán" })
         }
       }
     })

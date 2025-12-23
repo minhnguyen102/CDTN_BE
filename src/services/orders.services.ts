@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb"
-import { DishStatus, OrderItemStatus, OrderStatus, PaymentStatus, TableStatus } from "../constants/enums"
+import { DishStatus, OrderItemStatus, PaymentStatus, TableStatus } from "../constants/enums"
 import databaseService from "./database.servies"
 import { getIO } from "../utils/socket"
 import { ErrorWithStatus } from "../models/Errors"
@@ -9,7 +9,6 @@ import Account from "../models/schema/Account.schema"
 import USER_MESSAGES from "../constants/message"
 import Dish from "../models/schema/Dish.schema"
 import Order from "../models/schema/Order.schema"
-import guestServices from "./guests.services"
 
 interface DishItemInputFE {
   dishId: string

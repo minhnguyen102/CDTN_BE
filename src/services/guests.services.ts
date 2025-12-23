@@ -218,7 +218,7 @@ class GuestService {
     }
     if (rating) {
       objectFind.ratingAverage = {
-        $gt: rating
+        $gte: rating
       }
     }
     if (isFeatured) {

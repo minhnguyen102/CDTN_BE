@@ -1,9 +1,10 @@
 asyncapi: 2.6.0
 info:
   title: Kitchen & Order Socket Service (CDTN)
-  version: 1.0.6
+  version: 1.1.0
   description: |
     Tài liệu mô tả giao thức Socket.IO cho hệ thống quản lý nhà hàng.
+    Cập nhật tính năng: **Thanh toán tiền mặt (Cash Payment)**.
     
     ### 🔐 Hướng dẫn xác thực (Auth)
     - **Handshake**: Gửi Token qua `auth: { Authorization: "Bearer <token>" }` hoặc Headers.
@@ -18,76 +19,25 @@ servers:
       - bearerAuth: []
 
 tags:
-  - name: Admin Actions
-    description: Hành động do Admin/Bếp thực hiện (Client -> Server)
   - name: Guest Actions
-    description: Hành động do Khách hàng thực hiện (Client -> Server)
+    description: Sự kiện từ phía Khách hàng gửi lên (Client -> Server)
+  - name: Admin Actions
+    description: Sự kiện từ phía Quản lý/Bếp gửi lên (Client -> Server)
   - name: Server Notifications
-    description: Sự kiện Server bắn về (Server -> Client)
+    description: Sự kiện Server bắn về các Room (Server -> Client)
 
 channels:
   # ==========================================
-  # 1. KHU VỰC ADMIN (Client -> Server)
+  # 1. GUEST CHANNELS (Client -> Server)
   # ==========================================
-  join_kitchen_room:
-    publish:
-      tags:
-        - name: Admin Actions
-      summary: Admin tham gia phòng bếp
-      description: |
-        Admin join vào `admin_room` để nhận thông báo đơn mới.
-        **Quyền:** `socket_join_kitchen`
-      message:
-        payload: 
-          type: object
-          nullable: true
-    subscribe:
-      tags:
-        - name: Server Notifications
-      summary: Phản hồi Join thành công
-      message:
-        $ref: '#/components/messages/JoinSuccess'
-
-  update_order_status:admin:
-    publish:
-      tags:
-        - name: Admin Actions
-      summary: Admin cập nhật trạng thái món
-      description: |
-        Chuyển trạng thái: Pending -> Cooking -> Served -> Reject.
-        Server sẽ bắn `update_order_item` và `order_update:admin` về cho client.
-      message:
-        payload:
-          $ref: '#/components/schemas/UpdateStatusInput'
-      bindings:
-        socketio:
-          ack:
-            $ref: '#/components/schemas/StandardAck'
-
-  create_order:admin:
-    publish:
-      tags:
-        - name: Admin Actions
-      summary: Admin tạo đơn hộ khách
-      description: Tạo hoặc cập nhật đơn cho một bàn cụ thể.
-      message:
-        payload:
-          $ref: '#/components/schemas/CreateOrderInput'
-      bindings:
-        socketio:
-          ack:
-            $ref: '#/components/schemas/StandardAck'
-
-  # ==========================================
-  # 2. KHU VỰC GUEST (Client -> Server)
-  # ==========================================
+  
   join_table:
     publish:
       tags:
         - name: Guest Actions
-      summary: Khách join vào bàn ăn
+      summary: Khách gia nhập bàn
       description: |
-        Join vào room `table_{tableId}` để nhận thông báo realtime của bàn.
+        Khách quét QR và join vào room `table_{tableId}`.
         **Quyền:** `socket_join_own_table`
       message:
         payload:
@@ -101,8 +51,8 @@ channels:
     publish:
       tags:
         - name: Guest Actions
-      summary: Khách gọi món
-      description: Gửi danh sách món lên server.
+      summary: Khách gọi món mới
+      description: Gửi danh sách món ăn lên server để tạo đơn.
       message:
         payload:
           $ref: '#/components/schemas/CreateOrderInput'
@@ -115,10 +65,8 @@ channels:
     publish:
       tags:
         - name: Guest Actions
-      summary: Khách hủy món
-      description: |
-        Khách hủy món khi đang ở trạng thái Pending.
-        Server hoàn kho, trừ tiền và trả về thông tin cập nhật.
+      summary: Khách hủy món (Pending)
+      description: Chỉ hủy được món đang ở trạng thái Pending.
       message:
         payload:
           type: object
@@ -126,50 +74,22 @@ channels:
           properties:
             orderId:
               type: string
-              example: "6578a9b1c2d3e4f5a6b7c8d9"
             itemId:
               type: string
-              example: "6578a9b1c2d3e4f5a6b7c999"
             status:
               type: string
               enum: [Reject]
-              example: "Reject"
       bindings:
         socketio:
           ack:
-            type: object
-            properties:
-              success:
-                type: boolean
-              message:
-                type: string
-              data:
-                type: object
-                description: Data trả về trong callback (chứa tiền mới)
-                properties:
-                  orderId:
-                    type: string
-                  itemId:
-                    type: string
-                  status: 
-                    type: string
-                  mamageBy:
-                    type: string
-                  newTotalAmount:
-                    type: number
-                    description: Tổng tiền mới sau khi trừ hoàn tiền
-                  message:
-                    type: string
-                    description: Thông báo chi tiết
+            $ref: '#/components/schemas/CancelOrderAck'
 
   get_orders:guest:
     publish:
       tags:
         - name: Guest Actions
-      summary: Lấy danh sách món (Đã phân nhóm)
-      description: |
-        Dùng khi khách mở popup "Theo dõi đơn hàng".
-        Server trả về danh sách items đã được chia vào 4 key: Pending, Cooking, Served, Reject.
+      summary: Lấy danh sách món theo trạng thái
+      description: Dùng cho popup "Theo dõi đơn hàng". Trả về list món chia theo 4 nhóm trạng thái.
       message:
         payload:
           type: object
@@ -179,55 +99,136 @@ channels:
       bindings:
         socketio:
           ack:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: true
-              message:
-                type: string
-                example: "Lấy danh sách đơn hàng thành công"
-              data:
-                $ref: '#/components/schemas/GroupedOrderItems'
+            $ref: '#/components/schemas/GetOrdersAck'
+
+  pay_by_cash:guest:
+    publish:
+      tags:
+        - name: Guest Actions
+      summary: Khách yêu cầu thanh toán tiền mặt
+      description: |
+        Khách nhấn nút "Thanh toán tiền mặt". 
+        Server sẽ gửi thông báo `pay_by_cash_notification` đến Admin Room.
+      message:
+        payload:
+          $ref: '#/components/schemas/PayByCashPayload'
+      bindings:
+        socketio:
+          ack:
+            $ref: '#/components/schemas/StandardAck'
 
   # ==========================================
-  # 3. SERVER NOTIFICATIONS (Server -> Client)
+  # 2. ADMIN CHANNELS (Client -> Server)
   # ==========================================
-  
-  # Notification: update_order_item
-  update_order_item:
+
+  join_kitchen_room:
+    publish:
+      tags:
+        - name: Admin Actions
+      summary: Admin gia nhập bếp
+      description: Join vào `admin_room` để nhận đơn mới và thông báo thanh toán.
+      message:
+        payload: 
+          type: object
+          nullable: true
     subscribe:
       tags:
         - name: Server Notifications
-      summary: Thông báo trạng thái món thay đổi (Toast)
-      description: >
-        Gửi tới `admin_room` và `table_{id}`.
-        Dùng để hiện Toast: "Món X đã chuyển sang Y".
+      summary: Phản hồi Join thành công
       message:
         payload:
           type: object
           properties:
-            orderId:
-              type: string
-            itemId:
-              type: string
-            status:
-              type: string
-              enum: [Pending, Cooking, Served, Reject]
-            mamageBy:
-              type: string
-            newTotalAmount:
-              type: number
             message:
               type: string
+            roomId:
+              type: string
 
-  # Notification: order_update:admin
+  update_order_status:admin:
+    publish:
+      tags:
+        - name: Admin Actions
+      summary: Cập nhật trạng thái món
+      description: Chuyển trạng thái Pending -> Cooking -> Served -> Reject.
+      message:
+        payload:
+          $ref: '#/components/schemas/UpdateStatusInput'
+      bindings:
+        socketio:
+          ack:
+            $ref: '#/components/schemas/StandardAck'
+
+  create_order:admin:
+    publish:
+      tags:
+        - name: Admin Actions
+      summary: Admin tạo đơn hộ khách
+      description: Admin dùng tablet để order giùm khách.
+      message:
+        payload:
+          $ref: '#/components/schemas/CreateOrderInput'
+      bindings:
+        socketio:
+          ack:
+            $ref: '#/components/schemas/StandardAck'
+
+  confirmed_pay_by_cash:admin:
+    publish:
+      tags:
+        - name: Admin Actions
+      summary: Admin xác nhận đã thu tiền mặt
+      description: |
+        Sau khi thu tiền tại bàn, Admin nhấn xác nhận.
+        Hành động này set đơn hàng thành `PAID` và giải phóng bàn.
+      message:
+        payload:
+          $ref: '#/components/schemas/PayByCashPayload'
+      bindings:
+        socketio:
+          ack:
+            $ref: '#/components/schemas/StandardAck'
+
+  # ==========================================
+  # 3. SERVER NOTIFICATIONS (Server -> Client)
+  # ==========================================
+
+  # --- Nhóm thông báo về Đơn hàng ---
+  new_order:guest:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Có đơn mới (Gửi cho Khách)
+      description: Gửi tới `table_{id}` để đồng bộ giữa các thiết bị của khách.
+      message:
+        payload:
+          $ref: '#/components/schemas/OrderObjectPayload'
+
+  new_order:admin:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Có đơn mới (Gửi cho Bếp/Admin)
+      description: Gửi tới `admin_room` để bếp biết có món mới.
+      message:
+        payload:
+          $ref: '#/components/schemas/OrderObjectPayload'
+
+  update_order_item:
+    subscribe:
+      tags:
+        - name: Server Notifications
+      summary: Toast thông báo trạng thái món
+      description: Gửi tới cả Admin và Guest khi 1 món thay đổi trạng thái.
+      message:
+        payload:
+          $ref: '#/components/schemas/UpdateItemNotification'
+
   order_update:admin:
     subscribe:
       tags:
         - name: Server Notifications
-      summary: Cập nhật chi tiết đơn hàng (Admin)
-      description: Gửi tới `admin_room` mỗi khi có thay đổi để reload danh sách.
+      summary: Reload danh sách đơn (Admin)
+      description: Gửi tới Admin để cập nhật lại UI quản lý đơn hàng.
       message:
         payload:
           type: object
@@ -237,79 +238,55 @@ channels:
               items:
                 $ref: '#/components/schemas/OrderObject'
 
-  # Notification: order:update
   order:update:
     subscribe:
       tags:
         - name: Server Notifications
-      summary: Gửi về TOÀN BỘ object đơn hàng mới (Guest)
-      description: Gửi tới `table_{id}` để đồng bộ full data.
+      summary: Reload chi tiết đơn (Guest)
+      description: Gửi tới Guest để cập nhật lại danh sách món đã gọi.
       message:
         payload:
           $ref: '#/components/schemas/OrderObject'
 
-  # Notification: New Order (Admin)
-  new_order:admin:
+  # --- Nhóm thông báo về Thanh toán (Payment) ---
+  
+  pay_by_cash_notification:
     subscribe:
       tags:
         - name: Server Notifications
-      summary: Có đơn mới (Gửi cho Admin)
+      summary: Thông báo khách muốn trả tiền mặt (Admin)
+      description: Gửi tới `admin_room` khi khách nhấn nút gọi thanh toán.
       message:
         payload:
           type: object
           properties:
-            type: 
-              type: string
-              example: "NEW_ORDER_CREATED:ADMIN"
             message:
               type: string
-            data:
-              $ref: '#/components/schemas/OrderObject'
+              example: "Bàn 12 muốn thanh toán bằng tiền mặt."
 
-  # Notification: New Order (Guest)
-  new_order:guest:
-    subscribe:
-      tags:
-        - name: Server Notifications
-      summary: Có đơn mới (Gửi cho Khách cùng bàn)
-      message:
-        payload:
-          type: object
-          properties:
-            type: 
-              type: string
-              example: "NEW_ORDER_CREATED:CLIENT"
-            message:
-              type: string
-            data:
-              $ref: '#/components/schemas/OrderObject'
-
-  # [UPDATED] Notification: Thanh toán thành công (Cho Khách)
   payment_success:
     subscribe:
       tags:
         - name: Server Notifications
-      summary: Thông báo thanh toán thành công (Guest)
+      summary: Thanh toán thành công (Guest)
       description: |
-        Gửi tới `table_{id}` khi Webhook SePay xác nhận tiền đã về.
-        FE dùng sự kiện này để đóng modal QR và hiện màn hình cảm ơn kèm danh sách món đã ăn.
+        Gửi tới `table_{id}` sau khi Admin xác nhận thu tiền hoặc thanh toán Online thành công.
+        Client dùng để hiện màn hình "Cảm ơn".
       message:
         payload:
-          $ref: '#/components/schemas/PaymentSuccessGuestPayload'
+          $ref: '#/components/schemas/PaymentSuccessPayload'
 
-  # [UPDATED] Notification: Thanh toán thành công (Cho Admin)
   payment_received:
     subscribe:
       tags:
         - name: Server Notifications
-      summary: Thông báo nhận tiền (Admin)
-      description: |
-        Gửi tới `admin_room` khi có bàn thanh toán.
-        Giúp thu ngân biết tiền đã về mà không cần check app ngân hàng.
+      summary: Đã nhận tiền (Admin)
+      description: Gửi tới `admin_room` để đồng bộ trạng thái bàn (Đỏ -> Xanh).
       message:
         payload:
-          $ref: '#/components/schemas/PaymentReceivedAdminPayload'
+          $ref: '#/components/schemas/PaymentReceivedPayload'
 
+  # --- Lỗi hệ thống ---
   error_msg:
     subscribe:
       tags:
@@ -330,13 +307,14 @@ components:
       bearerFormat: JWT
 
   schemas:
-    StandardAck:
+    # --- INPUT SCHEMAS ---
+    PayByCashPayload:
       type: object
+      required: [orderId]
       properties:
-        success:
-          type: boolean
-        message:
+        orderId:
           type: string
+          example: "65f2ea21d1d14ce2ee11a972"
 
     UpdateStatusInput:
       type: object
@@ -370,6 +348,41 @@ components:
               note: 
                 type: string
 
+    # --- ACKNOWLEDGEMENT SCHEMAS ---
+    StandardAck:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    CancelOrderAck:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            newTotalAmount:
+              type: number
+            message:
+              type: string
+
+    GetOrdersAck:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/GroupedOrderItems'
+
+    # --- DATA OBJECT SCHEMAS ---
     DishItemObject:
       type: object
       properties:
@@ -395,23 +408,6 @@ components:
         createdAt:
           type: string
           format: date-time
-
-    # [NEW] Object rút gọn cho màn hình thanh toán
-    PaymentItemSummary:
-      type: object
-      properties:
-        dishId:
-          type: string
-          example: "dish-1"
-        dishName:
-          type: string
-          example: "Phở Bò Đặc Biệt"
-        quantity:
-          type: integer
-          example: 2
-        image:
-          type: string
-          example: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43"
 
     OrderObject:
       type: object
@@ -449,51 +445,68 @@ components:
           items:
             $ref: '#/components/schemas/DishItemObject'
 
-    # [UPDATED] Payload cho sự kiện payment_success (Guest)
-    PaymentSuccessGuestPayload:
+    # --- NOTIFICATION PAYLOAD SCHEMAS ---
+    OrderObjectPayload:
+      type: object
+      properties:
+        type:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/OrderObject'
+
+    UpdateItemNotification:
       type: object
       properties:
         orderId:
           type: string
-          example: "693f7a63e7455fa6893e7080"
-        amount:
+        itemId:
+          type: string
+        status:
+          type: string
+        mamageBy:
+          type: string
+        newTotalAmount:
           type: number
-          example: 266000
         message:
           type: string
-          example: "Thanh toán thành công!"
+
+    PaymentItemSummary:
+      type: object
+      description: Object rút gọn hiển thị trong hóa đơn
+      properties:
+        dishId:
+          type: string
+        dishName:
+          type: string
+        quantity:
+          type: integer
+        image:
+          type: string
+
+    PaymentSuccessPayload:
+      type: object
+      properties:
+        orderId:
+          type: string
+        amount:
+          type: number
+        message:
+          type: string
         items:
           type: array
           items:
             $ref: '#/components/schemas/PaymentItemSummary'
 
-    # [UPDATED] Payload cho sự kiện payment_received (Admin)
-    PaymentReceivedAdminPayload:
+    PaymentReceivedPayload:
       type: object
       properties:
         orderId:
           type: string
-          example: "693f7a63e7455fa6893e7080"
         tableNumber:
           type: integer
-          example: 5
         amount:
           type: number
-          example: 266000
         message:
           type: string
-          example: "Bàn 5 vừa thanh toán 266,000đ"
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentItemSummary'
-
-  messages:
-    JoinSuccess:
-      payload:
-        type: object
-        properties:
-          message:
-            type: string
-          roomId:
-            type: string

@@ -87,5 +87,5 @@ const startServer = async () => {
 startServer()
 
 // Deploy
-// export default app
+export default app
 // console.log(generatePassword())
