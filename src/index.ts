@@ -37,12 +37,6 @@ const httpServer = createServer(app)
 const port = process.env.PORT || 3000
 initSocket(httpServer)
 
-const file = fs.readFileSync(path.resolve("cdtn.swagger.yaml"), "utf8")
-const swaggerDocument = YAML.parse(file)
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-
-app.use(express.json())
-
 const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // Các request từ Postman, Server-to-Server thường không có origin -> Cho phép
@@ -58,6 +52,10 @@ const corsOptions: CorsOptions = {
   credentials: true
 }
 app.use(cors(corsOptions))
+app.use(express.json())
+const file = fs.readFileSync(path.resolve("cdtn.swagger.yaml"), "utf8")
+const swaggerDocument = YAML.parse(file)
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Router admin
 routesAdmin(app)
