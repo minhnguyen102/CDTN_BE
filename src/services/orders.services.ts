@@ -218,7 +218,7 @@ class OrderServices {
 
     const queryPipeline: any[] = [
       { $match: match },
-      { $sort: { createdAt: 1 } },
+      { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -301,7 +301,7 @@ class OrderServices {
       },
       {
         projection: {
-          "items.dishId": 0,
+          // "items.dishId": 0,
           _id: 0,
           tableId: 0,
           tableNumber: 0,
@@ -322,7 +322,20 @@ class OrderServices {
         status: HTTP_STATUS.BAD_REQUEST
       })
     }
-    return orderDetail
+    const validItems = orderDetail.items.filter((item) => item.status !== OrderItemStatus.Reject)
+    const itemsMap = new Map<string, any>()
+    for (const item of validItems) {
+      const dishIdString = item.dishId.toString()
+      if (itemsMap.has(dishIdString)) {
+        itemsMap.get(dishIdString).quantity += item.quantity // Cộng dồn
+      } else {
+        itemsMap.set(dishIdString, { ...item })
+      }
+    }
+    const result = Array.from(itemsMap.values())
+    return {
+      items: result
+    }
   }
 
   async updateItemStatus({
