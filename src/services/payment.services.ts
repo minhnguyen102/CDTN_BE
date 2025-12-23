@@ -74,19 +74,23 @@ class PaymentService {
       )
     ])
 
+    // lọc dữ liệu từ order
+
     const itemQuantityMap = new Map<string, number>()
     const uniqueDishIds: ObjectId[] = []
 
     if (order.items && order.items.length > 0) {
       order.items.forEach((item: any) => {
-        const idStr = item.dishId.toString()
-        if (itemQuantityMap.has(idStr)) {
-          // Nếu đã có, cộng dồn số lượng
-          itemQuantityMap.set(idStr, itemQuantityMap.get(idStr)! + item.quantity)
-        } else {
-          // Nếu chưa có, set số lượng ban đầu và push vào mảng ID để query DB
-          itemQuantityMap.set(idStr, item.quantity)
-          uniqueDishIds.push(item.dishId)
+        if (item.status !== OrderItemStatus.Reject) {
+          const idStr = item.dishId.toString()
+          if (itemQuantityMap.has(idStr)) {
+            // Nếu đã có, cộng dồn số lượng
+            itemQuantityMap.set(idStr, itemQuantityMap.get(idStr)! + item.quantity)
+          } else {
+            // Nếu chưa có, set số lượng ban đầu và push vào mảng ID để query DB
+            itemQuantityMap.set(idStr, item.quantity)
+            uniqueDishIds.push(item.dishId)
+          }
         }
       })
     }
@@ -103,9 +107,10 @@ class PaymentService {
       dishId: dish._id.toString(),
       dishName: dish.name,
       quantity: itemQuantityMap.get(dish._id.toString()) || 0,
-      image: dish.image // Giả sử trong DB bạn lưu field là 'image'
+      image: dish.image
     }))
 
+    // console.log("formattedItems: ", formattedItems) // đã lọc
     // [REAL-TIME] Bắn Socket thông báo
     const io = getIO()
 
