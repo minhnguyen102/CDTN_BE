@@ -73,7 +73,7 @@ export const statusValidation: ParamSchema = {
   trim: true,
   isIn: {
     options: [Object.values(AccountStatus)],
-    errorMessage: `${USER_MESSAGES.STATUS_IS_INVALID}. Allowed values: ${Object.values(AccountStatus).join(", ")}`
+    errorMessage: `${USER_MESSAGES.STATUS_IS_INVALID}. Các trạng thái cho phép: ${Object.values(AccountStatus).join(", ")}`
   }
 }
 
@@ -312,6 +312,7 @@ export const emailVerifyTokenValidation = validate(
     ["body"]
   )
 )
+
 export const resendEmailVerifyTokenValidation = validate(
   checkSchema(
     {
@@ -550,7 +551,7 @@ export const updateAccountValidation = validate(
       optional: true,
       isIn: {
         options: [Object.values(AccountStatus)],
-        errorMessage: `${USER_MESSAGES.STATUS_IS_INVALID}. Allowed values: ${Object.values(AccountStatus).join(", ")}`
+        errorMessage: `${USER_MESSAGES.STATUS_IS_INVALID}. Giá trị cho phép: ${Object.values(AccountStatus).join(", ")}`
       }
     },
     role_id: {
