@@ -1,11 +1,9 @@
 import { JwtPayload } from "jsonwebtoken"
-import { ObjectId } from "mongodb"
-import { AccountStatus, AccountVerifyStatus, RoleAccount, TableStatus, TokenType } from "../../constants/enums"
+import { AccountStatus, AccountVerifyStatus, TableStatus, TokenType } from "../../constants/enums"
 
 export interface RegisterReqBody {
   name: string
   email: string
-  // password: string
   phone: string
   confirm_password: string
   date_of_birth: Date
@@ -26,7 +24,6 @@ export interface TokenPayload extends JwtPayload {
   user_id: string
   token_type: TokenType
   verify: AccountVerifyStatus
-  // role: RoleAccount
 }
 
 export interface resetPasswordReqBody {

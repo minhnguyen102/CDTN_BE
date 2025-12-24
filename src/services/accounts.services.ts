@@ -43,21 +43,12 @@ class AccountsServices {
     })
   }
 
-  private signRefreshToken({
-    user_id,
-    verify
-    // role
-  }: {
-    user_id: string
-    verify: AccountVerifyStatus
-    // role: RoleAccount
-  }) {
+  private signRefreshToken({ user_id, verify }: { user_id: string; verify: AccountVerifyStatus }) {
     return signToken({
       payload: {
         user_id,
         token_type: TokenType.REFRESH_TOKEN,
         verify
-        // role
       },
       privateKey: process.env.PRIVATE_KEY_SIGN_REFRESH_TOKEN as string,
       optionals: {
@@ -115,7 +106,7 @@ class AccountsServices {
     // Dùng aggregate để lookup role và permissions
     const roleData = await databaseService.roles
       .aggregate([
-        // 1. Tìm role_id
+        // Tìm role_id
         {
           $match: {
             _id: role_id,
@@ -123,7 +114,7 @@ class AccountsServices {
             status: RoleStatus.ACTIVE // và đang active)
           }
         },
-        // 2. Lookup sang collection 'permissions'
+        // Lookup sang collection 'permissions'
         {
           $lookup: {
             from: "permissions",
@@ -132,7 +123,7 @@ class AccountsServices {
             as: "permissions"
           }
         },
-        // 3. Chỉ lấy ra trường name và mảng tên permission
+        // Chỉ lấy ra trường name và mảng tên permission
         {
           $project: {
             _id: 0,
@@ -150,7 +141,6 @@ class AccountsServices {
       })
     }
 
-    // Trả về { role_name: "Employee", permissions: ["view_tables", ...] }
     return roleData[0]
   }
 
@@ -262,7 +252,7 @@ class AccountsServices {
             password: hashPassword(password)
           },
           $currentDate: {
-            updatedAt: true // Cập nhật thời gian khi lưu vào bản ghi (thời điểm sau)
+            updatedAt: true
           }
         }
       ),
@@ -303,7 +293,7 @@ class AccountsServices {
   async forgotPassword({ user_id, verify, email }: { user_id: string; verify: AccountVerifyStatus; email: string }) {
     // sign forgot_password_token và lưu vào db
     const forgot_password_token = await this.signForgotPasswordToken({ user_id, verify })
-    const resetLink = `${process.env.BASE_URL}/forgot-password-token?token=${forgot_password_token}`
+    const resetLink = `${process.env.BASE_URL_ADMIN}/forgot-password-token?token=${forgot_password_token}`
     const html = `
       <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
         <h2 style="color: #333;">Yêu cầu đặt lại mật khẩu</h2>

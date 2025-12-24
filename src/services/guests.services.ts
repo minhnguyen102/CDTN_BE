@@ -55,6 +55,7 @@ class GuestService {
       await session.endSession()
     }
   }
+
   private signAccessToken({
     user_id,
     tableNumber,
@@ -80,6 +81,7 @@ class GuestService {
       }
     })
   }
+
   private async checkAndDeductStock(items: any[], dishMap: Map<string, any>) {
     // Gom tất cả nguyên liệu cần thiết (Gom hết gà từ các đơn cần gà)
     const ingredientUpdates = new Map<string, number>()

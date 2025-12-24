@@ -5,7 +5,6 @@ import { createRoleReqBody, updateRoleReqBody } from "../../models/requests/Role
 import roleServices from "../../services/roles.services"
 import HTTP_STATUS from "../../constants/httpStatus"
 import { pick } from "lodash"
-import { ObjectId } from "mongodb"
 
 export const createRoleController = async (req: Request<ParamsDictionary, any, createRoleReqBody>, res: Response) => {
   const payload = req.body

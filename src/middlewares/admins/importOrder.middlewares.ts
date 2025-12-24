@@ -131,7 +131,7 @@ export const changeImportOrderStatusValidator = validate(
             // YÊU CẦU: Chỉ cho phép chuyển sang 'confirmed'
             if (value !== ImportOrderStatus.CONFIRMED) {
               throw new ErrorWithStatus({
-                message: "Only 'confirmed' status is accepted for this action",
+                message: USER_MESSAGES.ONLY_CONFIRMED_STATUS_ACCEPTED,
                 status: HTTP_STATUS.BAD_REQUEST
               })
             }

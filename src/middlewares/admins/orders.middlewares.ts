@@ -54,7 +54,7 @@ const itemDishIdSchema: ParamSchema = {
   custom: {
     options: (value: string) => {
       if (!ObjectId.isValid(value)) {
-        throw new Error("Invalid Dish ID format")
+        throw new Error(USER_MESSAGES.INVALID_DISH_ID_FORMAT)
       }
       return true
     }
@@ -95,7 +95,6 @@ export const createOrderForTableValidation = validate(
   )
 )
 
-export const adminCreateOrderValidation = validate(checkSchema({}))
 export const getDetailOrderHistoryValidation = validate(
   checkSchema(
     {
@@ -119,3 +118,5 @@ export const getDetailOrderHistoryValidation = validate(
     ["params"]
   )
 )
+
+export const adminCreateOrderValidation = validate(checkSchema({}))

@@ -3,7 +3,6 @@ import databaseService from "./database.servies"
 import { DishStatus } from "../constants/enums"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { config } from "dotenv"
-import { reject } from "lodash"
 config()
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string)

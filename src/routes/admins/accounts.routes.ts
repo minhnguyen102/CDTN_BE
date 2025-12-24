@@ -48,7 +48,7 @@ accountRoutes.post("/login", loginValidation, wrapHandlerFunction(loginControlle
  * Description: Register a new user
  * PATH: admin/accounts/register
  * Method: POST
- * Body: { name: string, email: string, password: string, confirm_password: string, date_of_birth: ISO8601, role: RoleAccount}
+ * Body: { name: string, email: string, password: string, confirm_password: string, date_of_birth: ISO8601}
  */
 accountRoutes.post("/register", registerValidation, wrapHandlerFunction(registerController))
 

@@ -38,7 +38,6 @@ class DishCategoryService {
     }
 
     if (search) {
-      // search theo name || des
       matchFilter.key_search = { $regex: removeAccents(search), $options: "i" }
     }
 

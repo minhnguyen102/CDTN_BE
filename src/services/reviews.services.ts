@@ -5,7 +5,6 @@ import { ErrorWithStatus } from "../models/Errors"
 import USER_MESSAGES from "../constants/message"
 import HTTP_STATUS from "../constants/httpStatus"
 import { PaymentStatus, ReviewStatus } from "../constants/enums"
-import Account from "../models/schema/Account.schema"
 
 class ReviewService {
   private async updateDishRating({ dishId }: { dishId: string }) {

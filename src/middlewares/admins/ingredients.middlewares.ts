@@ -1,9 +1,9 @@
 // src/modules/ingredients/ingredient.validations.ts
 import { checkSchema, ParamSchema } from "express-validator"
-import { validate } from "../../utils/validation" // (Giả định)
-import USER_MESSAGES from "../../constants/message" // (Giả định)
-import HTTP_STATUS from "../../constants/httpStatus" // (Giả định)
-import { ErrorWithStatus } from "../../models/Errors" // (Giả định)
+import { validate } from "../../utils/validation"
+import USER_MESSAGES from "../../constants/message"
+import HTTP_STATUS from "../../constants/httpStatus"
+import { ErrorWithStatus } from "../../models/Errors"
 import { ObjectId } from "mongodb"
 
 const nameValidation: ParamSchema = {
@@ -46,7 +46,7 @@ const unitValidation: ParamSchema = {
 const supplierIdsValidation: ParamSchema = {
   optional: true,
   isArray: {
-    errorMessage: "Supplier IDs must be an array"
+    errorMessage: USER_MESSAGES.SUPPLIER_IDS_MUST_BE_ARRAY
   },
   custom: {
     options: (value: string[]) => {
@@ -54,7 +54,7 @@ const supplierIdsValidation: ParamSchema = {
 
       const isAllObjectId = value.every((id) => ObjectId.isValid(id))
       if (!isAllObjectId) {
-        throw new Error("Array contains invalid Supplier ID")
+        throw new Error(USER_MESSAGES.ARRAY_CONTAINS_INVALID_SUPPLIER_ID)
       }
       return true
     }
@@ -66,8 +66,7 @@ const unitPriceValidation: ParamSchema = {
     errorMessage: USER_MESSAGES.UNIT_PRICE_IS_REQUIRED
   },
   isFloat: {
-    // Dùng isFloat để chấp nhận cả số nguyên và số thập phân
-    options: { gt: 0 }, // Phải lớn hơn 0
+    options: { gt: 0 },
     errorMessage: USER_MESSAGES.UNIT_PRICE_MUST_BE_POSITIVE
   },
   toFloat: true
@@ -78,10 +77,10 @@ const minStockValidation: ParamSchema = {
     errorMessage: USER_MESSAGES.MIN_STOCK_IS_REQUIRED
   },
   isInt: {
-    options: { gt: 0 }, // Tồn kho tối thiểu bằng 0 là hợp lệ
+    options: { gt: 0 },
     errorMessage: USER_MESSAGES.MIN_STOCK_MUST_BE_POSITIVE_INTEGER
   },
-  toInt: true // Tự động chuyển đổi
+  toInt: true
 }
 
 const idParamValidation: ParamSchema = {

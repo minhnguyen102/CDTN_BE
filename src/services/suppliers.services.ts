@@ -102,12 +102,6 @@ class SupplierServices {
         status: HTTP_STATUS.NOT_FOUND
       })
     }
-    // let key_search = ""
-    // if (payload.name) {
-    //   key_search += removeAccents(payload.name)
-    // } else {
-    //   key_search += removeAccents(supplier.name)
-    // }
     const name = payload.name !== undefined ? payload.name : supplier.name
     const contactPerson = payload.contactPerson !== undefined ? payload.contactPerson : supplier.contactPerson
     const email = payload.email !== undefined ? payload.email : supplier.email

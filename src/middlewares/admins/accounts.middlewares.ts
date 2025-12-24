@@ -11,7 +11,7 @@ import { JsonWebTokenError } from "jsonwebtoken"
 import _ from "lodash"
 import { ObjectId } from "mongodb"
 import { TokenPayload } from "../../models/requests/Account.request"
-import { AccountStatus, AccountVerifyStatus, MESSAGE_CODES, RoleAccount } from "../../constants/enums"
+import { AccountStatus, AccountVerifyStatus, MESSAGE_CODES } from "../../constants/enums"
 
 const nameValidation: ParamSchema = {
   notEmpty: {
@@ -47,6 +47,34 @@ const passwordValidation: ParamSchema = {
     errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRONG
   }
 }
+
+const confirmPasswordValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED
+  },
+  custom: {
+    options: (value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
+      }
+      return true
+    }
+  }
+}
+
+const dateOfBirthValidation: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.DATE_OF_BIRTH_IS_REQUIRED
+  },
+  isISO8601: {
+    options: {
+      strict: true,
+      strictSeparator: true
+    },
+    errorMessage: USER_MESSAGES.DATE_OF_BIRTH_MUST_BE_ISO8601
+  }
+}
+
 export const phoneValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.PHONE_REQUIRED
@@ -74,33 +102,6 @@ export const statusValidation: ParamSchema = {
   isIn: {
     options: [Object.values(AccountStatus)],
     errorMessage: `${USER_MESSAGES.STATUS_IS_INVALID}. Các trạng thái cho phép: ${Object.values(AccountStatus).join(", ")}`
-  }
-}
-
-const confirmPasswordValidation: ParamSchema = {
-  notEmpty: {
-    errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED
-  },
-  custom: {
-    options: (value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
-      }
-      return true
-    }
-  }
-}
-
-const dateOfBirthValidation: ParamSchema = {
-  notEmpty: {
-    errorMessage: USER_MESSAGES.DATE_OF_BIRTH_IS_REQUIRED
-  },
-  isISO8601: {
-    options: {
-      strict: true,
-      strictSeparator: true
-    },
-    errorMessage: USER_MESSAGES.DATE_OF_BIRTH_MUST_BE_ISO8601
   }
 }
 

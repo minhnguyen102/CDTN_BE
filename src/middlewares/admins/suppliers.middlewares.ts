@@ -1,5 +1,5 @@
 import { validate } from "../../utils/validation"
-import { check, checkSchema, ParamSchema } from "express-validator"
+import { checkSchema, ParamSchema } from "express-validator"
 import USER_MESSAGES from "../../constants/message"
 import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
@@ -65,6 +65,7 @@ const phoneValidation: ParamSchema = {
   },
   trim: true
 }
+
 const emailValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
@@ -74,6 +75,7 @@ const emailValidation: ParamSchema = {
   },
   normalizeEmail: true
 }
+
 const addressValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.SUPPLIER_ADDRESS_REQUIRED
@@ -84,7 +86,6 @@ const addressValidation: ParamSchema = {
   trim: true
 }
 
-// Validate cho Id
 const idParamValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.ID_IS_REQUIRED
@@ -96,6 +97,7 @@ const idParamValidation: ParamSchema = {
     })
   }
 }
+
 export const createSupplierValidation = validate(
   checkSchema(
     {

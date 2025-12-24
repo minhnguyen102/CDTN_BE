@@ -20,7 +20,6 @@ const nameValidation: ParamSchema = {
   }
 }
 
-// Validate cho description
 const descriptionValidation: ParamSchema = {
   optional: true,
   isString: {
@@ -33,7 +32,6 @@ const descriptionValidation: ParamSchema = {
   }
 }
 
-// Logic kiểm tra định dạng file (Dùng chung)
 const checkImageFormat = (file: Express.Multer.File) => {
   const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
   if (!validTypes.includes(file.mimetype)) {
@@ -45,7 +43,6 @@ const checkImageFormat = (file: Express.Multer.File) => {
   return true
 }
 
-// Validate cho CREATE (Bắt buộc phải có ảnh)
 const imageRequiredValidation: ParamSchema = {
   custom: {
     options: (value, { req }) => {
@@ -60,21 +57,18 @@ const imageRequiredValidation: ParamSchema = {
   }
 }
 
-// Validate cho UPDATE (Không bắt buộc, chỉ check nếu có file)
 const imageOptionalValidation: ParamSchema = {
   custom: {
     options: (value, { req }) => {
-      // Nếu không có file -> Cho qua (return true) để giữ ảnh cũ
       if (!req.file) {
         return true
       }
-      // Nếu có file -> Check định dạng
+
       return checkImageFormat(req.file)
     }
   }
 }
 
-// Validate cho displayOrder
 const displayOrderValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.DISPLAY_ORDER_REQUIRED
@@ -86,7 +80,6 @@ const displayOrderValidation: ParamSchema = {
   toInt: true
 }
 
-// Validate cho status
 const statusValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.STATUS_IS_REQUIRED
@@ -101,7 +94,6 @@ const statusValidation: ParamSchema = {
   trim: true
 }
 
-// Validate cho Id (Dùng chung)
 const idParamValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.ID_IS_REQUIRED
@@ -119,7 +111,6 @@ const idParamValidation: ParamSchema = {
   }
 }
 
-// Validation cho TẠO MỚI category
 export const createDishCategoryValidator = validate(
   checkSchema(
     {
@@ -133,7 +124,6 @@ export const createDishCategoryValidator = validate(
   )
 )
 
-// Validation cho CẬP NHẬT category
 export const updateDishCategoryValidator = validate(
   checkSchema(
     {

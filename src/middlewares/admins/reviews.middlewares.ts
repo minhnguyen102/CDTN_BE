@@ -3,7 +3,6 @@ import { checkSchema, ParamSchema } from "express-validator"
 import USER_MESSAGES from "../../constants/message"
 import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
-import { ObjectId } from "mongodb"
 import { ReviewStatus } from "../../constants/enums"
 
 const IdSchema: ParamSchema = {

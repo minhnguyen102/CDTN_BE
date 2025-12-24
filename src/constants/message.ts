@@ -1,79 +1,5 @@
 const USER_MESSAGES = {
-  ORDER_NOT_FOUND_OR_NOT_PAID: "Không tìm thấy đơn hàng hoặc đơn hàng chưa được thanh toán",
-  DISH_IDS_MUST_BE_ARRAY: "dishIds phải là một mảng",
-  DISH_ID_MUST_BE_MONGO_ID: "Mỗi mục trong dishIds phải là một ObjectId hợp lệ",
-  CONTENT_REPLY_IS_REQUIRED: "Nội dung phản hồi là bắt buộc",
-  CONTENT_MUST_BE_STRING: "Nội dung phản hồi phải là một chuỗi",
-  ORDER_NOT_FOUND_OR_ORDER_NOT_PAID: "Không tìm thấy đơn hàng hoặc đơn hàng chưa thanh toán",
-  REVIEW_NOT_FOUND: "Không tìm thấy đánh giá",
-  REVIEW_ID_IS_REQUIRED: "ID đánh giá là bắt buộc",
-  RATING_MUST_BE_BETWEEN_1_AND_5: "Đánh giá phải là số nguyên từ 1 đến 5",
-  INVALID_REVIEW_STATUS: "Trạng thái đánh giá không hợp lệ",
-  GET_ALL_REVIEW_SUCCESS: "Lấy tất cả đánh giá thành công",
-  GET_DISH_CATEGORIES_SUCCESS: "Lấy danh mục món ăn thành công",
-  INVALID_CATEGORY_ID: "ID danh mục không hợp lệ",
-  CATEGORY_ID_MUST_BE_A_STRING: "ID danh mục phải là một chuỗi",
-  ORDER_ID_IS_REQUIRED: "ID đơn hàng là bắt buộc",
-  ORDER_ID_MUST_BE_STRING: "ID đơn hàng phải là một chuỗi",
-  INVALID_ORDER_ID: "Kiểu ID đơn hàng không hợp lệ",
-
-  DISH_ID_IS_REQUIRED: "ID món ăn là bắt buộc",
-  DISH_ID_MUST_BE_STRING: "ID món ăn phải là một chuỗi",
-  INVALID_DISH_ID: "Kiểu ID món ăn không hợp lệ",
-
-  RATING_IS_REQUIRED: "Đánh giá là bắt buộc",
-  RATING_MUST_BE_FROM_1_TO_5: "Đánh giá phải là số nguyên từ 1 đến 5",
-
-  COMMENT_MUST_BE_STRING: "Bình luận phải là một chuỗi",
-  COMMENT_LENGTH_MUST_BE_LESS_THAN_500: "Độ dài bình luận phải ít hơn 500 ký tự",
-  REVIEW_POSTED_SUCCESSFULLY: "Đăng đánh giá thành công",
-  THIS_ITEMS_ALREADY_REVIEWED: "Mục này đã được đánh giá",
-  YOU_NOT_ALLOW_REVIEW_THIS_ORDER: "Bạn không được phép đánh giá đơn hàng này",
-  DISH_NOT_FOUND: "Không tìm thấy món ăn",
-  ORDER_NOT_PAID: "Đơn hàng chưa được thanh toán",
-  GET_PAYMENT_QR_SUCCESSFULLY: "Lấy mã QR thanh toán thành công",
-  ORDER_NOT_FOUND: "Không tìm thấy đơn hàng",
-  TABLE_NOT_FOUND: "Không tìm thấy bàn",
-  TABLE_ID_IS_REQUIRED: "ID bàn là bắt buộc",
-  TABLE_ID_IS_INVALID: "Định dạng ID bàn không hợp lệ",
-  GET_MENU_SUCCESS: "Lấy thực đơn thành công",
-  CREATE_ORDER_SUCCESS: "Đặt món thành công",
-  LOGIN_GUEST_SUCCESS: "Đăng nhập thành công",
-  // --- Order Validation ---
-  ORDER_ITEMS_REQUIRED: "Các mục đơn hàng là bắt buộc",
-  ORDER_ITEMS_MUST_BE_ARRAY: "Các mục đơn hàng phải là một mảng",
-  ORDER_ITEMS_EMPTY: "Đơn hàng phải chứa ít nhất một món",
-
-  ORDER_DISH_ID_REQUIRED: "ID món ăn là bắt buộc",
-  ORDER_DISH_ID_INVALID: "ID món ăn không hợp lệ",
-
-  ORDER_QUANTITY_REQUIRED: "Số lượng là bắt buộc",
-  ORDER_QUANTITY_MUST_BE_POSITIVE: "Số lượng phải lớn hơn 0",
-
-  ORDER_NOTE_MUST_BE_STRING: "Ghi chú phải là một chuỗi",
-  DISH_UPDATED_SUCCESSFULLY: "Cập nhật món ăn thành công",
-  DISH_CREATED_SUCCESSFULLY: "Tạo món ăn thành công",
-  DELETE_INGREDIENT_SUCESSFULLY: "Xóa nguyên liệu thành công",
-  INGREDIENT_NOT_FOUND: "Không tìm thấy nguyên liệu",
-  IMPORT_ORDER_ALREADY_CONFIRMED: "Đơn nhập hàng này đã được xác nhận",
-  IMPORT_ORDER_CONFIRMED_SUCCESSFULLY: "Xác nhận đơn nhập hàng thành công",
-  GET_ALL_CATEGORY_SUCCESS: "Lấy tất cả danh mục thành công",
-  CATEGORY_LIST_SUCCESS: "Lấy danh sách danh mục thành công",
-  DISPAY_ORDER_STATUS_INVALID: "Trạng thái phải là một chuỗi",
-  DISPAY_ORDER_STATUS: "Trạng thái phải là 'active' hoặc 'inactive'",
-  IMAGE_URL_MUST_BE_STRING: "URL hình ảnh phải là một chuỗi",
-  IMAGE_MUST_BE_VALID_URL: "Hình ảnh phải là một URL hợp lệ",
-  IMAGE_REQUIRED: "Hình ảnh là bắt buộc",
-  // === General ===
-  VALIDATION_ERROR: "Lỗi xác thực",
-  TOKEN_IS_REQUIRED: "Token là bắt buộc",
-  TOKEN_IS_INVALID: "Token không hợp lệ",
-  USER_NOT_FOUND: "Không tìm thấy người dùng",
-  ACCESS_DENIED: "Truy cập bị từ chối", // 403 Forbidden
-  UNAUTHORIZED: "Chưa được xác thực",
-  FORBIDDEN: "Bạn không có quyền truy cập vào tài nguyên này.",
-
-  // === Register / Login / Logout ===
+  // ACCOUNT
   REGISTER_SUCCESS: "Đăng ký thành công",
   LOGIN_SUCCESS: "Đăng nhập thành công",
   LOGOUT_SUCCESS: "Đăng xuất thành công",
@@ -90,42 +16,28 @@ const USER_MESSAGES = {
   PASSWORD_MUST_BE_STRONG:
     "Mật khẩu phải dài ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 ký hiệu đặc biệt.",
   ACCOUNTS_FETCHED_SUCCESSFULLY: "Lấy danh sách tài khoản thành công",
-
-  // === User Fields ===
   NAME_IS_REQUIRED: "Tên là bắt buộc",
   NAME_MUST_BE_STRING: "Tên phải là một chuỗi",
   NAME_LENGTH: "Tên phải từ 1 đến 50 ký tự",
-
   EMAIL_IS_REQUIRED: "Email là bắt buộc",
   EMAIL_IS_INVALID: "Định dạng email không hợp lệ",
   EMAIL_MUST_BE_STRING: "Email phải là một chuỗi",
-
   DATE_OF_BIRTH_MUST_BE_ISO8601: "Ngày sinh phải theo định dạng ISO 8601",
   DATE_OF_BIRTH_IS_REQUIRED: "Ngày sinh là bắt buộc",
   IMAGE_IS_INVALID: "Định dạng hình ảnh không hợp lệ",
-
-  // === Follow ===
-  ALREADY_FOLLOWED: "Bạn đã theo dõi người dùng này",
-  NOT_FOLLOWED_YET: "Bạn chưa theo dõi người dùng này",
-
   ACCESS_TOKEN_IS_REQUIRED: "Access token là bắt buộc",
   REFRESH_TOKEN_IS_REQUIRED: "Refresh token là bắt buộc",
   USED_REFRESH_TOKEN_OR_NOT_EXIST: "Refresh token đã được sử dụng hoặc không tồn tại",
   REFRESH_TOKEN_IS_INVALID: "Refresh token không hợp lệ",
   REFRESH_TOKEN_SUCCESS: "Làm mới token thành công",
   EMAIL_VERIFY_TOKEN_TOKEN_IS_REQUIRED: "Token xác thực email là bắt buộc",
-  // === Email Verification ===
   VERIFY_EMAIL_SUCCESS: "Tài khoản của bạn đã được xác thực thành công. Vui lòng kiểm tra email để nhận mật khẩu.",
   EMAIL_ALREADY_VERIFIED: "Email này đã được xác thực.",
   ACCOUNT_NOT_VERIFIED: "Tài khoản của bạn chưa được xác thực. Vui lòng kiểm tra email.",
   EMAIL_VERIFICATION_TOKEN_INVALID: "Token xác thực email không hợp lệ hoặc đã hết hạn.",
   RESEND_VERIFY_EMAIL_SUCCESS: "Một email xác thực mới đã được gửi. Vui lòng kiểm tra hộp thư của bạn.",
   USER_NOT_VERIFY: "Tài khoản của bạn chưa được xác thực.",
-
-  // (You can use this message for the Register route to notify the user)
   REGISTER_SUCCESS_PENDING_VERIFICATION: "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.",
-
-  // === Forgot/Reset Password ===
   FORGOT_PASSWORD_INSTRUCTIONS_SENT:
     "Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra hộp thư (và thư rác) để hoàn tất quá trình.",
   EMAIL_NOT_FOUND: "Email này không được đăng ký trong hệ thống của chúng tôi.",
@@ -134,14 +46,10 @@ const USER_MESSAGES = {
   RESET_PASSWORD_SUCCESS:
     "Mật khẩu của bạn đã được đặt lại thành công. Bây giờ bạn có thể đăng nhập bằng mật khẩu mới.",
   VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS: "Xác thực token quên mật khẩu thành công",
-
   GET_MY_PROFILE_SUCCESS: "Lấy thông tin cá nhân thành công",
-
   AVATAR_URL_MUST_BE_STRING: "URL ảnh đại diện phải là một chuỗi",
   AVATAR_URL_LENGTH: "URL ảnh đại diện phải có độ dài từ 1 đến 500 ký tự",
   UPDATE_INFOR_SUCCESS: "Cập nhật thông tin thành công",
-
-  // === Change Password ===
   CHANGE_PASSWORD_SUCCESS: "Mật khẩu của bạn đã được thay đổi thành công.",
   OLD_PASSWORD_IS_REQUIRED: "Mật khẩu cũ là bắt buộc.",
   NEW_PASSWORD_IS_REQUIRED: "Mật khẩu mới là bắt buộc.",
@@ -149,19 +57,192 @@ const USER_MESSAGES = {
   OLD_PASSWORD_IS_INCORRECT: "Mật khẩu cũ không chính xác.",
   NEW_PASSWORD_AND_CONFIRM_PASSWORD_DO_NOT_MATCH: "Mật khẩu mới và mật khẩu xác nhận không khớp.",
   NEW_PASSWORD_CANNOT_BE_THE_SAME_AS_OLD_PASSWORD: "Mật khẩu mới không được trùng với mật khẩu cũ.",
+  // END ACCOUNT
 
-  CAPACITY_REQUIRED: "Sức chứa là bắt buộc.",
-  CAPACITY_MUST_BE_POSITIVE_INTEGER: "Sức chứa phải là một số nguyên dương.",
-  GET_ALL_TABLES_SUCCESS: "Lấy tất cả danh sách bàn thành công.",
-  UPDATE_TABLE_SUCCESS: "Cập nhật bàn thành công.",
-  CREATE_TABLE_SUCCESS: "Tạo bàn thành công.",
-  DELETE_TABLE_SUCCESS: "Xóa bàn thành công.",
+  // CATEGORY
+  CATEGORY_NAME_REQUIRED: "Tên danh mục là bắt buộc.",
+  CATEGORY_NAME_INVALID: "Tên danh mục phải là một chuỗi.",
+  CATEGORY_NAME_LENGTH: "Tên danh mục phải từ 1 đến 50 ký tự.",
+  CATEGORY_DESCRIPTION_REQUIRED: "Mô tả danh mục là bắt buộc.",
+  CATEGORY_DESCRIPTION_INVALID: "Mô tả danh mục phải là một chuỗi.",
+  CATEGORY_DESCRIPTION_LENGTH: "Mô tả danh mục không được vượt quá 255 ký tự.",
+  CATEGORY_STATUS_REQUIRED: "Trạng thái danh mục là bắt buộc.",
+  CATEGORY_STATUS_INVALID: "Trạng thái danh mục phải là 'active' hoặc 'inactive'.",
+  CREATE_CATEGORY_SUCCESS: "Tạo danh mục thành công.",
+  UPDATE_CATEGORY_SUCCESS: "Cập nhật danh mục thành công.",
+  // END CATEGORY
 
-  ID_IS_REQUIRED: "ID không được để trống.",
-  INVALID_MONGODB_ID_FORMAT: "ID được cung cấp không đúng định dạng MongoDB ObjectId.",
-  REGENERATE_QR_TOKEN_SUCCESS: "Tạo lại token QR thành công.",
+  // DISH  MESSAGE
+  INVALID_DISH_ID_FORMAT: "Định dạng ID món ăn không hợp lệ",
+  DISH_IDS_MUST_BE_ARRAY: "dishIds phải là một mảng",
+  DISH_ID_MUST_BE_MONGO_ID: "Mỗi mục trong dishIds phải là một ObjectId hợp lệ",
+  DISH_ID_IS_REQUIRED: "ID món ăn là bắt buộc",
+  DISH_ID_MUST_BE_STRING: "ID món ăn phải là một chuỗi",
+  INVALID_DISH_ID: "Kiểu ID món ăn không hợp lệ",
+  DISH_NOT_FOUND: "Không tìm thấy món ăn",
+  DISH_UPDATED_SUCCESSFULLY: "Cập nhật món ăn thành công",
+  DISH_CREATED_SUCCESSFULLY: "Tạo món ăn thành công",
+  DISH_NAME_REQUIRED: "Tên món ăn là bắt buộc",
+  DISH_NAME_MUST_BE_STRING: "Tên món ăn phải là một chuỗi",
+  DISH_NAME_LENGTH: "Tên món ăn phải từ 1 đến 200 ký tự",
+  DISH_PRICE_REQUIRED: "Giá món ăn là bắt buộc",
+  DISH_PRICE_MUST_BE_NUMBER: "Giá món ăn phải là một số",
+  DISH_PRICE_MUST_BE_POSITIVE: "Giá món ăn phải lớn hơn hoặc bằng 0",
+  DISH_DESCRIPTION_REQUIRED: "Mô tả món ăn là bắt buộc",
+  DISH_DESCRIPTION_MUST_BE_STRING: "Mô tả phải là một chuỗi",
+  DISH_STATUS_REQUIRED: "Trạng thái món ăn là bắt buộc",
+  DISH_STATUS_INVALID: "Trạng thái món ăn không hợp lệ",
+  DISH_CATEGORY_REQUIRED: "ID danh mục là bắt buộc",
+  DISH_CATEGORY_INVALID: "ID danh mục không hợp lệ",
+  DISH_RECIPE_REQUIRED: "Công thức món ăn là bắt buộc",
+  DISH_RECIPE_MUST_BE_ARRAY: "Công thức món ăn phải là một mảng",
+  DISH_IMAGE_REQUIRED: "Hình ảnh món ăn là bắt buộc",
+  // END DISH  MESSAGE
 
-  //supplier
+  // DISH CATEGORIES
+  CATEGORY_NAME_IS_REQUIRED: "Tên danh mục là bắt buộc",
+  CATEGORY_NAME_MUST_BE_STRING: "Tên danh mục phải là một chuỗi",
+  CATEGORY_CREATED_SUCCESSFULLY: "Tạo danh mục món ăn thành công",
+  CATEGORIES_FETCHED_SUCCESSFULLY: "Lấy danh sách danh mục món ăn thành công",
+  CATEGORY_DETAIL_FETCHED_SUCCESSFULLY: "Lấy chi tiết danh mục món ăn thành công",
+  CATEGORY_UPDATED_SUCCESSFULLY: "Cập nhật danh mục món ăn thành công",
+  CATEGORY_DELETED_SUCCESSFULLY: "Xóa danh mục món ăn thành công",
+  INGREDIENT_CATEGORY_NOT_FOUND: "Không tìm thấy danh mục nguyên liệu",
+  CATEGORY_NOT_FOUND: "Không tìm thấy danh mục món ăn",
+  CATEGORY_HAS_DISHES: "Không thể xóa danh mục này vì nó đang chứa các món ăn",
+  PHONE_REQUIRED: "Số điện thoại là bắt buộc",
+  PHONE_MUST_BE_STRING: "Số điện thoại phải là một chuỗi",
+  PHONE_LENGTH_MUST_BE_FROM_10_TO_11: "Độ dài số điện thoại phải từ 10 đến 11 ký tự",
+  PHONE_IS_INVALID: "Định dạng số điện thoại không hợp lệ",
+  GET_DISH_CATEGORIES_SUCCESS: "Lấy danh mục món ăn thành công",
+  // END DISH CATEGORIES
+
+  // GENERAL
+  VALIDATION_ERROR: "Lỗi xác thực",
+  TOKEN_IS_REQUIRED: "Token là bắt buộc",
+  TOKEN_IS_INVALID: "Token không hợp lệ",
+  USER_NOT_FOUND: "Không tìm thấy người dùng",
+  ACCESS_DENIED: "Truy cập bị từ chối",
+  UNAUTHORIZED: "Chưa được xác thực",
+  FORBIDDEN: "Bạn không có quyền truy cập vào tài nguyên này.",
+  // END GENERAL
+
+  // INGREDIENT
+  DELETE_INGREDIENT_SUCESSFULLY: "Xóa nguyên liệu thành công",
+  INGREDIENT_NOT_FOUND: "Không tìm thấy nguyên liệu",
+  IMPORT_ORDER_ALREADY_CONFIRMED: "Đơn nhập hàng này đã được xác nhận",
+  IMPORT_ORDER_CONFIRMED_SUCCESSFULLY: "Xác nhận đơn nhập hàng thành công",
+  GET_ALL_CATEGORY_SUCCESS: "Lấy tất cả danh mục thành công",
+  CATEGORY_LIST_SUCCESS: "Lấy danh sách danh mục thành công",
+  DISPAY_ORDER_STATUS_INVALID: "Trạng thái phải là một chuỗi",
+  DISPAY_ORDER_STATUS: "Trạng thái phải là 'active' hoặc 'inactive'",
+  IMAGE_URL_MUST_BE_STRING: "URL hình ảnh phải là một chuỗi",
+  IMAGE_MUST_BE_VALID_URL: "Hình ảnh phải là một URL hợp lệ",
+  IMAGE_REQUIRED: "Hình ảnh là bắt buộc",
+  INGREDIENT_NAME_IS_REQUIRED: "Tên nguyên liệu là bắt buộc",
+  INGREDIENT_NAME_MUST_BE_STRING: "Tên nguyên liệu phải là một chuỗi",
+  INGREDIENT_NAME_MIN_LENGTH: "Tên nguyên liệu phải dài ít nhất 2 ký tự",
+  CATEGORY_ID_IS_REQUIRED: "Tên danh mục là bắt buộc",
+  CATEGORY_ID_INVALID: "ID danh mục không hợp lệ (phải là một MongoID)",
+  UNIT_IS_REQUIRED: "Đơn vị là bắt buộc",
+  UNIT_MUST_BE_STRING: "Đơn vị phải là một chuỗi",
+  UNIT_PRICE_IS_REQUIRED: "Đơn giá là bắt buộc",
+  UNIT_PRICE_MUST_BE_POSITIVE: "Đơn giá phải là một số lớn hơn 0",
+  MIN_STOCK_IS_REQUIRED: "Tồn kho tối thiểu là bắt buộc",
+  MIN_STOCK_MUST_BE_POSITIVE_INTEGER: "Tồn kho tối thiểu phải là số nguyên lớn hơn hoặc bằng 0",
+  INGREDIENT_CREATED_SUCCESSFULLY: "Tạo nguyên liệu thành công",
+  INGREDIENT_UPDATED_SUCCESSFULLY: "Cập nhật nguyên liệu thành công",
+  INGREDIENTS_FETCHED_SUCCESSFULLY: "Lấy danh sách nguyên liệu thành công",
+  ITEM_INGREDIENT_ID_IS_REQUIRED: "Mỗi mục hàng phải có một ingredientId",
+  ITEM_INGREDIENT_ID_INVALID: "ingredientId không hợp lệ (phải là một MongoID)",
+  RECIPE_INGREDIENT_ID_REQUIRED: "ID nguyên liệu trong công thức là bắt buộc",
+  RECIPE_INGREDIENT_ID_INVALID: "ID nguyên liệu trong công thức không hợp lệ",
+  // END INGREDIENT
+
+  // IMPORT ORDER
+  IMPORT_DATE_IS_REQUIRED: "Ngày nhập hàng là bắt buộc",
+  IMPORT_DATE_INVALID: "Ngày nhập hàng phải là một chuỗi định dạng ngày ISO 8601 hợp lệ",
+  STATUS_IS_REQUIRED: "Trạng thái là bắt buộc",
+  STATUS_INVALID: "Trạng thái phải là 'draft' hoặc 'confirmed'",
+  ITEMS_ARE_REQUIRED: "Mảng các mục hàng là bắt buộc và không được để trống",
+  ITEMS_MUST_BE_ARRAY: "Các mục hàng phải là một mảng",
+  ITEM_QUANTITY_IS_REQUIRED: "Mỗi mục hàng phải có số lượng",
+  ITEM_QUANTITY_MUST_BE_POSITIVE: "Số lượng mục hàng phải là một số lớn hơn 0",
+  ITEM_IMPORT_PRICE_IS_REQUIRED: "Mỗi mục hàng phải có giá nhập",
+  ITEM_IMPORT_PRICE_MUST_BE_POSITIVE: "Giá nhập mục hàng phải là một số lớn hơn hoặc bằng 0",
+  TAX_RATE_MUST_BE_POSITIVE: "Thuế suất phải là một số lớn hơn hoặc bằng 0",
+  IMPORT_ORDER_CREATED_SUCCESSFULLY: "Tạo đơn nhập hàng thành công",
+  IMPORT_ORDERS_FETCHED_SUCCESSFULLY: "Lấy danh sách đơn nhập hàng thành công",
+  IMPORT_ORDER_DETAIL_FETCHED_SUCCESSFULLY: "Lấy chi tiết đơn nhập hàng thành công",
+  IMPORT_ORDER_NOT_FOUND: "Không tìm thấy đơn nhập hàng",
+  // IMPORT ORDER
+
+  // ORDER
+  ORDER_NOT_PAID: "Đơn hàng chưa được thanh toán",
+  GET_PAYMENT_QR_SUCCESSFULLY: "Lấy mã QR thanh toán thành công",
+  ORDER_NOT_FOUND: "Không tìm thấy đơn hàng",
+  TABLE_NOT_FOUND: "Không tìm thấy bàn",
+  TABLE_ID_IS_REQUIRED: "ID bàn là bắt buộc",
+  TABLE_ID_IS_INVALID: "Định dạng ID bàn không hợp lệ",
+  GET_MENU_SUCCESS: "Lấy thực đơn thành công",
+  CREATE_ORDER_SUCCESS: "Đặt món thành công",
+  LOGIN_GUEST_SUCCESS: "Đăng nhập thành công",
+  ORDER_ITEMS_REQUIRED: "Các mục đơn hàng là bắt buộc",
+  ORDER_ITEMS_MUST_BE_ARRAY: "Các mục đơn hàng phải là một mảng",
+  ORDER_ITEMS_EMPTY: "Đơn hàng phải chứa ít nhất một món",
+  ORDER_DISH_ID_REQUIRED: "ID món ăn là bắt buộc",
+  ORDER_DISH_ID_INVALID: "ID món ăn không hợp lệ",
+  ORDER_QUANTITY_REQUIRED: "Số lượng là bắt buộc",
+  ORDER_QUANTITY_MUST_BE_POSITIVE: "Số lượng phải lớn hơn 0",
+  ORDER_NOTE_MUST_BE_STRING: "Ghi chú phải là một chuỗi",
+  // END ORDER
+
+  // PAYMENT
+  ONLY_CONFIRMED_STATUS_ACCEPTED: "Chỉ trạng thái 'confirmed' mới được chấp nhận cho hành động này",
+  ORDER_NOT_FOUND_OR_NOT_PAID: "Không tìm thấy đơn hàng hoặc đơn hàng chưa được thanh toán",
+  // END PAYMENT
+
+  // PERMISSION
+  PERMISSION_ID_IS_REQUIRED: "ID quyền hạn là bắt buộc.",
+  PERMISSION_NAME_REQUIRED: "Tên quyền hạn là bắt buộc.",
+  PERMISSION_NAME_MUST_BE_STRING: "Tên quyền hạn phải là một chuỗi.",
+  PERMISSION_DESCRIPTION_MUST_BE_STRING: "Mô tả quyền hạn phải là một chuỗi.",
+  PERMISSION_MODULE_MUST_BE_STRING: "Module quyền hạn phải là một chuỗi.",
+  PERMISSION_NAME_ALREADY_EXISTS: "Tên quyền hạn đã tồn tại.",
+  GET_ALL_PERMISSIONS_SUCCESS: "Lấy tất cả quyền hạn thành công",
+  UPDATE_PERMISSION_SUCCESS: "Cập nhật quyền hạn thành công.",
+  PERMISSION_NOT_FOUND: "Không tìm thấy quyền hạn.",
+  DELETE_PERMISSION_SUCCESS: "Xóa quyền hạn thành công.",
+  PERMISSION_ID_NOT_FOUND: "Một hoặc nhiều ID quyền hạn không tồn tại.",
+  CREATE_PERMISSION_SUCCESS: "Tạo quyền hạn thành công.",
+  // END PERMISSION
+
+  // REVIEW - RATING
+  CONTENT_REPLY_IS_REQUIRED: "Nội dung phản hồi là bắt buộc",
+  CONTENT_MUST_BE_STRING: "Nội dung phản hồi phải là một chuỗi",
+  ORDER_NOT_FOUND_OR_ORDER_NOT_PAID: "Không tìm thấy đơn hàng hoặc đơn hàng chưa thanh toán",
+  REVIEW_NOT_FOUND: "Không tìm thấy đánh giá",
+  REVIEW_ID_IS_REQUIRED: "ID đánh giá là bắt buộc",
+  RATING_MUST_BE_BETWEEN_1_AND_5: "Đánh giá phải là số nguyên từ 1 đến 5",
+  INVALID_REVIEW_STATUS: "Trạng thái đánh giá không hợp lệ",
+  GET_ALL_REVIEW_SUCCESS: "Lấy tất cả đánh giá thành công",
+  INVALID_CATEGORY_ID: "ID danh mục không hợp lệ",
+  CATEGORY_ID_MUST_BE_A_STRING: "ID danh mục phải là một chuỗi",
+  ORDER_ID_IS_REQUIRED: "ID đơn hàng là bắt buộc",
+  ORDER_ID_MUST_BE_STRING: "ID đơn hàng phải là một chuỗi",
+  INVALID_ORDER_ID: "Kiểu ID đơn hàng không hợp lệ",
+  RATING_IS_REQUIRED: "Đánh giá là bắt buộc",
+  RATING_MUST_BE_FROM_1_TO_5: "Đánh giá phải là số nguyên từ 1 đến 5",
+  COMMENT_MUST_BE_STRING: "Bình luận phải là một chuỗi",
+  COMMENT_LENGTH_MUST_BE_LESS_THAN_500: "Độ dài bình luận phải ít hơn 500 ký tự",
+  REVIEW_POSTED_SUCCESSFULLY: "Đăng đánh giá thành công",
+  THIS_ITEMS_ALREADY_REVIEWED: "Mục này đã được đánh giá",
+  YOU_NOT_ALLOW_REVIEW_THIS_ORDER: "Bạn không được phép đánh giá đơn hàng này",
+  // END REVIEW - RATING
+
+  // SUPPLIER MESSAGE
+  SUPPLIER_IDS_MUST_BE_ARRAY: "ID nhà cung cấp phải là một mảng",
+  ARRAY_CONTAINS_INVALID_SUPPLIER_ID: "Mảng chứa ID nhà cung cấp không hợp lệ",
   SUPPLIER_NAME_REQUIRED: "Tên nhà cung cấp là bắt buộc.",
   SUPPLIER_NAME_INVALID: "Tên nhà cung cấp phải là một chuỗi.",
   SUPPLIER_TAX_CODE_REQUIRED: "Mã số thuế là bắt buộc.",
@@ -176,44 +257,28 @@ const USER_MESSAGES = {
   SUPPLIER_EMAIL_INVALID: "Địa chỉ email không hợp lệ.",
   SUPPLIER_ADDRESS_REQUIRED: "Địa chỉ là bắt buộc.",
   SUPPLIER_ADDRESS_INVALID: "Địa chỉ phải là một chuỗi.",
-
   CREATE_SUPPLIER_SUCCESS: "Tạo nhà cung cấp thành công.",
   SUPPLIER_UPDATE_SUCCESS: "Cập nhật nhà cung cấp thành công.",
   GET_ALL_SUPPLIERS_SUCCESS: "Lấy tất cả nhà cung cấp thành công",
   SUPPLIER_NOT_FOUND: "Không tìm thấy nhà cung cấp",
   SUPPLIER_ID_IS_REQUIRED: "ID nhà cung cấp là bắt buộc.",
   DELETE_SUPPLIER_SUCCESS: "Xóa nhà cung cấp thành công.",
+  SUPPLIER_ID_INVALID: "ID nhà cung cấp không hợp lệ (phải là một MongoID)",
+  // END SUPPLIER MESSAGE
 
-  // Category
-  CATEGORY_NAME_REQUIRED: "Tên danh mục là bắt buộc.",
-  CATEGORY_NAME_INVALID: "Tên danh mục phải là một chuỗi.",
-  CATEGORY_NAME_LENGTH: "Tên danh mục phải từ 1 đến 50 ký tự.",
-  CATEGORY_DESCRIPTION_REQUIRED: "Mô tả danh mục là bắt buộc.",
-  CATEGORY_DESCRIPTION_INVALID: "Mô tả danh mục phải là một chuỗi.",
-  CATEGORY_DESCRIPTION_LENGTH: "Mô tả danh mục không được vượt quá 255 ký tự.",
-  CATEGORY_STATUS_REQUIRED: "Trạng thái danh mục là bắt buộc.",
-  CATEGORY_STATUS_INVALID: "Trạng thái danh mục phải là 'active' hoặc 'inactive'.",
-  CREATE_CATEGORY_SUCCESS: "Tạo danh mục thành công.",
-  UPDATE_CATEGORY_SUCCESS: "Cập nhật danh mục thành công.",
+  // TABLE
+  CAPACITY_REQUIRED: "Số ghế là bắt buộc.",
+  CAPACITY_MUST_BE_POSITIVE_INTEGER: "Số ghế phải là một số nguyên dương.",
+  GET_ALL_TABLES_SUCCESS: "Lấy tất cả danh sách bàn thành công.",
+  UPDATE_TABLE_SUCCESS: "Cập nhật bàn thành công.",
+  CREATE_TABLE_SUCCESS: "Tạo bàn thành công.",
+  DELETE_TABLE_SUCCESS: "Xóa bàn thành công.",
+  ID_IS_REQUIRED: "ID không được để trống.",
+  INVALID_MONGODB_ID_FORMAT: "ID được cung cấp không đúng định dạng MongoDB ObjectId.",
+  REGENERATE_QR_TOKEN_SUCCESS: "Tạo lại token QR thành công.",
+  // END TABLE
 
-  // Messages for Ingredients
-  INGREDIENT_NAME_IS_REQUIRED: "Tên nguyên liệu là bắt buộc",
-  INGREDIENT_NAME_MUST_BE_STRING: "Tên nguyên liệu phải là một chuỗi",
-  INGREDIENT_NAME_MIN_LENGTH: "Tên nguyên liệu phải dài ít nhất 2 ký tự",
-  CATEGORY_ID_IS_REQUIRED: "Tên danh mục là bắt buộc",
-  CATEGORY_ID_INVALID: "ID danh mục không hợp lệ (phải là một MongoID)",
-  UNIT_IS_REQUIRED: "Đơn vị là bắt buộc",
-  UNIT_MUST_BE_STRING: "Đơn vị phải là một chuỗi",
-  UNIT_PRICE_IS_REQUIRED: "Đơn giá là bắt buộc",
-  UNIT_PRICE_MUST_BE_POSITIVE: "Đơn giá phải là một số lớn hơn 0",
-  MIN_STOCK_IS_REQUIRED: "Tồn kho tối thiểu là bắt buộc",
-  MIN_STOCK_MUST_BE_POSITIVE_INTEGER: "Tồn kho tối thiểu phải là số nguyên lớn hơn hoặc bằng 0",
-  // Ingredient Success Messages
-  INGREDIENT_CREATED_SUCCESSFULLY: "Tạo nguyên liệu thành công",
-  INGREDIENT_UPDATED_SUCCESSFULLY: "Cập nhật nguyên liệu thành công",
-  INGREDIENTS_FETCHED_SUCCESSFULLY: "Lấy danh sách nguyên liệu thành công",
-
-  // New Messages for Roles
+  // ROLE
   ROLE_ID_IS_REQUIRED: "ID vai trò là bắt buộc.",
   ROLE_NAME_REQUIRED: "Tên vai trò là bắt buộc.",
   ROLE_NAME_MUST_BE_STRING: "Tên vai trò phải là một chuỗi.",
@@ -229,66 +294,7 @@ const USER_MESSAGES = {
   ROLE_NOT_FOUND: "Không tìm thấy vai trò.",
   DELETE_ROLE_SUCCESS: "Xóa vai trò thành công.",
   ROLE_NOT_FOUND_OR_INACTIVE: "Vai trò không tìm thấy hoặc đang bị khóa",
-
-  // New Messages for Permissions
-  PERMISSION_ID_IS_REQUIRED: "ID quyền hạn là bắt buộc.",
-  PERMISSION_NAME_REQUIRED: "Tên quyền hạn là bắt buộc.",
-  PERMISSION_NAME_MUST_BE_STRING: "Tên quyền hạn phải là một chuỗi.",
-  PERMISSION_DESCRIPTION_MUST_BE_STRING: "Mô tả quyền hạn phải là một chuỗi.",
-  PERMISSION_MODULE_MUST_BE_STRING: "Module quyền hạn phải là một chuỗi.",
-  PERMISSION_NAME_ALREADY_EXISTS: "Tên quyền hạn đã tồn tại.",
-  GET_ALL_PERMISSIONS_SUCCESS: "Lấy tất cả quyền hạn thành công",
-  UPDATE_PERMISSION_SUCCESS: "Cập nhật quyền hạn thành công.",
-  PERMISSION_NOT_FOUND: "Không tìm thấy quyền hạn.",
-  DELETE_PERMISSION_SUCCESS: "Xóa quyền hạn thành công.",
-  PERMISSION_ID_NOT_FOUND: "Một hoặc nhiều ID quyền hạn không tồn tại.",
-  CREATE_PERMISSION_SUCCESS: "Tạo quyền hạn thành công.",
-
-  // --- Import Order Messages ---
-  SUPPLIER_ID_INVALID: "ID nhà cung cấp không hợp lệ (phải là một MongoID)",
-
-  IMPORT_DATE_IS_REQUIRED: "Ngày nhập hàng là bắt buộc",
-  IMPORT_DATE_INVALID: "Ngày nhập hàng phải là một chuỗi định dạng ngày ISO 8601 hợp lệ",
-
-  STATUS_IS_REQUIRED: "Trạng thái là bắt buộc",
-  STATUS_INVALID: "Trạng thái phải là 'draft' hoặc 'confirmed'",
-
-  ITEMS_ARE_REQUIRED: "Mảng các mục hàng là bắt buộc và không được để trống",
-  ITEMS_MUST_BE_ARRAY: "Các mục hàng phải là một mảng",
-
-  ITEM_INGREDIENT_ID_IS_REQUIRED: "Mỗi mục hàng phải có một ingredientId",
-  ITEM_INGREDIENT_ID_INVALID: "ingredientId không hợp lệ (phải là một MongoID)",
-
-  ITEM_QUANTITY_IS_REQUIRED: "Mỗi mục hàng phải có số lượng",
-  ITEM_QUANTITY_MUST_BE_POSITIVE: "Số lượng mục hàng phải là một số lớn hơn 0",
-
-  ITEM_IMPORT_PRICE_IS_REQUIRED: "Mỗi mục hàng phải có giá nhập",
-  ITEM_IMPORT_PRICE_MUST_BE_POSITIVE: "Giá nhập mục hàng phải là một số lớn hơn hoặc bằng 0",
-
-  TAX_RATE_MUST_BE_POSITIVE: "Thuế suất phải là một số lớn hơn hoặc bằng 0",
-  IMPORT_ORDER_CREATED_SUCCESSFULLY: "Tạo đơn nhập hàng thành công",
-  IMPORT_ORDERS_FETCHED_SUCCESSFULLY: "Lấy danh sách đơn nhập hàng thành công",
-  IMPORT_ORDER_DETAIL_FETCHED_SUCCESSFULLY: "Lấy chi tiết đơn nhập hàng thành công",
-  IMPORT_ORDER_NOT_FOUND: "Không tìm thấy đơn nhập hàng",
-
-  // --- Dish Categories ---
-  CATEGORY_NAME_IS_REQUIRED: "Tên danh mục là bắt buộc",
-  CATEGORY_NAME_MUST_BE_STRING: "Tên danh mục phải là một chuỗi",
-  // CATEGORY_ID_INVALID: "ID danh mục không hợp lệ",
-
-  CATEGORY_CREATED_SUCCESSFULLY: "Tạo danh mục món ăn thành công",
-  CATEGORIES_FETCHED_SUCCESSFULLY: "Lấy danh sách danh mục món ăn thành công",
-  CATEGORY_DETAIL_FETCHED_SUCCESSFULLY: "Lấy chi tiết danh mục món ăn thành công",
-  CATEGORY_UPDATED_SUCCESSFULLY: "Cập nhật danh mục món ăn thành công",
-  CATEGORY_DELETED_SUCCESSFULLY: "Xóa danh mục món ăn thành công",
-
-  INGREDIENT_CATEGORY_NOT_FOUND: "Không tìm thấy danh mục nguyên liệu",
-  CATEGORY_NOT_FOUND: "Không tìm thấy danh mục món ăn",
-  CATEGORY_HAS_DISHES: "Không thể xóa danh mục này vì nó đang chứa các món ăn",
-  PHONE_REQUIRED: "Số điện thoại là bắt buộc",
-  PHONE_MUST_BE_STRING: "Số điện thoại phải là một chuỗi",
-  PHONE_LENGTH_MUST_BE_FROM_10_TO_11: "Độ dài số điện thoại phải từ 10 đến 11 ký tự",
-  PHONE_IS_INVALID: "Định dạng số điện thoại không hợp lệ",
+  // END ROLE
 
   // STATUS
   STATUS_MUST_BE_STRING: "Trạng thái phải là một chuỗi",
@@ -298,40 +304,16 @@ const USER_MESSAGES = {
   ACCOUNT_ID_IS_INVALID: "ID tài khoản không hợp lệ",
   ROLE_ID_IS_INVALID: "ID vai trò không hợp lệ",
   NO_IMAGE_UPLOADED: "Không có hình ảnh nào được tải lên",
+  // END STATUS
 
-  // Thêm mới
+  // OTHERS
   DISPLAY_ORDER_REQUIRED: "Thứ tự hiển thị là bắt buộc",
   DISPLAY_ORDER_INTEGER: "Thứ tự hiển thị phải là một số nguyên và lớn hơn 0",
   FILE_TYPE_NOT_SUPPORTED: "Loại tệp không được hỗ trợ",
   DELETE_DISH_CATEGORY_SUCCESS: "Xóa danh mục món ăn thành công",
   DISH_CATEFORY_ID_NOT_FOUND: "Không tìm thấy ID danh mục món ăn",
-  // --- Dish Validation ---
-  DISH_NAME_REQUIRED: "Tên món ăn là bắt buộc",
-  DISH_NAME_MUST_BE_STRING: "Tên món ăn phải là một chuỗi",
-  DISH_NAME_LENGTH: "Tên món ăn phải từ 1 đến 200 ký tự",
-
-  DISH_PRICE_REQUIRED: "Giá món ăn là bắt buộc",
-  DISH_PRICE_MUST_BE_NUMBER: "Giá món ăn phải là một số",
-  DISH_PRICE_MUST_BE_POSITIVE: "Giá món ăn phải lớn hơn hoặc bằng 0",
-  DISH_DESCRIPTION_REQUIRED: "Mô tả món ăn là bắt buộc",
-
-  DISH_DESCRIPTION_MUST_BE_STRING: "Mô tả phải là một chuỗi",
-
-  DISH_STATUS_REQUIRED: "Trạng thái món ăn là bắt buộc",
-  DISH_STATUS_INVALID: "Trạng thái món ăn không hợp lệ",
-
-  DISH_CATEGORY_REQUIRED: "ID danh mục là bắt buộc",
-  DISH_CATEGORY_INVALID: "ID danh mục không hợp lệ",
-
-  DISH_RECIPE_REQUIRED: "Công thức món ăn là bắt buộc",
-  DISH_RECIPE_MUST_BE_ARRAY: "Công thức món ăn phải là một mảng",
-
-  RECIPE_INGREDIENT_ID_REQUIRED: "ID nguyên liệu trong công thức là bắt buộc",
-  RECIPE_INGREDIENT_ID_INVALID: "ID nguyên liệu trong công thức không hợp lệ",
   RECIPE_QUANTITY_REQUIRED: "Số lượng trong công thức là bắt buộc",
   RECIPE_QUANTITY_MUST_BE_POSITIVE: "Số lượng trong công thức phải lớn hơn 0",
-
-  DISH_IMAGE_REQUIRED: "Hình ảnh món ăn là bắt buộc",
   FORGOT_PASSWORD_TOKEN_EXPIRED: "Token đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu mã mới.",
   SESSION_EXPIRED: "Phiên làm việc đã hết hạn. Vui lòng thử lại."
 }

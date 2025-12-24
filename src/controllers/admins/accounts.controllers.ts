@@ -13,7 +13,7 @@ import {
 import accountsServices from "../../services/accounts.services"
 import { ParamsDictionary } from "express-serve-static-core"
 import USER_MESSAGES from "../../constants/message"
-import { Code, ObjectId } from "mongodb"
+import { ObjectId } from "mongodb"
 import databaseService from "../../services/database.servies"
 import HTTP_STATUS from "../../constants/httpStatus"
 import { AccountVerifyStatus, MESSAGE_CODES } from "../../constants/enums"

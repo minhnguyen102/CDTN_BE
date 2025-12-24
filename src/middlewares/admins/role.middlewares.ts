@@ -1,17 +1,16 @@
-import { Request } from "express"
 import { checkSchema, ParamSchema } from "express-validator"
 import { validate } from "../../utils/validation"
 import USER_MESSAGES from "../../constants/message"
 import HTTP_STATUS from "../../constants/httpStatus"
 import { ErrorWithStatus } from "../../models/Errors"
-import { RoleStatus } from "../../constants/enums" // Giả sử bạn có enum này
-import { isMongoId } from "validator" // Import trực tiếp để dùng trong custom validation
+import { RoleStatus } from "../../constants/enums"
+import { isMongoId } from "validator"
 import databaseService from "../../services/database.servies"
 import { ObjectId } from "mongodb"
 
 const roleIdValidate: ParamSchema = {
   notEmpty: {
-    errorMessage: USER_MESSAGES.ROLE_ID_IS_REQUIRED // Cần thêm message này
+    errorMessage: USER_MESSAGES.ROLE_ID_IS_REQUIRED
   },
   isMongoId: {
     errorMessage: new ErrorWithStatus({
@@ -23,20 +22,19 @@ const roleIdValidate: ParamSchema = {
 
 const nameValidation: ParamSchema = {
   notEmpty: {
-    errorMessage: USER_MESSAGES.ROLE_NAME_REQUIRED // Cần thêm message này
+    errorMessage: USER_MESSAGES.ROLE_NAME_REQUIRED
   },
   isString: {
-    errorMessage: USER_MESSAGES.ROLE_NAME_MUST_BE_STRING // Cần thêm message này
+    errorMessage: USER_MESSAGES.ROLE_NAME_MUST_BE_STRING
   },
   custom: {
     options: async (value: string) => {
       const role = await databaseService.roles.findOne({ name: value })
 
       if (role) {
-        // Nếu tìm thấy role, nghĩa là name đã tồn tại -> ném lỗi
         throw new ErrorWithStatus({
-          message: USER_MESSAGES.ROLE_NAME_ALREADY_EXISTS, // Cần thêm message này
-          status: HTTP_STATUS.CONFLICT // 409 Conflict là status code phù hợp
+          message: USER_MESSAGES.ROLE_NAME_ALREADY_EXISTS,
+          status: HTTP_STATUS.CONFLICT
         })
       }
 
@@ -49,28 +47,27 @@ const nameValidation: ParamSchema = {
 const descriptionValidation: ParamSchema = {
   optional: true,
   isString: {
-    errorMessage: USER_MESSAGES.ROLE_DESCRIPTION_MUST_BE_STRING // Cần thêm message này
+    errorMessage: USER_MESSAGES.ROLE_DESCRIPTION_MUST_BE_STRING
   },
   trim: true
 }
 
 const statusValidation: ParamSchema = {
   notEmpty: {
-    errorMessage: USER_MESSAGES.ROLE_STATUS_REQUIRED // Cần thêm message này
+    errorMessage: USER_MESSAGES.ROLE_STATUS_REQUIRED
   },
   isIn: {
     options: [Object.values(RoleStatus)],
-    errorMessage: USER_MESSAGES.INVALID_ROLE_STATUS // Cần thêm message này
+    errorMessage: USER_MESSAGES.INVALID_ROLE_STATUS
   }
 }
 
 const permissionIdsValidation: ParamSchema = {
-  // Phải tồn tại (có thể là mảng rỗng, nhưng không được thiếu)
   exists: {
-    errorMessage: USER_MESSAGES.ROLE_PERMISSION_IDS_REQUIRED // Cần thêm
+    errorMessage: USER_MESSAGES.ROLE_PERMISSION_IDS_REQUIRED
   },
   isArray: {
-    errorMessage: USER_MESSAGES.ROLE_PERMISSION_IDS_MUST_BE_ARRAY // Cần thêm
+    errorMessage: USER_MESSAGES.ROLE_PERMISSION_IDS_MUST_BE_ARRAY
   },
   custom: {
     options: async (value: any[]) => {
@@ -80,17 +77,16 @@ const permissionIdsValidation: ParamSchema = {
       if (value.length === 0) {
         return true
       }
-      // Kiểm tra từng ID trong mảng
+
       for (const id of value) {
         if (!isMongoId(String(id))) {
-          // Báo lỗi ngay lập tức nếu tìm thấy 1 ID không hợp lệ
           throw new ErrorWithStatus({
             message: `${USER_MESSAGES.INVALID_MONGODB_ID_FORMAT}: ${id}`,
             status: HTTP_STATUS.BAD_REQUEST
           })
         }
       }
-      // Kiểm tra tồn tại trong db permissions
+
       const objectIdArray = value.map((id) => new ObjectId(String(id)))
       const count = await databaseService.permissions.countDocuments({
         _id: { $in: objectIdArray }
@@ -107,8 +103,6 @@ const permissionIdsValidation: ParamSchema = {
     }
   }
 }
-
-// --- Xuất các middleware validation ---
 
 export const createRoleValidation = validate(
   checkSchema(
@@ -131,7 +125,6 @@ export const updateRoleValidation = validate(
         ...nameValidation,
         notEmpty: false,
         custom: {
-          // ghi đè custom bên trên
           options: async (value: string, { req }) => {
             const role_id = req.params?.role_id
 
@@ -139,7 +132,6 @@ export const updateRoleValidation = validate(
               _id: new ObjectId(String(role_id))
             })
 
-            // nếu là id ma => roleBeingUpdated = null
             if (!roleBeingUpdated) {
               throw new ErrorWithStatus({
                 message: USER_MESSAGES.ROLE_NOT_FOUND,
@@ -147,12 +139,10 @@ export const updateRoleValidation = validate(
               })
             }
 
-            // Kiểm tra xem có trùng tên với các role đã tồn tại rồi hay không
             const role = await databaseService.roles.findOne({
               name: value,
               _id: { $ne: new ObjectId(String(role_id)) }
             })
-            // console.log("role", role)
 
             if (role) {
               throw new ErrorWithStatus({
@@ -173,14 +163,13 @@ export const updateRoleValidation = validate(
       permissionIds: {
         optional: true,
         ...permissionIdsValidation,
-        exists: false // Ghi đè exists để cho phép bỏ qua
+        exists: false
       }
     },
     ["body", "params"]
   )
 )
 
-// Dùng cho GET /:role_id và DELETE /:role_id
 export const roleIdValidation = validate(
   checkSchema(
     {

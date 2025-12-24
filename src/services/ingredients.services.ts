@@ -304,6 +304,7 @@ class IngredientServices {
       .toArray()
     return updatedIngredient
   }
+
   async delete({ id }: { id: string }) {
     const result = await databaseService.ingredients.updateOne(
       {

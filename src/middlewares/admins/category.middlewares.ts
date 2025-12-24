@@ -4,7 +4,6 @@ import USER_MESSAGES from "../../constants/message"
 import { ErrorWithStatus } from "../../models/Errors"
 import HTTP_STATUS from "../../constants/httpStatus"
 
-// Validate cho name
 const nameValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.CATEGORY_NAME_REQUIRED
@@ -19,7 +18,6 @@ const nameValidation: ParamSchema = {
   }
 }
 
-// Validate cho description
 const descriptionValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.CATEGORY_DESCRIPTION_REQUIRED
@@ -34,7 +32,6 @@ const descriptionValidation: ParamSchema = {
   }
 }
 
-// Validate cho status
 const statusValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.CATEGORY_STATUS_REQUIRED
@@ -45,7 +42,6 @@ const statusValidation: ParamSchema = {
   }
 }
 
-// Validate cho Id
 const idParamValidation: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.ID_IS_REQUIRED
@@ -58,7 +54,6 @@ const idParamValidation: ParamSchema = {
   }
 }
 
-// Validation cho tạo mới category
 export const createCategoryValidation = validate(
   checkSchema(
     {

@@ -1,8 +1,3 @@
-export enum RoleAccount {
-  Employee = "Employee", // tương ứng = 0
-  Owner = "Owner"
-}
-
 export enum AccountVerifyStatus {
   UNVERIFIED = "unverified", // chưa xác thực (Mặc định)
   VERIFIED = "verified", // Đã xác thực

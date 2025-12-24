@@ -142,7 +142,6 @@ const idParamValidation: ParamSchema = {
   }
 }
 
-// Validation cho CREATE DISH
 export const createDishValidation = validate(
   checkSchema(
     {
@@ -155,7 +154,6 @@ export const createDishValidation = validate(
 
       recipe: recipeValidation,
 
-      // Validate chi tiết từng phần tử trong mảng recipe
       "recipe.*.ingredientId": {
         notEmpty: { errorMessage: USER_MESSAGES.RECIPE_INGREDIENT_ID_REQUIRED },
         custom: {
@@ -189,7 +187,6 @@ export const createDishValidation = validate(
   )
 )
 
-// Validation cho UPDATE DISH
 export const updateDishValidation = validate(
   checkSchema(
     {
