@@ -99,3 +99,11 @@ export enum ReviewStatus {
   ACTIVE = "Active",
   HIDDEN = "Hidden"
 }
+
+export enum BookingStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+  NO_SHOW = "NO_SHOW"
+}
