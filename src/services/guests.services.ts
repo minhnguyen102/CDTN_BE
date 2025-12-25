@@ -164,7 +164,7 @@ class GuestService {
     if (table.status === TableStatus.OCCUPIED && table.currentOrderId) {
       currentOrderId = table.currentOrderId
     }
-
+    console.log("currentOrderId: ", currentOrderId)
     return {
       accessToken,
       guest: {

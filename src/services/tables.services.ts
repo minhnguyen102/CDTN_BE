@@ -113,6 +113,17 @@ class TableServices {
   }
 
   async updateTable({ payload, id }: { payload: updateTableReqBody; id: string }) {
+    const { status } = payload
+
+    const table = (await databaseService.tables.findOne({
+      _id: new ObjectId(id)
+    })) as Table
+    if (status === TableStatus.AVAILABLE && table.currentOrderId) {
+      throw new ErrorWithStatus({
+        message: "Bàn đang phục vụ, không được chuyển trạng thái về đang trống",
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
     const result = await databaseService.tables.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
