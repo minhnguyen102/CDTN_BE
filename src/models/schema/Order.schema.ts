@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb"
-import { OrderStatus, OrderItemStatus, PaymentStatus, PaymentMethod } from "../../constants/enums"
+import { OrderItemStatus, PaymentStatus, PaymentMethod } from "../../constants/enums"
 import { Interface } from "readline"
 
 export interface OrderItem {

@@ -66,14 +66,6 @@ export const MESSAGE_CODES = {
   FORGOT_PASSWORD_TOKEN_INVALID: "FORGOT_PASSWORD_TOKEN_INVALID"
 }
 
-export enum OrderStatus {
-  PENDING = "Pending",
-  PROCESSING = "Processing",
-  DELIVERED = "Delivered",
-  PAID = "Paid",
-  CANCELLED = "Cancelled"
-}
-
 //Trạng thái cho từng món ăn lẻ (để track món nào ra rồi, món nào chưa)
 export enum OrderItemStatus {
   Pending = "Pending", // Chờ nấu

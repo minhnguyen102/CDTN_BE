@@ -4788,7 +4788,170 @@ paths:
           description: Dữ liệu không hợp lệ (Sai định dạng JSON, File quá lớn...)
         '401':
           description: Chưa đăng nhập (Thiếu Token)
-    
+  
+  /dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Lấy dữ liệu thống kê tổng quan (Admin)
+      description: >
+        API trả về dữ liệu toàn diện cho trang Dashboard:
+        1. **Stats**: 4 thẻ chỉ số (Doanh thu, Đơn hàng, Món ăn, Bàn).
+        2. **Chart**: Dữ liệu biểu đồ doanh thu theo khung giờ (ngày) hoặc ngày (tuần/tháng).
+        3. **Top Products**: 5 món ăn bán chạy nhất (theo doanh thu).
+        4. **Recent Orders**: 5 đơn hàng mới nhất kèm trạng thái xử lý thời gian thực.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: day
+          description: >
+            Khung thời gian thống kê:
+            - `day`: Xem theo giờ trong ngày hôm nay (so với hôm qua).
+            - `week`: Xem theo thứ trong tuần này (so với tuần trước).
+            - `month`: Xem theo ngày trong tháng này (so với tháng trước).
+      responses:
+        '200':
+          description: Lấy dữ liệu thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Success"
+                  data:
+                    type: object
+                    properties:
+                      # --- 1. THẺ THỐNG KÊ (4 Cards) ---
+                      stats:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                              enum: [revenue, orders, dishes, tables]
+                              description: Mã định danh của thẻ
+                            label:
+                              type: string
+                              description: | 
+                                Tên hiển thị (VD: Tổng doanh thu)
+                            value:
+                              oneOf:
+                                - type: number
+                                - type: string
+                              description: Giá trị chính (Số tiền, số lượng hoặc string tỉ lệ bàn '12/20')
+                              example: 15450000
+                            trend_value:
+                              type: number
+                              description: | 
+                                Phần trăm tăng/giảm (VD: 12.5)
+                            trend_type:
+                              type: string
+                              enum: [up, down, neutral]
+                              description: Hướng mũi tên (Tăng/Giảm/Đi ngang)
+                            trend_label:
+                              type: string
+                              description: | 
+                                Nhãn so sánh (VD: 'so với hôm qua')
+
+                      # --- 2. BIỂU ĐỒ (Chart) ---
+                      chart:
+                        type: object
+                        properties:
+                          categories:
+                            type: array
+                            description: Nhãn trục hoành (Giờ hoặc Ngày/Thứ)
+                            items:
+                              type: string
+                            example: ["08:00", "09:00", "10:00", "11:00"]
+                          series:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  example: "Doanh thu"
+                                data:
+                                  type: array
+                                  description: Dữ liệu trục tung (Tiền)
+                                  items:
+                                    type: number
+                                  example: [0, 500000, 1200000, 850000]
+
+                      # --- 3. TOP MÓN BÁN CHẠY ---
+                      top_products:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: ID món ăn
+                            name:
+                              type: string
+                              example: "Lẩu Thái Hải Sản"
+                            price:
+                              type: number
+                              description: Giá bán trung bình hoặc giá hiện tại
+                              example: 350000
+                            sales:
+                              type: integer
+                              description: Số lượng đã bán (quantity)
+                              example: 45
+                            revenue:
+                              type: number
+                              description: Tổng doanh thu từ món này
+                              example: 15750000
+
+                      # --- 4. ĐƠN HÀNG GẦN ĐÂY ---
+                      recent_orders:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: ID đơn hàng
+                            table:
+                              type: string
+                              description: Tên bàn
+                              example: "Bàn 10"
+                            amount:
+                              type: number
+                              description: Tổng tiền đơn hàng (totalAmount)
+                              example: 540000
+                            status:
+                              type: string
+                              enum: [completed, cooking, serving, pending]
+                              description: >
+                                Trạng thái hiển thị (Logic):
+                                - `completed`: Đã thanh toán (PAID).
+                                - `cooking`: Chưa trả tiền + Có món đang nấu.
+                                - `serving`: Chưa trả tiền + Có món đã lên bàn.
+                                - `pending`: Đơn mới tạo.
+                              example: "cooking"
+                            type:
+                              type: string
+                              example: "Dùng tại bàn"
+                            time:
+                              type: string
+                              description: Giờ tạo đơn (Format HH:mm)
+                              example: "19:30"
+
+        '401':
+          description: Chưa đăng nhập (Thiếu Token)
+        '403':
+          description: Không có quyền truy cập (Token không phải Admin)
+        '500':
+          description: Lỗi Server
   /dishes/public:
     get:
       tags:
