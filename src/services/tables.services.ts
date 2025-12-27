@@ -1,12 +1,14 @@
 import databaseService from "./database.servies"
 import Table from "../models/schema/Table.schema"
-import { TableStatus } from "../constants/enums"
+import { BookingStatus, TableStatus } from "../constants/enums"
 import { genQRtable } from "../utils/qr"
 import { randomQrToken } from "../utils/crypto"
 import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { ObjectId } from "mongodb"
 import { updateTableReqBody } from "../models/requests/Account.request"
+import USER_MESSAGES from "../constants/message"
+import { parseTimeToMinutes } from "../utils/helpers"
 
 class TableServices {
   async createTable({ capacity }: { capacity: number }) {
@@ -167,6 +169,62 @@ class TableServices {
       qrToken,
       QRtable: newQRtable
     }
+  }
+
+  async getAvailableTables({ bookingId }: { bookingId: string }) {
+    const MEAL_DURATION = 120 // 2 tiếng: fix cứng cho một bữa ăn
+    const booking = await databaseService.bookings.findOne({
+      _id: new ObjectId(bookingId)
+    })
+    if (!booking) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.BOOKING_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    const { guestNumber, bookingDate, bookingTime } = booking
+    const requestTimeMinutes = parseTimeToMinutes(bookingTime)
+    // Xác định khung giờ trong ngày hôm đó
+    const startOffDay = new Date(bookingDate)
+    startOffDay.setHours(0, 0, 0, 0)
+    const endOffDay = new Date(bookingDate)
+    endOffDay.setHours(23, 59, 59, 99)
+
+    // Tìm ra các bàn đã bị đặt
+    const conflictBookings = await databaseService.bookings
+      .find({
+        bookingDate: { $gte: startOffDay, $lte: endOffDay },
+        _id: { $ne: new ObjectId(bookingId) },
+        status: { $nin: [BookingStatus.CANCELLED, BookingStatus.NO_SHOW] },
+        tableId: { $ne: null as any }
+      })
+      .toArray() // lấy ra danh sách các booking trong ngày hôm đó (trong trạng thái chờ, xác nhận hoặc đã xử lí)
+
+    const busyTableIds: ObjectId[] = []
+    for (const item of conflictBookings) {
+      const existingTimeMinutes = parseTimeToMinutes(item.bookingTime)
+      if (Math.abs(existingTimeMinutes - requestTimeMinutes) < MEAL_DURATION) {
+        if (item.tableId) busyTableIds.push(item.tableId)
+      }
+    }
+
+    // Tìm ra danh sách bàn hợp lí
+    const availableTables = await databaseService.tables
+      .find(
+        {
+          capacity: { $gte: guestNumber },
+          _id: { $nin: busyTableIds }
+        },
+        {
+          projection: {
+            number: 1,
+            capacity: 1
+          }
+        }
+      )
+      .sort({ capacity: 1 })
+      .toArray()
+    return availableTables
   }
 }
 

@@ -102,8 +102,8 @@ export enum ReviewStatus {
 
 export enum BookingStatus {
   PENDING = "Pending",
-  CONFIRMED = "Confirmed",
-  COMPLETED = "Completed",
+  CONFIRMED = "Confirmed", // xác nhận giữ chỗ cho khách
+  COMPLETED = "Completed", // khách đến như đã hẹn
   CANCELLED = "Cancelled",
   NO_SHOW = "No_show"
 }

@@ -2,6 +2,7 @@ import { Router } from "express"
 import {
   createTableController,
   getAllTablesController,
+  getAvailableTablesController,
   regenerateQrTokenController,
   updateTableController
 } from "../../controllers/admins/tables.controllers"
@@ -75,6 +76,18 @@ tableRoutes.patch(
   checkPermission("regenerate_table_qr"),
   regenerateQrTokenValidation,
   wrapHandlerFunction(regenerateQrTokenController)
+)
+
+/**
+ * Path: /tables/available-for-booking/:bookingId
+ * Method: GET
+ * Desc: Lấy danh sách bàn phù hợp cho 1 booking cụ thể
+ */
+tableRoutes.get(
+  "/available-for-booking/:bookingId",
+  accessTokenValidation,
+  verifiedUserValidation,
+  wrapHandlerFunction(getAvailableTablesController)
 )
 
 export default tableRoutes

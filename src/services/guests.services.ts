@@ -563,7 +563,7 @@ class GuestService {
     let overlappingCount = 0
     for (const booking of activeBookings) {
       const existingTimeMinutes = parseTimeToMinutes(booking.bookingTime)
-      if (existingTimeMinutes - reqTimesToMinutes < MEAL_DURATION_MINUTES) {
+      if (Math.abs(existingTimeMinutes - reqTimesToMinutes) < MEAL_DURATION_MINUTES) {
         overlappingCount++
       }
     }

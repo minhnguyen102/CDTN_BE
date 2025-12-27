@@ -19,5 +19,18 @@ bookingAdminRoutes.get(
   // getAllBookingValidation
   wrapHandlerFunction(getAllBookingsController)
 )
+/**
+ * Path: /bookings/:status
+ * Method: PATCH
+ * * Headers: {Authorization: Bearer access_token}
+ */
+bookingAdminRoutes.get(
+  "/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  // checkPermission("view_bookings"), // chưa tạo
+  // getAllBookingValidation
+  wrapHandlerFunction(getAllBookingsController)
+)
 
 export default bookingAdminRoutes

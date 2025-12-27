@@ -60,6 +60,7 @@ const USER_MESSAGES = {
   // END ACCOUNT
 
   // BOOKING MESSAGES
+  BOOKING_NOT_FOUND: "Không tìm thấy đơn đặt",
   GUEST_NAME_IS_REQUIRED: "Tên khách hàng là bắt buộc",
   NAME_MUST_BE_A_STRING: "Tên khách hàng phải là chuỗi ký tự",
   PHONE_IS_REQUIRED: "Số điện thoại là bắt buộc",

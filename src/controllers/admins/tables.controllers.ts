@@ -72,3 +72,12 @@ export const regenerateQrTokenController = async (req: Request<ParamsDictionary,
     table
   })
 }
+
+export const getAvailableTablesController = async (req: Request, res: Response) => {
+  const { bookingId } = req.params
+  const result = await tableServices.getAvailableTables({ bookingId })
+  res.json({
+    message: "Danh sách bàn phù hợp với đơn đặt",
+    data: result
+  })
+}
