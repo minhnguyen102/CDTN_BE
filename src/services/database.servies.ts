@@ -15,6 +15,7 @@ import Order from "../models/schema/Order.schema"
 import Review from "../models/schema/Review.schema"
 import Recommendation from "../models/schema/Recomendation.schema"
 import Booking from "../models/schema/Booking.schema"
+import RestaurantSettings from "../models/schema/RestaurantSettings.schema"
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.sqjfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -91,6 +92,9 @@ class DatabaseService {
   }
   get bookings(): Collection<Booking> {
     return this.db.collection("bookings")
+  }
+  get restaurant_setting(): Collection<RestaurantSettings> {
+    return this.db.collection("restaurant_setting")
   }
 }
 

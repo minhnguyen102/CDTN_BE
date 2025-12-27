@@ -284,6 +284,46 @@ const USER_MESSAGES = {
   SUPPLIER_ID_INVALID: "ID nhà cung cấp không hợp lệ (phải là một MongoID)",
   // END SUPPLIER MESSAGE
 
+  // SETTING
+  SETTINGS: {
+    // Brand Name
+    BRAND_NAME_MUST_BE_STRING: "Tên thương hiệu phải là chuỗi ký tự",
+
+    // Common String fields
+    SLOGAN_MUST_BE_STRING: "Slogan phải là chuỗi ký tự",
+    DESCRIPTION_MUST_BE_STRING: "Mô tả phải là chuỗi ký tự",
+    ADDRESS_MUST_BE_STRING: "Địa chỉ phải là chuỗi ký tự",
+    HOTLINE_MUST_BE_STRING: "Hotline phải là chuỗi ký tự",
+    BANK_NAME_MUST_BE_STRING: "Tên ngân hàng phải là chuỗi ký tự",
+    ACCOUNT_NUMBER_MUST_BE_STRING: "Số tài khoản phải là chuỗi ký tự",
+    ACCOUNT_HOLDER_MUST_BE_STRING: "Tên chủ tài khoản phải là chuỗi ký tự",
+
+    // URL fields
+    LOGO_URL_MUST_BE_VALID: "Link Logo không hợp lệ",
+    FAVICON_MUST_BE_VALID: "Link Favicon không hợp lệ",
+    GOOGLE_MAP_URL_MUST_BE_VALID: "Link Google Map không hợp lệ",
+    QR_CODE_URL_MUST_BE_VALID: "Link mã QR không hợp lệ",
+
+    // Email
+    EMAIL_IS_INVALID: "Email không đúng định dạng",
+
+    // Arrays
+    SOCIAL_LINKS_MUST_BE_ARRAY: "Danh sách mạng xã hội phải là một mảng",
+    SOCIAL_PLATFORM_INVALID:
+      "Nền tảng mạng xã hội không hợp lệ (Chỉ chấp nhận: Facebook, Instagram, Youtube, Tiktok, Zalo)",
+    SOCIAL_URL_INVALID: "Đường dẫn mạng xã hội không hợp lệ",
+
+    OPENING_HOURS_MUST_BE_ARRAY: "Danh sách giờ mở cửa phải là một mảng",
+    OPENING_HOURS_LABEL_MUST_BE_STRING: "Nhãn giờ mở cửa (label) phải là chuỗi",
+    OPENING_HOURS_TIME_MUST_BE_STRING: "Thời gian mở cửa (time) phải là chuỗi",
+
+    // SEO
+    SEO_TITLE_MUST_BE_STRING: "Meta Title phải là chuỗi ký tự",
+    SEO_DESCRIPTION_MUST_BE_STRING: "Meta Description phải là chuỗi ký tự",
+    SEO_KEYWORDS_MUST_BE_ARRAY: "Keywords phải là một mảng các chuỗi"
+  },
+  // END SETTING
+
   // TABLE
   CAPACITY_REQUIRED: "Số ghế là bắt buộc.",
   CAPACITY_MUST_BE_POSITIVE_INTEGER: "Số ghế phải là một số nguyên dương.",

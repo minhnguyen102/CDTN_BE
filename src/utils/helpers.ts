@@ -46,3 +46,14 @@ export const parseTimeToMinutes = (timeString: string): number => {
   const [hours, minutes] = timeString.split(":").map(Number)
   return hours * 60 + minutes
 }
+
+export const getPublicIdFromUrl = (url: string) => {
+  try {
+    // Regex này cắt lấy phần sau chữ 'upload/' (và bỏ qua version v123...) và trước dấu chấm đuôi file
+    const regex = /\/upload\/(?:v\d+\/)?(.+)\.[a-z]+$/
+    const match = url.match(regex)
+    return match ? match[1] : null
+  } catch (error) {
+    return null
+  }
+}

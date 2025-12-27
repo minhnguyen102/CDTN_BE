@@ -2,6 +2,7 @@ import { v2 as cloudinary } from "cloudinary"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
 import multer from "multer"
 import dotenv from "dotenv"
+import { Request, Response, NextFunction } from "express"
 
 dotenv.config()
 
@@ -46,4 +47,37 @@ export const deleteFileFromCloudinary = async (filename: string) => {
   } catch (error) {
     console.error(`Error deleting file from Cloudinary: ${error}`)
   }
+}
+
+export const parseCloudinaryFiles = (req: Request, res: Response, next: NextFunction) => {
+  // Vì upload.fields trả về object dictionary nên phải ép kiểu
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined
+
+  if (!files) {
+    return next()
+  }
+
+  // 1. Xử lý Logo
+  if (files.logo && files.logo[0]) {
+    req.body.logoUrl = files.logo[0].path // Cloudinary trả về link ảnh trong .path
+  }
+
+  // 2. Xử lý Favicon
+  if (files.favicon && files.favicon[0]) {
+    req.body.favicon = files.favicon[0].path
+  }
+
+  const tryParseJSON = (field: string) => {
+    if (req.body[field] && typeof req.body[field] === "string") {
+      try {
+        req.body[field] = JSON.parse(req.body[field])
+      } catch (error) {
+        console.log(`Lỗi parse JSON trường ${field}:`, error)
+        // Nếu lỗi thì giữ nguyên hoặc set về undefined tùy logic
+      }
+    }
+  }
+  tryParseJSON("socialLinks")
+  tryParseJSON("openingHours")
+  next()
 }
