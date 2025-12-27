@@ -7,3 +7,7 @@ export interface GetBookingListReqQuery {
   date?: string
   search?: string // Tìm theo tên hoặc SĐT
 }
+
+export interface assignTableReqBody {
+  tableId: string
+}

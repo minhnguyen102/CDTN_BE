@@ -2,7 +2,7 @@ import { Router } from "express"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { checkPermission } from "../../middlewares/admins/auth.middlewares"
-import { getAllBookingsController } from "../../controllers/admins/bookings.controllers"
+import { assignTableController, getAllBookingsController } from "../../controllers/admins/bookings.controllers"
 const bookingAdminRoutes = Router()
 
 /**
@@ -33,4 +33,16 @@ bookingAdminRoutes.get(
   wrapHandlerFunction(getAllBookingsController)
 )
 
+/**
+ * Path: /bookings/:bookingId/assign-table
+ * Method: PUT
+ * Body: { "tableId": "65ae..." }
+ * Desc: Admin chọn bàn cho khách -> Đơn thành Confirmed
+ */
+bookingAdminRoutes.patch(
+  "/:bookingId/assign-table",
+  accessTokenValidation,
+  verifiedUserValidation,
+  wrapHandlerFunction(assignTableController)
+)
 export default bookingAdminRoutes
