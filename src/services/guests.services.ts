@@ -3,10 +3,10 @@ import { ErrorWithStatus } from "../models/Errors"
 import HTTP_STATUS from "../constants/httpStatus"
 import { signToken } from "../utils/jwt"
 import {
+  BookingStatus,
   DishCategoryStatus,
   DishStatus,
   OrderItemStatus,
-  OrderStatus,
   ROLE_GUEST,
   TableStatus,
   TokenType
@@ -16,6 +16,9 @@ import { ObjectId } from "mongodb"
 import Dish from "../models/schema/Dish.schema"
 import Order from "../models/schema/Order.schema"
 import USER_MESSAGES from "../constants/message"
+import { CreateBookingReqBody } from "../models/requests/Guest.request"
+import { parseTimeToMinutes, removeAccents } from "../utils/helpers"
+import Booking from "../models/schema/Booking.schema"
 
 export interface DishItemInputFE {
   dishId: string
@@ -526,6 +529,77 @@ class GuestService {
 
     return groupItems
   }
+
+  // BOOKING
+  async createBooking({ name, phone, bookingDate, bookingTime, guestNumber, note }: CreateBookingReqBody) {
+    // Số bàn trống[] = Số bàn thỏa mãn (chỗ ngồi) - số bàn đã được booking trong thời gian đó
+    const MEAL_DURATION_MINUTES = 120 // Cấu hình cứng là 120p cho một phiên ăn
+    // Số bàn trống
+    const totalSuitableTables = await databaseService.tables.countDocuments({
+      capacity: { $gte: guestNumber }
+    })
+
+    if (!totalSuitableTables) {
+      throw new ErrorWithStatus({
+        message: `Rất tiếc, nhà hàng không có bàn nào đủ chỗ cho ${guestNumber} người trong khung giờ ${bookingTime} ngày ${bookingDate}.`,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    // Số bàn (đã đặt cọc hoặc chờ duyệt) trong thời gian đó => Tìm trong danh sách booking của ngày hôm đó
+    const bookingDateObj = new Date(bookingDate)
+    const startOfDay = new Date(bookingDateObj.setHours(0, 0, 0, 0))
+    const endOfDay = new Date(bookingDateObj.setHours(23, 59, 59, 99))
+    // Lấy ra các booking trong ngày hôm đó
+    const activeBookings = await databaseService.bookings
+      .find({
+        bookingDate: { $gte: startOfDay, $lte: endOfDay }, // trong ngày hôm đó
+        status: { $in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] }, // trạng thái chờ duyệt hoặc đã xác nhận
+        guestCount: { $lte: Number(guestNumber) + 2 }
+      })
+      .toArray()
+
+    const reqTimesToMinutes = parseTimeToMinutes(bookingTime)
+    let overlappingCount = 0
+    for (const booking of activeBookings) {
+      const existingTimeMinutes = parseTimeToMinutes(booking.bookingTime)
+      if (existingTimeMinutes - reqTimesToMinutes < MEAL_DURATION_MINUTES) {
+        overlappingCount++
+      }
+    }
+    if (overlappingCount >= totalSuitableTables) {
+      throw new ErrorWithStatus({
+        message: `Rất tiếc, khung giờ ${bookingTime} đã hết bàn phù hợp. Vui lòng chọn giờ khác.`,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    // Nếu thỏa mãn => Tạo mới booking
+    const newBooking = new Booking({
+      guestInfo: {
+        name,
+        phone
+      },
+      bookingDate: new Date(bookingDate),
+      bookingTime: bookingTime,
+      guestNumber: guestNumber,
+      note: note,
+      status: BookingStatus.PENDING,
+      key_search: removeAccents(name + " " + phone)
+    })
+    const result = await databaseService.bookings.insertOne(newBooking)
+    // SOCKET
+    const io = getIO()
+    io.to("admin_room").emit("new_booking_notification", {
+      bookingId: result.insertedId,
+      guestName: name,
+      bookingTime: `${bookingTime} ngày ${bookingDate}`,
+      guestNumber: guestNumber,
+      message: `🔔 Có đơn đặt bàn mới: ${name} (${guestNumber} khách) lúc ${bookingTime}`
+    })
+    return result.insertedId
+  }
+  // END BOOKING
 }
 const guestServices = new GuestService()
 export default guestServices

@@ -59,6 +59,24 @@ const USER_MESSAGES = {
   NEW_PASSWORD_CANNOT_BE_THE_SAME_AS_OLD_PASSWORD: "Mật khẩu mới không được trùng với mật khẩu cũ.",
   // END ACCOUNT
 
+  // BOOKING MESSAGES
+  GUEST_NAME_IS_REQUIRED: "Tên khách hàng là bắt buộc",
+  NAME_MUST_BE_A_STRING: "Tên khách hàng phải là chuỗi ký tự",
+  PHONE_IS_REQUIRED: "Số điện thoại là bắt buộc",
+  PHONE_MUST_BE_A_STRING: "Số điện thoại phải là chuỗi",
+  PHONE_INVALID: "Số điện thoại không hợp lệ (Phải là số điện thoại Việt Nam 10 số)",
+  DATE_IS_REQUIRED: "Ngày đặt bàn là bắt buộc",
+  DATE_MUST_BE_ISO8601: "Ngày không đúng định dạng (YYYY-MM-DD)",
+  DATE_MUST_BE_FUTURE: "Ngày đặt bàn không được chọn trong quá khứ",
+  TIME_IS_REQUIRED: "Giờ đặt bàn là bắt buộc",
+  TIME_INVALID_FORMAT: "Giờ không đúng định dạng (HH:mm)",
+  PEOPLE_IS_REQUIRED: "Số lượng người là bắt buộc",
+  PEOPLE_MUST_BE_NUMBER: "Số lượng người phải là số",
+  PEOPLE_MIN_1: "Số lượng người phải lớn hơn 0",
+  PEOPLE_MAX_50: "Số lượng người quá lớn, vui lòng liên hệ hotline để đặt tiệc",
+  NOTE_MUST_BE_STRING: "Ghi chú phải là chuỗi ký tự",
+  // BOOKING MESSAGES
+
   // CATEGORY
   CATEGORY_NAME_REQUIRED: "Tên danh mục là bắt buộc.",
   CATEGORY_NAME_INVALID: "Tên danh mục phải là một chuỗi.",

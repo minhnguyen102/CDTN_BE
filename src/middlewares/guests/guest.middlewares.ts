@@ -333,3 +333,94 @@ export const cartRecommendationValidation = validate(
     ["body"]
   )
 )
+
+export const bookingValidation = validate(
+  checkSchema({
+    name: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.GUEST_NAME_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGES.NAME_MUST_BE_A_STRING
+      },
+      trim: true
+    },
+    phone: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.PHONE_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
+      },
+      trim: true,
+      custom: {
+        options: (value) => {
+          // Regex số điện thoại Việt Nam (10 số, đầu 0)
+          const regexPhoneNumber = /(84|0[3|5|7|8|9])+([0-9]{8})\b/
+          if (!regexPhoneNumber.test(value)) {
+            throw new Error(USER_MESSAGES.PHONE_INVALID)
+          }
+          return true
+        }
+      }
+    },
+    bookingDate: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.DATE_IS_REQUIRED
+      },
+      isISO8601: {
+        errorMessage: USER_MESSAGES.DATE_MUST_BE_ISO8601
+      },
+      custom: {
+        options: (value) => {
+          // Check ngày không được trong quá khứ (so với 00:00 hôm nay)
+          const inputDate = new Date(value)
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+
+          if (inputDate < today) {
+            throw new Error(USER_MESSAGES.DATE_MUST_BE_FUTURE)
+          }
+          return true
+        }
+      }
+    },
+    bookingTime: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.TIME_IS_REQUIRED
+      },
+      matches: {
+        // Regex định dạng giờ HH:mm (Ví dụ: 09:30, 19:00)
+        options: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+        errorMessage: USER_MESSAGES.TIME_INVALID_FORMAT
+      }
+    },
+    guestNumber: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.PEOPLE_IS_REQUIRED
+      },
+      isInt: {
+        options: { min: 1, max: 50 },
+        errorMessage: USER_MESSAGES.PEOPLE_MUST_BE_NUMBER
+      },
+      custom: {
+        options: (value) => {
+          if (Number(value) < 1) {
+            throw new Error(USER_MESSAGES.PEOPLE_MIN_1)
+          }
+          if (Number(value) > 50) {
+            throw new Error(USER_MESSAGES.PEOPLE_MAX_50)
+          }
+          return true
+        }
+      }
+    },
+    note: {
+      optional: true,
+      isString: {
+        errorMessage: USER_MESSAGES.NOTE_MUST_BE_STRING
+      },
+      trim: true
+    }
+  })
+)

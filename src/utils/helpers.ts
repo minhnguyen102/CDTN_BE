@@ -41,3 +41,8 @@ export const removeAccents = (str: string) => {
     .replace(/đ/g, "d") // Xử lý chữ đ thường
     .replace(/Đ/g, "D") // Xử lý chữ Đ hoa
 }
+// Chuuyeenr đổi từ giờ sang phút "19:30" -> 1170 (phút)
+export const parseTimeToMinutes = (timeString: string): number => {
+  const [hours, minutes] = timeString.split(":").map(Number)
+  return hours * 60 + minutes
+}
