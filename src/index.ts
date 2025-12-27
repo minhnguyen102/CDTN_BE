@@ -13,6 +13,7 @@ import { initSocket } from "./utils/socket"
 import paymentRouter from "./routes/payments/payment.routes"
 import { initScheduledJobs } from "./utils/scheduler"
 import settingsRouter from "./routes/setting/setting.routes"
+import publicsRouter from "./routes/public/public.routes"
 
 export const WHILELIST_DOMAINS: string[] = [
   // Môi trường Local
@@ -65,6 +66,7 @@ routesGuest(app)
 // Payment
 app.use("/payment", paymentRouter)
 app.use("/settings", settingsRouter)
+app.use("", publicsRouter)
 
 app.use(defaultErrorHandler)
 

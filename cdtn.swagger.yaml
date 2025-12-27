@@ -4679,6 +4679,170 @@ paths:
         '404':
           description: Không tìm thấy đánh giá (Review Not Found)
 
+  # Setting
+  /settings:
+    # ==========================
+    # 1. METHOD: GET
+    # ==========================
+    get:
+      tags:
+        - Settings
+      summary: Lấy thông tin cấu hình nhà hàng
+      description: API Public, dùng cho cả Admin và Landing Page để hiển thị thông tin chung (Logo, Footer, Contact...).
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Lấy cấu hình thành công
+                  data:
+                    $ref: '#/components/schemas/RestaurantSettings'
+        '500':
+          description: Lỗi Server
+
+    # ==========================
+    # 2. METHOD: PATCH (Thay cho PUT/POST)
+    # ==========================
+    patch:
+      tags:
+        - Settings
+      summary: Tạo mới hoặc Cập nhật cấu hình (Upsert)
+      description: >
+        Dành cho Admin. Sử dụng `multipart/form-data`.
+        
+        - Các trường Text gửi bình thường.
+        - Các trường File (`logo`, `favicon`) gửi dạng binary.
+        - Các trường Mảng/Object (`socialLinks`, `openingHours`) gửi dạng **JSON String**.
+      security:
+        - BearerAuth: []
+      requestBody:
+        # required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                # --- FILE UPLOAD ---
+                logo:
+                  type: string
+                  format: binary
+                  description: Upload ảnh Logo mới (Nếu không gửi sẽ giữ nguyên ảnh cũ)
+                favicon:
+                  type: string
+                  format: binary
+                  description: Upload ảnh Favicon mới
+
+                # --- TEXT FIELDS ---
+                brandName:
+                  type: string
+                  description: SNACKIO Update
+                slogan:
+                  type: string
+                  description: Thỏa mãn cơn đói
+                description:
+                  type: string
+                  description: Mô tả chi tiết về nhà hàng...
+                address:
+                  type: string
+                  description: 123 Đường Láng, Hà Nội
+                hotline:
+                  type: string
+                  description: "0912345678"
+                email:
+                  type: string
+                  description: admin@snackio.vn
+                googleMapUrl:
+                  type: string
+                  description: https://goo.gl/maps/xyz
+
+                # --- JSON STRINGS (Quan trọng: Frontend phải JSON.stringify trước khi gửi) ---
+                socialLinks:
+                  type: string
+                  description: 'Chuỗi JSON của mảng SocialLink. VD: `[{"platform":"Facebook","url":"..."}]`'
+                  example: '[{"platform":"Facebook","url":"https://fb.com/snackio"},{"platform":"Tiktok","url":"https://tiktok.com/@snackio"}]'
+                
+                openingHours:
+                  type: string
+                  description: 'Chuỗi JSON của mảng OpeningHour. VD: `[{"label":"T2-T6","time":"8h-22h"}]`'
+                  example: '[{"label":"Thứ 2 - Thứ 6","time":"08:00 - 22:00"},{"label":"Cuối tuần","time":"09:00 - 23:00"}]'
+
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cập nhật cấu hình nhà hàng thành công!
+                  data:
+                    $ref: '#/components/schemas/RestaurantSettings'
+        '400':
+          description: Dữ liệu không hợp lệ (Sai định dạng JSON, File quá lớn...)
+        '401':
+          description: Chưa đăng nhập (Thiếu Token)
+    
+  /dishes/public:
+    get:
+      tags:
+        - Public API
+      summary: Lấy danh sách món ăn (Public)
+      description: >
+        API lấy danh sách món ăn hiển thị ra trang chủ/thực đơn.
+        Chỉ trả về các món có trạng thái `AVAILABLE` và chưa bị xóa.
+      parameters:
+        - in: query
+          name: isFeatured
+          schema:
+            type: boolean
+            example: true
+          description: Nếu gửi `true`, chỉ lấy các món nổi bật (Best Seller).
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Giới hạn số lượng món hiển thị.
+      responses:
+        '200':
+          description: Lấy dữ liệu thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Lấy thực đơn thành công"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:  # 👈 Thêm trường này
+                          type: string
+                          example: "654321..."
+                        name:
+                          type: string
+                          example: "Gà Rán Combo"
+                        price:
+                          type: number
+                          example: 150000
+                        image:
+                          type: string
+                          example: "https://res.cloudinary.com/demo/image/upload/dish1.jpg"
+                        description:
+                          type: string
+                          example: "Gà rán giòn rụm kèm khoai tây chiên"
+        '500':
+          description: Lỗi Server
 components:
   schemas:
     Table:
@@ -5651,6 +5815,71 @@ components:
                 type: string
                 format: date-time
                 example: "2025-12-19T09:58:05.712Z"
+  
+    SocialLink:
+      type: object
+      properties:
+        platform:
+          type: string
+          enum: [Facebook, Instagram, Youtube, Tiktok, Zalo]
+          example: Facebook
+        url:
+          type: string
+          example: https://www.facebook.com/snackio
+
+    # 2. Schema con: OpeningHour
+    OpeningHour:
+      type: object
+      properties:
+        label:
+          type: string
+          example: Thứ 2 - Thứ 6
+        time:
+          type: string
+          example: 08:00 - 22:00
+
+    # 3. Schema chính: RestaurantSettings (Dùng cho Response)
+    RestaurantSettings:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 658a5b2e9c1d4a001c8e1234
+        brandName:
+          type: string
+          example: SNACKIO Premium
+        slogan:
+          type: string
+          example: Ăn ngon - Sống khỏe
+        description:
+          type: string
+          example: Nhà hàng đồ ăn nhanh số 1...
+        logoUrl:
+          type: string
+          example: https://res.cloudinary.com/.../logo.jpg
+        favicon:
+          type: string
+          example: https://res.cloudinary.com/.../favicon.ico
+        address:
+          type: string
+          example: 123 Cầu Giấy, Hà Nội
+        googleMapUrl:
+          type: string
+          example: https://maps.google.com/...
+        hotline:
+          type: string
+          example: 1900 888 999
+        email:
+          type: string
+          example: contact@snackio.vn
+        socialLinks:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialLink'
+        openingHours:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpeningHour'  
   securitySchemes:
     BearerAuth:
       type: http
