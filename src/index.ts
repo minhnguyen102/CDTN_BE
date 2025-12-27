@@ -11,7 +11,7 @@ import { routesGuest } from "./routes/guests/index.routes"
 import { createServer } from "http"
 import { initSocket } from "./utils/socket"
 import paymentRouter from "./routes/payments/payment.routes"
-import { initScheduledJobs } from "./utils/scheduler"
+import { initScheduledJobs, initScheduledJobsBooking } from "./utils/scheduler"
 
 export const WHILELIST_DOMAINS: string[] = [
   // Môi trường Local
@@ -73,7 +73,7 @@ const startServer = async () => {
 
     // Khởi tạo cron 1 lần duy nhất
     initScheduledJobs()
-
+    // initScheduledJobsBooking()
     httpServer.listen(port, () => {
       console.log(`Example app listening on port ${port}`)
     })
