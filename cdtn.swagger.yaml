@@ -4681,14 +4681,14 @@ paths:
 
   # Setting
   /settings:
-    # ==========================
-    # 1. METHOD: GET
-    # ==========================
+    # ===========================================
+    # 1. GET: Lấy cấu hình
+    # ===========================================
     get:
       tags:
         - Settings
       summary: Lấy thông tin cấu hình nhà hàng
-      description: API Public, dùng cho cả Admin và Landing Page để hiển thị thông tin chung (Logo, Footer, Contact...).
+      description: API Public, dùng cho cả trang Admin và Landing Page.
       responses:
         '200':
           description: Thành công
@@ -4699,26 +4699,23 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Lấy cấu hình thành công
+                    example: "Lấy cấu hình thành công"
                   data:
                     $ref: '#/components/schemas/RestaurantSettings'
-        '500':
-          description: Lỗi Server
 
-    # ==========================
-    # 2. METHOD: PATCH (Thay cho PUT/POST)
-    # ==========================
-    patch:
+    # ===========================================
+    # 2. PUT: Cập nhật cấu hình
+    # ===========================================
+    put:
       tags:
         - Settings
-      summary: Cập nhật cấu hình (Admin Only)
+      summary: Tạo mới hoặc Cập nhật cấu hình (Admin)
       description: >
-        API cập nhật thông tin nhà hàng và giao diện Landing Page.
+        API cập nhật toàn bộ thông tin nhà hàng.
         
-        **Lưu ý quan trọng cho Frontend:**
-        - Content-Type: `multipart/form-data`.
-        - Các trường Object/Array (như `heroSection`, `socialLinks`...) phải được **JSON.stringify()** trước khi gửi.
-        - Ảnh upload ở các field file riêng biệt.
+        **Lưu ý quan trọng (Multipart/Form-data):**
+        1. Các trường Object/Array (`gallerySection`, `aboutUsSection`...) phải được **JSON.stringify()** trước khi gửi.
+        2. Thứ tự file trong `galleryImages` sẽ khớp với thứ tự object trong mảng `gallerySection.images` JSON.
       security:
         - BearerAuth: []
       requestBody:
@@ -4728,77 +4725,81 @@ paths:
             schema:
               type: object
               properties:
-                # --- A. FILE UPLOAD (ẢNH) ---
+                # --- A. CÁC FILE UPLOAD ---
                 logo:
                   type: string
                   format: binary
-                  description: Upload Logo mới (1 ảnh)
+                  description: Upload Logo (1 file)
                 favicon:
                   type: string
                   format: binary
-                  description: Upload Favicon mới (1 ảnh)
+                  description: Upload Favicon (1 file)
                 
                 aboutUsImage:
                   type: string
                   format: binary
-                  description: Upload ảnh minh họa cho phần About Us (1 ảnh)
+                  description: Upload ảnh cho phần Về chúng tôi (1 file)
                 
                 heroImages:
                   type: array
                   items:
                     type: string
                     format: binary
-                  description: Upload danh sách ảnh Banner (Nhiều ảnh). Chọn nhiều file cùng lúc.
+                  description: Upload danh sách Banner (Nhiều file)
                 
                 galleryImages:
                   type: array
                   items:
                     type: string
                     format: binary
-                  description: Upload danh sách ảnh Không gian quán (Nhiều ảnh).
+                  description: Upload danh sách ảnh Gallery (Nhiều file). Thứ tự file khớp với thứ tự mô tả trong JSON.
 
-                # --- B. TEXT FIELDS (CƠ BẢN) ---
+                # --- B. THÔNG TIN CƠ BẢN (TEXT) ---
                 brandName:
                   type: string
-                  example: "SNACKIO Update"
-                  description: "SNACKIO"
+                  example: "SNACKIO Premium"
+                slogan:
+                  type: string
+                  example: "Tinh hoa ẩm thực Việt"
+                description:
+                  type: string
                 address:
                   type: string
-                  description: Ha Noi
                 hotline:
                   type: string
-                  description: "0987651456"
                 email:
                   type: string
-                  description: "snackio@ggmail.com"
 
-                # --- C. JSON STRINGS (CẤU HÌNH LANDING PAGE) ---
-                # Frontend phải JSON.stringify() các cục này
+                # --- C. CÁC JSON STRING (Cần Stringify từ Frontend) ---
                 
                 heroSection:
                   type: string
-                  description: 'JSON String cấu hình Banner. VD: `{"isActive":true}`. (Không cần gửi field images trong JSON này, BE tự map)'
+                  description: 'JSON String. VD: `{"isActive": true}`'
                   example: '{"isActive": true}'
-                
+
                 aboutUsSection:
                   type: string
-                  description: 'JSON String cấu hình About Us. VD: `{"title":"...","content":"..."}`'
-                  example: '{"isActive": true, "title": "Câu chuyện", "content": "Nội dung..."}'
-                
+                  description: >
+                    JSON String cấu hình About Us + Detail.
+                    VD: `{"isActive": true, "title": "...", "detail": {"years": 10, "branches": 5}}`
+                  example: '{"isActive": true, "title": "Về chúng tôi", "detail": {"years": 10, "total_orders": 999}}'
+
                 gallerySection:
                   type: string
-                  description: 'JSON String cấu hình Gallery. VD: `{"title":"Không gian"}`'
-                  example: '{"isActive": true, "title": "Góc Check-in"}'
+                  description: >
+                    JSON String cấu hình Gallery + Mô tả ảnh.
+                    **Quan trọng:** Mảng `images` chứa description phải khớp số lượng với file upload `galleryImages`.
+                  example: '{"isActive": true, "images": [{"description": "Sảnh chính"}, {"description": "Góc Chill"}]}'
 
-                # --- D. JSON STRINGS (CÁC TRƯỜNG CŨ) ---
                 socialLinks:
                   type: string
-                  example: '[{"platform":"Facebook","url":"..."}]'
-                  description: '[{"platform":"Facebook","url":"..."}]'
+                  description: 'JSON String mảng mạng xã hội.'
+                  example: '[{"platform": "Facebook", "url": "..."}]'
+
                 openingHours:
                   type: string
-                  example: '[{"label":"T2-CN","time":"8h-22h"}]'
-                  description: '[{"label":"T2-CN","time":"8h-22h"}]'
+                  description: 'JSON String giờ mở cửa.'
+                  example: '[{"label": "Thứ 2 - CN", "time": "8h - 22h"}]'
 
       responses:
         '200':
@@ -4808,17 +4809,15 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: true
                   message:
                     type: string
+                    example: "Cập nhật cấu hình nhà hàng thành công!"
                   data:
                     $ref: '#/components/schemas/RestaurantSettings'
-        '400':
-          description: Lỗi dữ liệu
         '401':
-          description: Chưa đăng nhập
+          description: Unauthorized
+        '403':
+          description: Forbidden (Không phải Admin)
   
   /dashboard/stats:
     get:
@@ -6016,102 +6015,102 @@ components:
         platform:
           type: string
           enum: [Facebook, Instagram, Youtube, Tiktok, Zalo]
-          example: Facebook
         url:
           type: string
-          example: https://www.facebook.com/snackio
 
-    # 2. Schema con: OpeningHour
     OpeningHour:
       type: object
       properties:
         label:
           type: string
-          example: Thứ 2 - Thứ 6
+          example: "Thứ 2 - Thứ 6"
         time:
           type: string
-          example: 08:00 - 22:00
+          example: "08:00 - 22:00"
+
     HeroSection:
       type: object
       properties:
         isActive:
           type: boolean
-          example: true
         images:
           type: array
-          description: Danh sách URL ảnh banner sau khi upload
           items:
             type: string
-            example: "https://res.cloudinary.com/.../banner1.jpg"
+            description: URL ảnh banner
 
-    # --- SCHEMA CON: Cấu hình About Us ---
+    AboutUsDetail:
+      type: object
+      properties:
+        years:
+          type: integer
+          example: 10
+        total_orders:
+          type: integer
+          example: 15000
+        branches:
+          type: integer
+          example: 5
+        percent_love:
+          type: integer
+          example: 99
+
     AboutUsSection:
       type: object
       properties:
         isActive:
           type: boolean
-          example: true
         title:
           type: string
-          example: "Câu chuyện thương hiệu"
         content:
           type: string
-          example: "Ra đời từ năm 1990..."
         image:
           type: string
-          description: URL ảnh đại diện
-          example: "https://res.cloudinary.com/.../about.jpg"
+        detail:
+          $ref: '#/components/schemas/AboutUsDetail'
 
-    # --- SCHEMA CON: Cấu hình Gallery ---
+    GalleryItem:
+      type: object
+      properties:
+        url:
+          type: string
+        description:
+          type: string
+
     GallerySection:
       type: object
       properties:
         isActive:
           type: boolean
-          example: true
-        title:
-          type: string
-          example: "Không gian nhà hàng"
         images:
           type: array
           items:
-            type: string
-            example: "https://res.cloudinary.com/.../space1.jpg"
+            $ref: '#/components/schemas/GalleryItem'
 
-    # 3. Schema chính: RestaurantSettings (Dùng cho Response)
+    # --- 2. SCHEMA CHÍNH (RESPONSE) ---
     RestaurantSettings:
       type: object
       properties:
         _id:
           type: string
-          example: 658a5b2e9c1d4a001c8e1234
         brandName:
           type: string
-          example: SNACKIO Premium
         slogan:
           type: string
-          example: Ăn ngon - Sống khỏe
         description:
           type: string
-          example: Nhà hàng đồ ăn nhanh số 1...
-        logoUrl:
-          type: string
-          example: https://res.cloudinary.com/.../logo.jpg
-        favicon:
-          type: string
-          example: https://res.cloudinary.com/.../favicon.ico
         address:
           type: string
-          example: 123 Cầu Giấy, Hà Nội
-        googleMapUrl:
-          type: string
-          example: https://maps.google.com/...
         hotline:
           type: string
-          example: 1900 888 999
         email:
           type: string
-          example: contact@snackio.vn
+        logoUrl:
+          type: string
+        favicon:
+          type: string
+        
+        # Các object con
         socialLinks:
           type: array
           items:
@@ -6119,8 +6118,7 @@ components:
         openingHours:
           type: array
           items:
-            $ref: '#/components/schemas/OpeningHour'  
-        # Các trường mới cho Landing Page
+            $ref: '#/components/schemas/OpeningHour'
         heroSection:
           $ref: '#/components/schemas/HeroSection'
         aboutUsSection:

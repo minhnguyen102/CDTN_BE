@@ -50,54 +50,70 @@ export const deleteFileFromCloudinary = async (filename: string) => {
 }
 
 export const parseCloudinaryFiles = (req: Request, res: Response, next: NextFunction) => {
-  // Vì upload.fields trả về object dictionary nên phải ép kiểu
   const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined
 
-  if (!files) {
-    return next()
-  }
-
+  // Helper parse JSON an toàn
   const tryParseJSON = (field: string) => {
     if (req.body[field] && typeof req.body[field] === "string") {
       try {
         req.body[field] = JSON.parse(req.body[field])
       } catch (error) {
-        console.log(`Lỗi parse JSON trường ${field}:`, error)
-        // Nếu lỗi thì giữ nguyên hoặc set về undefined tùy logic
+        req.body[field] = {} // Fallback
       }
     }
   }
-  tryParseJSON("socialLinks")
-  tryParseJSON("openingHours")
+
+  // 1. Parse JSON các trường phức tạp
   tryParseJSON("heroSection")
   tryParseJSON("aboutUsSection")
   tryParseJSON("gallerySection")
+  tryParseJSON("socialLinks")
+  tryParseJSON("openingHours")
 
-  if (!req.body.heroSection) req.body.heroSection = {}
-  if (!req.body.aboutUsSection) req.body.aboutUsSection = {}
-  if (!req.body.gallerySection) req.body.gallerySection = {}
+  // 2. Khởi tạo Object rỗng nếu client không gửi (để tránh lỗi undefined)
+  if (!req.body.heroSection) req.body.heroSection = { isActive: true, images: [] }
+  if (!req.body.heroSection.images) req.body.heroSection.images = []
+
+  if (!req.body.aboutUsSection) req.body.aboutUsSection = { isActive: true, detail: {} }
+
+  if (!req.body.gallerySection) req.body.gallerySection = { isActive: true, images: [] }
+  if (!Array.isArray(req.body.gallerySection.images)) req.body.gallerySection.images = []
+
+  // 3. Xử lý File Upload
   if (files) {
-    if (files.logo?.[0]) {
-      req.body.logoUrl = files.logo[0].path
-    }
-    if (files.favicon?.[0]) {
-      req.body.favicon = files.favicon[0].path
-    }
-    if (files.qrCode?.[0]) {
-      req.body.bankInfo.qrCodeUrl = files.qrCode[0].path
-    }
+    // Logo & Favicon
+    if (files.logo?.[0]) req.body.logoUrl = files.logo[0].path
+    if (files.favicon?.[0]) req.body.favicon = files.favicon[0].path
 
+    // About Us Image
     if (files.aboutUsImage?.[0]) {
       req.body.aboutUsSection.image = files.aboutUsImage[0].path
     }
 
+    // Hero Images (Banner) -> Mảng String
     if (files.heroImages) {
       req.body.heroSection.images = files.heroImages.map((file) => file.path)
     }
 
+    // Gallery Images (Không gian) -> Mảng Object {url, description}
     if (files.galleryImages) {
-      req.body.gallerySection.images = files.galleryImages.map((file) => file.path)
+      const uploadedFiles = files.galleryImages
+      // Lấy danh sách mô tả gửi kèm từ client
+      const galleryData = req.body.gallerySection.images || []
+
+      // Ghép URL ảnh mới với Description tương ứng
+      const mergedGallery = uploadedFiles.map((file, index) => {
+        // Dùng ?. để tránh lỗi nếu mảng description ngắn hơn mảng ảnh
+        const desc = galleryData[index]?.description || ""
+        return {
+          url: file.path,
+          description: desc
+        }
+      })
+
+      req.body.gallerySection.images = mergedGallery
     }
   }
+
   next()
 }

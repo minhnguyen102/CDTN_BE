@@ -6,6 +6,7 @@ export const getPublicDishesController = async (req: Request, res: Response) => 
   const { isFeatured, limit } = req.query
 
   const filter: any = {
+    isFeatured: true,
     status: DishStatus.AVAILABLE,
     deleted: false
   }

@@ -10,27 +10,32 @@ export interface OpeningHour {
   time: string
 }
 
-// Interface cho phần Hero (Slide)
 export interface HeroSection {
   isActive: boolean
   images: string[]
 }
 
-// Interface cho phần About Us
 export interface AboutUsSection {
   isActive: boolean
   image: string
   title: string
   content: string
-}
-// Interface cho phần Gallery (Không gian)
-export interface GallerySection {
-  isActive: boolean
-  title: string
-  images: string[]
+  detail: {
+    years: number
+    total_orders: number
+    branches: number
+    percent_love: number
+  }
 }
 
-// Định nghĩa dữ liệu gửi lên. Chỉ cần gửi 1 trường khi tạo mới cũng đc, từ những lần sau sẽ chỉ là cập nhật
+export interface GallerySection {
+  isActive: boolean
+  images: {
+    description: string
+    url: string
+  }[]
+}
+
 interface RestaurantSettingsType {
   _id?: ObjectId
   brandName?: string
@@ -38,11 +43,9 @@ interface RestaurantSettingsType {
   description?: string
   logoUrl?: string
   favicon?: string
-
   address?: string
   hotline?: string
   email?: string
-
   socialLinks?: SocialLink[]
   openingHours?: OpeningHour[]
   heroSection?: HeroSection
@@ -57,14 +60,11 @@ export default class RestaurantSettings {
   description: string
   logoUrl: string
   favicon: string
-
   address: string
   hotline: string
   email: string
-
   socialLinks: SocialLink[]
   openingHours: OpeningHour[]
-
   heroSection: HeroSection
   aboutUsSection: AboutUsSection
   gallerySection: GallerySection
@@ -76,11 +76,9 @@ export default class RestaurantSettings {
     this.description = data.description || ""
     this.logoUrl = data.logoUrl || ""
     this.favicon = data.favicon || ""
-
     this.address = data.address || ""
     this.hotline = data.hotline || ""
     this.email = data.email || ""
-
     this.socialLinks = data.socialLinks || []
     this.openingHours = data.openingHours || []
 
@@ -89,17 +87,42 @@ export default class RestaurantSettings {
       images: []
     }
 
+    // --- CẬP NHẬT: Thêm default cho field detail ---
     this.aboutUsSection = data.aboutUsSection || {
       isActive: true,
       image: "",
       title: "Về chúng tôi",
-      content: "Nội dung đang cập nhật..."
+      content: "Nội dung đang cập nhật...",
+      detail: {
+        years: 0,
+        total_orders: 0,
+        branches: 0,
+        percent_love: 0
+      }
+    }
+    // Phòng hờ trường hợp data gửi lên có aboutUsSection nhưng thiếu detail
+    if (this.aboutUsSection && !this.aboutUsSection.detail) {
+      this.aboutUsSection.detail = {
+        years: 0,
+        total_orders: 0,
+        branches: 0,
+        percent_love: 0
+      }
     }
 
     this.gallerySection = data.gallerySection || {
       isActive: true,
-      title: "Không gian nhà hàng",
       images: []
+    }
+
+    // Logic phòng hờ data cũ (string[]) map sang object
+    if (this.gallerySection.images && this.gallerySection.images.length > 0) {
+      if (typeof this.gallerySection.images[0] === "string") {
+        this.gallerySection.images = (this.gallerySection.images as any).map((url: string) => ({
+          url: url,
+          description: ""
+        }))
+      }
     }
   }
 }

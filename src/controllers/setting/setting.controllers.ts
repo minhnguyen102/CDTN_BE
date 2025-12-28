@@ -9,7 +9,7 @@ export const updateSettingsController = async (
 ) => {
   const payload = req.body
 
-  const updatedSettings = await settingsService.createOrUpdateSettings({ payload })
+  const updatedSettings = await settingsService.createOrUpdateSettings(payload)
 
   return res.status(200).json({
     message: "Cập nhật cấu hình nhà hàng thành công!",

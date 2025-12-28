@@ -24,44 +24,55 @@ class SettingsService {
     }
   }
 
-  async createOrUpdateSettings({ payload }: { payload: UpdateOrCreateReqBody }) {
+  async createOrUpdateSettings(payload: any) {
     const currentSettings = await databaseService.restaurant_setting.findOne({})
 
-    // --- LOGIC XÓA ẢNH CŨ TRÊN CLOUD ---
+    // --- LOGIC CLEANUP ẢNH CŨ ---
     if (currentSettings) {
+      // 1. Logo & Favicon
       if (payload.logoUrl && currentSettings.logoUrl && payload.logoUrl !== currentSettings.logoUrl) {
-        const publicId = getPublicIdFromUrl(currentSettings.logoUrl)
-        if (publicId) await deleteFileFromCloudinary(publicId)
+        const pid = getPublicIdFromUrl(currentSettings.logoUrl)
+        if (pid) await deleteFileFromCloudinary(pid)
       }
-
       if (payload.favicon && currentSettings.favicon && payload.favicon !== currentSettings.favicon) {
-        const publicId = getPublicIdFromUrl(currentSettings.favicon)
-        if (publicId) await deleteFileFromCloudinary(publicId)
+        const pid = getPublicIdFromUrl(currentSettings.favicon)
+        if (pid) await deleteFileFromCloudinary(pid)
       }
 
-      const oldAboutImg = currentSettings.aboutUsSection?.image
-      const newAboutImg = payload.aboutUsSection?.image
-      if (newAboutImg && oldAboutImg && newAboutImg !== oldAboutImg) {
-        const publicId = getPublicIdFromUrl(oldAboutImg)
-        if (publicId) await deleteFileFromCloudinary(publicId)
+      // 2. About Us Image
+      const oldAbout = currentSettings.aboutUsSection?.image
+      const newAbout = payload.aboutUsSection?.image
+      if (newAbout && oldAbout && newAbout !== oldAbout) {
+        const pid = getPublicIdFromUrl(oldAbout)
+        if (pid) await deleteFileFromCloudinary(pid)
       }
 
+      // 3. Hero Images (Mảng String)
       if (payload.heroSection?.images) {
-        const oldHeroImages = currentSettings.heroSection?.images || []
-        const newHeroImages = payload.heroSection.images
-        await this.deleteStaleImages(oldHeroImages, newHeroImages)
+        const oldHeroImgs = currentSettings.heroSection?.images || []
+        const newHeroImgs = payload.heroSection.images
+        await this.deleteStaleImages(oldHeroImgs, newHeroImgs)
       }
 
+      // 4. Gallery Images (Mảng Object -> Cần map ra URL)
       if (payload.gallerySection?.images) {
-        const oldGalleryImages = currentSettings.gallerySection?.images || []
-        const newGalleryImages = payload.gallerySection.images
-        await this.deleteStaleImages(oldGalleryImages, newGalleryImages)
+        // Lấy list URL cũ
+        const oldGalleryUrls = (currentSettings.gallerySection?.images || []).map((item: any) => {
+          return typeof item === "string" ? item : item.url
+        })
+
+        // Lấy list URL mới
+        const newGalleryUrls = payload.gallerySection.images.map((item: any) => item.url)
+
+        await this.deleteStaleImages(oldGalleryUrls, newGalleryUrls)
       }
     }
 
-    const defaultSettings = new RestaurantSettings({})
+    // --- LOGIC LƯU DB ---
+    const defaultSettings = new RestaurantSettings({} as any)
     delete defaultSettings._id
 
+    // Xóa các key trong default để tránh ghi đè dữ liệu user gửi lên bằng giá trị rỗng
     Object.keys(payload).forEach((key) => {
       delete (defaultSettings as any)[key]
     })
