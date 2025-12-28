@@ -150,6 +150,16 @@ export const initSocket = (httpServer: HttpServer) => {
       if (order.paymentStatus === PaymentStatus.PAID) {
         return { success: true, message: "Order already paid" }
       }
+      // Kiểm tra trạng thái các món của đơn => Nếu có đơn chưa phục vụ => chưa cho thanh toán
+      const flag = order.items.some(
+        (item) => item.status === OrderItemStatus.Pending || item.status === OrderItemStatus.Cooking
+      )
+      if (flag) {
+        throw new ErrorWithStatus({
+          message: "Tồn tại đơn hàng chưa phục vụ. Chưa thể thanh toán",
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
       // Update Database (Chuyển trạng thái thành PAID, chuyển trạng thái, currentOrderId của bàn)
       await Promise.all([
         await databaseService.orders.updateOne(
