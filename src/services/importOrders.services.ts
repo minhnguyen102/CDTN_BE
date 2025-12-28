@@ -186,6 +186,38 @@ class ImportOrderService {
         }
       },
       { $unwind: { path: "$staffDetail", preserveNullAndEmptyArrays: true } },
+      { $unwind: "$items" }, // tách mảng items ra từng document riêng lẻ
+      {
+        $lookup: {
+          from: "ingredients",
+          localField: "items.ingredientId",
+          foreignField: "_id",
+          as: "ingredientInfo"
+        }
+      },
+      { $unwind: { path: "$ingredientInfo", preserveNullAndEmptyArrays: true } },
+      {
+        $addFields: {
+          "items.ingredientName": "$ingredientInfo.name"
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          orderNumber: { $first: "$orderNumber" },
+          importDate: { $first: "$importDate" },
+          status: { $first: "$status" },
+          subtotal: { $first: "$subtotal" },
+          taxRate: { $first: "$taxRate" },
+          taxAmount: { $first: "$taxAmount" },
+          totalAmount: { $first: "$totalAmount" },
+          supplierName: { $first: "$supplierDetail.name" },
+          importedByName: { $first: "$staffDetail.name" },
+          createdAt: { $first: "$createdAt" }, // Cần lấy createdAt để sort lại nếu muốn chính xác
+          items: { $push: "$items" } // Gom lại mảng items đã có thêm ingredientName
+        }
+      },
+      { $sort: { createdAt: -1 } },
       {
         $project: {
           orderNumber: 1,
@@ -196,8 +228,8 @@ class ImportOrderService {
           taxAmount: 1,
           totalAmount: 1,
           items: 1,
-          supplierName: "$supplierDetail.name",
-          importedByName: "$staffDetail.name"
+          supplierName: 1,
+          importedByName: 1
         }
       }
     ]
