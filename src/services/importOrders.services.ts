@@ -255,6 +255,7 @@ class ImportOrderService {
   async getDetail({ id }: { id: string }) {
     const pipeline = [
       { $match: { _id: new ObjectId(id) } },
+
       {
         $lookup: {
           from: "suppliers",
@@ -264,6 +265,7 @@ class ImportOrderService {
         }
       },
       { $unwind: { path: "$supplierDetail", preserveNullAndEmptyArrays: true } },
+
       {
         $lookup: {
           from: "accounts",
@@ -273,6 +275,7 @@ class ImportOrderService {
         }
       },
       { $unwind: { path: "$staffDetail", preserveNullAndEmptyArrays: true } },
+
       { $unwind: "$items" },
       {
         $lookup: {
@@ -283,11 +286,14 @@ class ImportOrderService {
         }
       },
       { $unwind: { path: "$ingredientInfo", preserveNullAndEmptyArrays: true } },
+
       {
         $addFields: {
-          "items.unit": "$ingredientInfo.unit"
+          "items.unit": "$ingredientInfo.unit",
+          "items.ingredientName": "$ingredientInfo.name"
         }
       },
+
       {
         $group: {
           _id: "$_id",
@@ -295,6 +301,7 @@ class ImportOrderService {
           items: { $push: "$items" }
         }
       },
+
       {
         $replaceRoot: {
           newRoot: {
@@ -302,6 +309,7 @@ class ImportOrderService {
           }
         }
       },
+
       {
         $project: {
           _id: 1,
