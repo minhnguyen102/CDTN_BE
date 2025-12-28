@@ -2,7 +2,7 @@ import { OrderItemStatus, PaymentStatus, TableStatus } from "../constants/enums"
 import databaseService from "./database.servies"
 
 class DashboardService {
-  // 1. Hàm tính % tăng trưởng (giữ nguyên logic cũ)
+  // Hàm tính % tăng trưởng
   private calculateTrend(current: number, previous: number) {
     if (previous === 0) return { value: current === 0 ? 0 : 100, type: "neutral" }
     const percent = ((current - previous) / previous) * 100
@@ -12,7 +12,7 @@ class DashboardService {
     }
   }
 
-  // 2. Hàm lấy khung thời gian (giữ nguyên logic cũ)
+  // Hàm lấy khung thời gian
   private getTimeRange(type: "day" | "week" | "month") {
     const now = new Date()
     let start, end, prevStart, prevEnd
@@ -59,7 +59,7 @@ class DashboardService {
     return { start, end, prevStart, prevEnd, labelCompare, chartFormat }
   }
 
-  // 3. Hàm hiển thị trạng thái đơn hàng thông minh (cho Recent Orders)
+  // Hàm hiển thị trạng thái đơn hàng thông minh (cho Recent Orders)
   private deriveOrderStatus(order: any) {
     if (order.paymentStatus === PaymentStatus.PAID) return "completed" // Đã thanh toán -> Hoàn thành
 
@@ -166,32 +166,32 @@ class DashboardService {
 
     // --- EXECUTE ALL PROMISES ---
     const [curr, prev, chartRawData, topProducts, recentOrdersRaw, tables] = await Promise.all([
-      aggregateStats(start, end), // 1. Số liệu hiện tại
-      aggregateStats(prevStart, prevEnd), // 2. Số liệu quá khứ
-      getChartData(), // 3. Dữ liệu biểu đồ
-      getTopProducts(), // 4. Top món bán chạy
+      aggregateStats(start, end), // Số liệu hiện tại
+      aggregateStats(prevStart, prevEnd), // Số liệu quá khứ
+      getChartData(), // Dữ liệu biểu đồ
+      getTopProducts(), // Top món bán chạy
 
-      // 5. Đơn hàng gần đây (Lấy cả unpaid để theo dõi vận hành)
+      // Đơn hàng gần đây (Lấy cả unpaid để theo dõi vận hành)
       databaseService.orders.find({}).sort({ createdAt: -1 }).limit(5).toArray(),
 
-      // 6. Trạng thái bàn
+      // Trạng thái bàn
       databaseService.tables.find({}).toArray()
     ])
 
     // --- XỬ LÝ LOGIC HIỂN THỊ ---
 
-    // 1. Calculate Trends
+    // Calculate Trends
     const revenueTrend = this.calculateTrend(curr.revenue, prev.revenue)
     const orderTrend = this.calculateTrend(curr.orders, prev.orders)
     const dishTrend = this.calculateTrend(curr.dishes, prev.dishes)
 
-    // 2. Table Stats
+    // Table Stats
     const totalTables = tables.length
     // Bàn active là bàn không AVAILABLE (có thể là OCCUPIED hoặc BOOKED)
     const activeTables = tables.filter((t) => t.status !== TableStatus.AVAILABLE).length
     const capacityPercent = totalTables > 0 ? Math.round((activeTables / totalTables) * 100) : 0
 
-    // 3. Chart Filling (Điền số 0 vào giờ trống)
+    // Chart Filling (Điền số 0 vào giờ trống)
     const categories: string[] = []
     const seriesData: number[] = []
 
@@ -226,7 +226,6 @@ class DashboardService {
       }
     }
 
-    // --- FINAL RESPONSE FORMAT ---
     return {
       stats: [
         {
@@ -269,16 +268,16 @@ class DashboardService {
       top_products: topProducts.map((p) => ({
         id: p._id,
         name: p.name,
-        price: p.revenue / p.sales, // Tính lại giá trung bình nếu cần
+        price: p.revenue / p.sales,
         sales: p.sales,
         revenue: p.revenue
       })),
       recent_orders: recentOrdersRaw.map((o) => ({
         id: o._id,
-        table: `Bàn ${o.tableNumber}`, // Schema: tableNumber
-        amount: o.totalAmount, // Schema: totalAmount
-        status: this.deriveOrderStatus(o), // "completed" | "cooking" | "pending"
-        type: "Dùng tại bàn", // Có thể map dựa vào field khác nếu có
+        table: `Bàn ${o.tableNumber}`,
+        amount: o.totalAmount,
+        status: this.deriveOrderStatus(o),
+        type: "Dùng tại bàn",
         time: o.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
       }))
     }

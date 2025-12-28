@@ -1,4 +1,4 @@
-import { OpeningHour } from "../../models/schema/RestaurantSettings.schema"
+import { AboutUsSection, GallerySection, HeroSection, OpeningHour } from "../../models/schema/RestaurantSettings.schema"
 import { SocialLink } from "../../models/schema/RestaurantSettings.schema"
 
 export interface UpdateOrCreateReqBody {
@@ -15,4 +15,7 @@ export interface UpdateOrCreateReqBody {
 
   socialLinks?: SocialLink[]
   openingHours?: OpeningHour[]
+  heroSection?: HeroSection
+  aboutUsSection?: AboutUsSection
+  gallerySection?: GallerySection
 }

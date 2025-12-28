@@ -27,7 +27,10 @@ settingsRouter.patch(
   verifiedUserValidation,
   uploadCloud.fields([
     { name: "logo", maxCount: 1 },
-    { name: "favicon", maxCount: 1 }
+    { name: "favicon", maxCount: 1 },
+    { name: "aboutUsImage", maxCount: 1 }, // 1 Ảnh cho phần About
+    { name: "heroImages", maxCount: 5 }, // Tối đa 5 ảnh banner
+    { name: "galleryImages", maxCount: 10 } // Tối đa 10 ảnh không gian
   ]),
   parseCloudinaryFiles,
   updateSettingsValidation,

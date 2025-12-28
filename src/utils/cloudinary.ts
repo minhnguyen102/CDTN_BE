@@ -57,16 +57,6 @@ export const parseCloudinaryFiles = (req: Request, res: Response, next: NextFunc
     return next()
   }
 
-  // 1. Xử lý Logo
-  if (files.logo && files.logo[0]) {
-    req.body.logoUrl = files.logo[0].path // Cloudinary trả về link ảnh trong .path
-  }
-
-  // 2. Xử lý Favicon
-  if (files.favicon && files.favicon[0]) {
-    req.body.favicon = files.favicon[0].path
-  }
-
   const tryParseJSON = (field: string) => {
     if (req.body[field] && typeof req.body[field] === "string") {
       try {
@@ -79,5 +69,35 @@ export const parseCloudinaryFiles = (req: Request, res: Response, next: NextFunc
   }
   tryParseJSON("socialLinks")
   tryParseJSON("openingHours")
+  tryParseJSON("heroSection")
+  tryParseJSON("aboutUsSection")
+  tryParseJSON("gallerySection")
+
+  if (!req.body.heroSection) req.body.heroSection = {}
+  if (!req.body.aboutUsSection) req.body.aboutUsSection = {}
+  if (!req.body.gallerySection) req.body.gallerySection = {}
+  if (files) {
+    if (files.logo?.[0]) {
+      req.body.logoUrl = files.logo[0].path
+    }
+    if (files.favicon?.[0]) {
+      req.body.favicon = files.favicon[0].path
+    }
+    if (files.qrCode?.[0]) {
+      req.body.bankInfo.qrCodeUrl = files.qrCode[0].path
+    }
+
+    if (files.aboutUsImage?.[0]) {
+      req.body.aboutUsSection.image = files.aboutUsImage[0].path
+    }
+
+    if (files.heroImages) {
+      req.body.heroSection.images = files.heroImages.map((file) => file.path)
+    }
+
+    if (files.galleryImages) {
+      req.body.gallerySection.images = files.galleryImages.map((file) => file.path)
+    }
+  }
   next()
 }

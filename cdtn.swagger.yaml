@@ -4711,65 +4711,94 @@ paths:
     patch:
       tags:
         - Settings
-      summary: Tạo mới hoặc Cập nhật cấu hình (Upsert)
+      summary: Cập nhật cấu hình (Admin Only)
       description: >
-        Dành cho Admin. Sử dụng `multipart/form-data`.
+        API cập nhật thông tin nhà hàng và giao diện Landing Page.
         
-        - Các trường Text gửi bình thường.
-        - Các trường File (`logo`, `favicon`) gửi dạng binary.
-        - Các trường Mảng/Object (`socialLinks`, `openingHours`) gửi dạng **JSON String**.
+        **Lưu ý quan trọng cho Frontend:**
+        - Content-Type: `multipart/form-data`.
+        - Các trường Object/Array (như `heroSection`, `socialLinks`...) phải được **JSON.stringify()** trước khi gửi.
+        - Ảnh upload ở các field file riêng biệt.
       security:
         - BearerAuth: []
       requestBody:
-        # required: true
+        required: true
         content:
           multipart/form-data:
             schema:
               type: object
               properties:
-                # --- FILE UPLOAD ---
+                # --- A. FILE UPLOAD (ẢNH) ---
                 logo:
                   type: string
                   format: binary
-                  description: Upload ảnh Logo mới (Nếu không gửi sẽ giữ nguyên ảnh cũ)
+                  description: Upload Logo mới (1 ảnh)
                 favicon:
                   type: string
                   format: binary
-                  description: Upload ảnh Favicon mới
+                  description: Upload Favicon mới (1 ảnh)
+                
+                aboutUsImage:
+                  type: string
+                  format: binary
+                  description: Upload ảnh minh họa cho phần About Us (1 ảnh)
+                
+                heroImages:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Upload danh sách ảnh Banner (Nhiều ảnh). Chọn nhiều file cùng lúc.
+                
+                galleryImages:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Upload danh sách ảnh Không gian quán (Nhiều ảnh).
 
-                # --- TEXT FIELDS ---
+                # --- B. TEXT FIELDS (CƠ BẢN) ---
                 brandName:
                   type: string
-                  description: SNACKIO Update
-                slogan:
-                  type: string
-                  description: Thỏa mãn cơn đói
-                description:
-                  type: string
-                  description: Mô tả chi tiết về nhà hàng...
+                  example: "SNACKIO Update"
+                  description: "SNACKIO"
                 address:
                   type: string
-                  description: 123 Đường Láng, Hà Nội
+                  description: Ha Noi
                 hotline:
                   type: string
-                  description: "0912345678"
+                  description: "0987651456"
                 email:
                   type: string
-                  description: admin@snackio.vn
-                googleMapUrl:
-                  type: string
-                  description: https://goo.gl/maps/xyz
+                  description: "snackio@ggmail.com"
 
-                # --- JSON STRINGS (Quan trọng: Frontend phải JSON.stringify trước khi gửi) ---
+                # --- C. JSON STRINGS (CẤU HÌNH LANDING PAGE) ---
+                # Frontend phải JSON.stringify() các cục này
+                
+                heroSection:
+                  type: string
+                  description: 'JSON String cấu hình Banner. VD: `{"isActive":true}`. (Không cần gửi field images trong JSON này, BE tự map)'
+                  example: '{"isActive": true}'
+                
+                aboutUsSection:
+                  type: string
+                  description: 'JSON String cấu hình About Us. VD: `{"title":"...","content":"..."}`'
+                  example: '{"isActive": true, "title": "Câu chuyện", "content": "Nội dung..."}'
+                
+                gallerySection:
+                  type: string
+                  description: 'JSON String cấu hình Gallery. VD: `{"title":"Không gian"}`'
+                  example: '{"isActive": true, "title": "Góc Check-in"}'
+
+                # --- D. JSON STRINGS (CÁC TRƯỜNG CŨ) ---
                 socialLinks:
                   type: string
-                  description: 'Chuỗi JSON của mảng SocialLink. VD: `[{"platform":"Facebook","url":"..."}]`'
-                  example: '[{"platform":"Facebook","url":"https://fb.com/snackio"},{"platform":"Tiktok","url":"https://tiktok.com/@snackio"}]'
-                
+                  example: '[{"platform":"Facebook","url":"..."}]'
+                  description: '[{"platform":"Facebook","url":"..."}]'
                 openingHours:
                   type: string
-                  description: 'Chuỗi JSON của mảng OpeningHour. VD: `[{"label":"T2-T6","time":"8h-22h"}]`'
-                  example: '[{"label":"Thứ 2 - Thứ 6","time":"08:00 - 22:00"},{"label":"Cuối tuần","time":"09:00 - 23:00"}]'
+                  example: '[{"label":"T2-CN","time":"8h-22h"}]'
+                  description: '[{"label":"T2-CN","time":"8h-22h"}]'
 
       responses:
         '200':
@@ -4779,15 +4808,17 @@ paths:
               schema:
                 type: object
                 properties:
+                  success:
+                    type: boolean
+                    example: true
                   message:
                     type: string
-                    example: Cập nhật cấu hình nhà hàng thành công!
                   data:
                     $ref: '#/components/schemas/RestaurantSettings'
         '400':
-          description: Dữ liệu không hợp lệ (Sai định dạng JSON, File quá lớn...)
+          description: Lỗi dữ liệu
         '401':
-          description: Chưa đăng nhập (Thiếu Token)
+          description: Chưa đăng nhập
   
   /dashboard/stats:
     get:
@@ -6000,6 +6031,52 @@ components:
         time:
           type: string
           example: 08:00 - 22:00
+    HeroSection:
+      type: object
+      properties:
+        isActive:
+          type: boolean
+          example: true
+        images:
+          type: array
+          description: Danh sách URL ảnh banner sau khi upload
+          items:
+            type: string
+            example: "https://res.cloudinary.com/.../banner1.jpg"
+
+    # --- SCHEMA CON: Cấu hình About Us ---
+    AboutUsSection:
+      type: object
+      properties:
+        isActive:
+          type: boolean
+          example: true
+        title:
+          type: string
+          example: "Câu chuyện thương hiệu"
+        content:
+          type: string
+          example: "Ra đời từ năm 1990..."
+        image:
+          type: string
+          description: URL ảnh đại diện
+          example: "https://res.cloudinary.com/.../about.jpg"
+
+    # --- SCHEMA CON: Cấu hình Gallery ---
+    GallerySection:
+      type: object
+      properties:
+        isActive:
+          type: boolean
+          example: true
+        title:
+          type: string
+          example: "Không gian nhà hàng"
+        images:
+          type: array
+          items:
+            type: string
+            example: "https://res.cloudinary.com/.../space1.jpg"
 
     # 3. Schema chính: RestaurantSettings (Dùng cho Response)
     RestaurantSettings:
@@ -6043,6 +6120,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OpeningHour'  
+        # Các trường mới cho Landing Page
+        heroSection:
+          $ref: '#/components/schemas/HeroSection'
+        aboutUsSection:
+          $ref: '#/components/schemas/AboutUsSection'
+        gallerySection:
+          $ref: '#/components/schemas/GallerySection'
+    
   securitySchemes:
     BearerAuth:
       type: http

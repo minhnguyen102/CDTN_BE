@@ -6,26 +6,63 @@ import { getPublicIdFromUrl } from "../utils/helpers"
 import { deleteFileFromCloudinary } from "../utils/cloudinary"
 
 class SettingsService {
+  /**
+   * Hàm helper riêng: Xóa các ảnh có trong danh sách cũ nhưng KHÔNG có trong danh sách mới
+   */
+  private async deleteStaleImages(oldUrls: string[], newUrls: string[]) {
+    // Lọc ra các ảnh bị loại bỏ
+    const imagesToDelete = oldUrls.filter((oldUrl) => !newUrls.includes(oldUrl))
+
+    if (imagesToDelete.length > 0) {
+      // Xóa song song
+      await Promise.all(
+        imagesToDelete.map((url) => {
+          const publicId = getPublicIdFromUrl(url)
+          if (publicId) return deleteFileFromCloudinary(publicId)
+        })
+      )
+    }
+  }
+
   async createOrUpdateSettings({ payload }: { payload: UpdateOrCreateReqBody }) {
     const currentSettings = await databaseService.restaurant_setting.findOne({})
+
+    // --- LOGIC XÓA ẢNH CŨ TRÊN CLOUD ---
     if (currentSettings) {
-      // Check Logo
       if (payload.logoUrl && currentSettings.logoUrl && payload.logoUrl !== currentSettings.logoUrl) {
         const publicId = getPublicIdFromUrl(currentSettings.logoUrl)
         if (publicId) await deleteFileFromCloudinary(publicId)
       }
 
-      // Check Favicon
       if (payload.favicon && currentSettings.favicon && payload.favicon !== currentSettings.favicon) {
         const publicId = getPublicIdFromUrl(currentSettings.favicon)
         if (publicId) await deleteFileFromCloudinary(publicId)
+      }
+
+      const oldAboutImg = currentSettings.aboutUsSection?.image
+      const newAboutImg = payload.aboutUsSection?.image
+      if (newAboutImg && oldAboutImg && newAboutImg !== oldAboutImg) {
+        const publicId = getPublicIdFromUrl(oldAboutImg)
+        if (publicId) await deleteFileFromCloudinary(publicId)
+      }
+
+      if (payload.heroSection?.images) {
+        const oldHeroImages = currentSettings.heroSection?.images || []
+        const newHeroImages = payload.heroSection.images
+        await this.deleteStaleImages(oldHeroImages, newHeroImages)
+      }
+
+      if (payload.gallerySection?.images) {
+        const oldGalleryImages = currentSettings.gallerySection?.images || []
+        const newGalleryImages = payload.gallerySection.images
+        await this.deleteStaleImages(oldGalleryImages, newGalleryImages)
       }
     }
 
     const defaultSettings = new RestaurantSettings({})
     delete defaultSettings._id
+
     Object.keys(payload).forEach((key) => {
-      // Ép kiểu as any để TS không báo lỗi index signature
       delete (defaultSettings as any)[key]
     })
 
@@ -36,8 +73,8 @@ class SettingsService {
         $setOnInsert: defaultSettings
       },
       {
-        upsert: true, // Quan trọng: Không có thì tạo mới
-        returnDocument: "after" // Trả về dữ liệu MỚI sau khi update
+        upsert: true,
+        returnDocument: "after"
       }
     )
 
@@ -50,7 +87,6 @@ class SettingsService {
   async getSettings() {
     const settings = await databaseService.restaurant_setting.findOne({})
 
-    // Nếu chưa có gì, trả về null hoặc object mặc định tùy nhu cầu FE
     if (!settings) {
       return null
     }
