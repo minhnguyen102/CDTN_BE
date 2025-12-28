@@ -26,7 +26,12 @@ const storage = new CloudinaryStorage({
 })
 
 // Khởi tạo Multer Upload Middleware
-export const uploadCloud = multer({ storage })
+export const uploadCloud = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5 MB (Tính bằng bytes)
+  }
+})
 
 // Hàm xóa ảnh (Dùng khi update hoặc xóa món ăn)
 export const deleteImage = async (publicId: string) => {
