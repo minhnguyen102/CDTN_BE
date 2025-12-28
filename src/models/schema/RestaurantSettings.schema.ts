@@ -23,7 +23,7 @@ export interface AboutUsSection {
   title: string
   content: string
 }
-// 3. Interface cho phần Gallery (Không gian)
+// Interface cho phần Gallery (Không gian)
 export interface GallerySection {
   isActive: boolean
   title: string
@@ -40,7 +40,6 @@ interface RestaurantSettingsType {
   favicon?: string
 
   address?: string
-  googleMapUrl?: string
   hotline?: string
   email?: string
 
@@ -60,7 +59,6 @@ export default class RestaurantSettings {
   favicon: string
 
   address: string
-  googleMapUrl: string
   hotline: string
   email: string
 
@@ -80,7 +78,6 @@ export default class RestaurantSettings {
     this.favicon = data.favicon || ""
 
     this.address = data.address || ""
-    this.googleMapUrl = data.googleMapUrl || ""
     this.hotline = data.hotline || ""
     this.email = data.email || ""
 

@@ -154,8 +154,10 @@ export const initSocket = (httpServer: HttpServer) => {
       const flag = order.items.some(
         (item) => item.status === OrderItemStatus.Pending || item.status === OrderItemStatus.Cooking
       )
+      // [REAL-TIME] Bắn Socket thông báo
+      const io = getIO()
       if (flag) {
-        throw new ErrorWithStatus({
+        io.to("admin_room").emit("payment_reject", {
           message: "Tồn tại đơn hàng chưa phục vụ. Chưa thể thanh toán",
           status: HTTP_STATUS.BAD_REQUEST
         })
@@ -220,8 +222,6 @@ export const initSocket = (httpServer: HttpServer) => {
       }))
 
       // console.log("formattedItems: ", formattedItems) // đã lọc
-      // [REAL-TIME] Bắn Socket thông báo
-      const io = getIO()
 
       // a. Báo cho khách (Tại bàn đó) -> Để màn hình QR chuyển sang "Thành công"
       io.to(`table_${order.tableId}`).emit("payment_success", {
