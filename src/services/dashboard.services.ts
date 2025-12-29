@@ -129,7 +129,7 @@ class DashboardService {
           },
           {
             $group: {
-              _id: { $dateToString: { format: chartFormat, date: "$createdAt" } }, // timezone: "+07:00" nếu cần
+              _id: { $dateToString: { format: chartFormat, date: "$createdAt", timezone: "+07:00" } },
               revenue: { $sum: "$totalAmount" }
             }
           },
