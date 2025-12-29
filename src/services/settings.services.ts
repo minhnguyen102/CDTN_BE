@@ -27,7 +27,55 @@ class SettingsService {
   async createOrUpdateSettings(payload: any) {
     const currentSettings = await databaseService.restaurant_setting.findOne({})
 
-    // --- LOGIC CLEANUP ẢNH CŨ ---
+    // =================================================================
+    // 🟢 BƯỚC 1: LOGIC MERGE (GIỮ LẠI ẢNH CŨ NẾU KHÔNG CÓ ẢNH MỚI)
+    // =================================================================
+    if (currentSettings) {
+      // 1. Logo & Favicon
+      // Nếu payload không gửi logo mới (undefined/null/empty), nhưng DB đang có -> Lấy lại cái cũ
+      if (!payload.logoUrl && currentSettings.logoUrl) {
+        payload.logoUrl = currentSettings.logoUrl
+      }
+      if (!payload.favicon && currentSettings.favicon) {
+        payload.favicon = currentSettings.favicon
+      }
+
+      // 2. About Us Section
+      // Nếu có gửi thông tin About Us (text) nhưng không gửi file ảnh mới
+      if (payload.aboutUsSection) {
+        if (!payload.aboutUsSection.image && currentSettings.aboutUsSection?.image) {
+          payload.aboutUsSection.image = currentSettings.aboutUsSection.image
+        }
+
+        // Giữ lại cả detail cũ nếu payload không gửi lên (tùy chọn)
+        if (!payload.aboutUsSection.detail && currentSettings.aboutUsSection?.detail) {
+          payload.aboutUsSection.detail = currentSettings.aboutUsSection.detail
+        }
+      }
+
+      // 3. Hero Section (Banner)
+      if (payload.heroSection) {
+        // Nếu mảng ảnh mới RỖNG, thì giữ lại mảng ảnh cũ
+        // (Nghĩa là user chỉ update text isActive, không upload banner mới)
+        const newImages = payload.heroSection.images || []
+        if (newImages.length === 0 && currentSettings.heroSection?.images?.length > 0) {
+          payload.heroSection.images = currentSettings.heroSection.images
+        }
+      }
+
+      // 4. Gallery Section
+      if (payload.gallerySection) {
+        const newImages = payload.gallerySection.images || []
+        if (newImages.length === 0 && currentSettings.gallerySection?.images?.length > 0) {
+          payload.gallerySection.images = currentSettings.gallerySection.images
+        }
+      }
+    }
+
+    // =================================================================
+    // 🟡 BƯỚC 2: LOGIC CLEANUP (XÓA ẢNH THỪA)
+    // =================================================================
+    // Lúc này payload đã có đầy đủ ảnh (mới hoặc cũ). Logic so sánh sẽ hoạt động đúng.
     if (currentSettings) {
       // 1. Logo & Favicon
       if (payload.logoUrl && currentSettings.logoUrl && payload.logoUrl !== currentSettings.logoUrl) {
@@ -42,37 +90,37 @@ class SettingsService {
       // 2. About Us Image
       const oldAbout = currentSettings.aboutUsSection?.image
       const newAbout = payload.aboutUsSection?.image
+      // Nếu payload lấy lại ảnh cũ (ở Bước 1), thì newAbout === oldAbout -> Điều kiện này false -> KHÔNG XÓA (Đúng)
+      // Nếu payload có ảnh mới tinh, thì newAbout !== oldAbout -> XÓA CŨ (Đúng)
       if (newAbout && oldAbout && newAbout !== oldAbout) {
         const pid = getPublicIdFromUrl(oldAbout)
         if (pid) await deleteFileFromCloudinary(pid)
       }
 
-      // 3. Hero Images (Mảng String)
+      // 3. Hero Images
       if (payload.heroSection?.images) {
         const oldHeroImgs = currentSettings.heroSection?.images || []
         const newHeroImgs = payload.heroSection.images
         await this.deleteStaleImages(oldHeroImgs, newHeroImgs)
       }
 
-      // 4. Gallery Images (Mảng Object -> Cần map ra URL)
+      // 4. Gallery Images
       if (payload.gallerySection?.images) {
-        // Lấy list URL cũ
         const oldGalleryUrls = (currentSettings.gallerySection?.images || []).map((item: any) => {
           return typeof item === "string" ? item : item.url
         })
 
-        // Lấy list URL mới
         const newGalleryUrls = payload.gallerySection.images.map((item: any) => item.url)
-
         await this.deleteStaleImages(oldGalleryUrls, newGalleryUrls)
       }
     }
 
-    // --- LOGIC LƯU DB ---
+    // =================================================================
+    // 🔴 BƯỚC 3: LƯU DB (Giữ nguyên)
+    // =================================================================
     const defaultSettings = new RestaurantSettings({} as any)
     delete defaultSettings._id
 
-    // Xóa các key trong default để tránh ghi đè dữ liệu user gửi lên bằng giá trị rỗng
     Object.keys(payload).forEach((key) => {
       delete (defaultSettings as any)[key]
     })
