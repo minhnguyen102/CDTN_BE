@@ -56,8 +56,8 @@ class OrderServices {
             status: HTTP_STATUS.BAD_REQUEST
           })
         }
-        await session.commitTransaction()
       }
+      await session.commitTransaction()
     } catch (error) {
       await session.abortTransaction() // Nếu có bất kì 1 lỗi => Hủy toàn bộ các thay đổi trước đó
       throw error
