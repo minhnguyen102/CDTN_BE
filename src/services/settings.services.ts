@@ -69,6 +69,13 @@ class SettingsService {
         if (newImages.length === 0 && currentSettings.gallerySection?.images?.length > 0) {
           payload.gallerySection.images = currentSettings.gallerySection.images
         }
+        // B. Logic giữ Title & Description cũ (NẾU KHÔNG GỬI LÊN) 👇
+        if (!payload.gallerySection.title && currentSettings.gallerySection?.title) {
+          payload.gallerySection.title = currentSettings.gallerySection.title
+        }
+        if (!payload.gallerySection.description && currentSettings.gallerySection?.description) {
+          payload.gallerySection.description = currentSettings.gallerySection.description
+        }
       }
     }
 

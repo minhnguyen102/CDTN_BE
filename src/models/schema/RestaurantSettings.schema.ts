@@ -30,6 +30,8 @@ export interface AboutUsSection {
 
 export interface GallerySection {
   isActive: boolean
+  title: string
+  description: string
   images: {
     description: string
     url: string
@@ -111,6 +113,8 @@ export default class RestaurantSettings {
     }
 
     this.gallerySection = data.gallerySection || {
+      title: "",
+      description: "Không gian ấm cúng, sang trọng cùng những món ăn tinh tếe",
       isActive: true,
       images: []
     }

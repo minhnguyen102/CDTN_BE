@@ -6082,6 +6082,10 @@ components:
       properties:
         isActive:
           type: boolean
+        title:
+          type: string
+        description:
+          type: string
         images:
           type: array
           items:

@@ -81,7 +81,13 @@ export const parseCloudinaryFiles = (req: Request, res: Response, next: NextFunc
 
   if (!req.body.aboutUsSection) req.body.aboutUsSection = { isActive: true, detail: {} }
 
-  if (!req.body.gallerySection) req.body.gallerySection = { isActive: true, images: [] }
+  if (!req.body.gallerySection)
+    req.body.gallerySection = {
+      isActive: true,
+      title: "",
+      description: "",
+      images: []
+    }
   if (!Array.isArray(req.body.gallerySection.images)) req.body.gallerySection.images = []
 
   // 3. Xử lý File Upload
