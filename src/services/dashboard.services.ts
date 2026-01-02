@@ -275,10 +275,11 @@ class DashboardService {
       recent_orders: recentOrdersRaw.map((o) => ({
         id: o._id,
         table: `Bàn ${o.tableNumber}`,
+        guestName: o.guestName,
         amount: o.totalAmount,
         status: this.deriveOrderStatus(o),
         type: "Dùng tại bàn",
-        time: o.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+        time: o.createdAt.getTime()
       }))
     }
   }

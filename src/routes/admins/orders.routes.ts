@@ -70,7 +70,7 @@ ordersRouter.patch(
   "/:order_id/:item_id",
   accessTokenValidation,
   verifiedUserValidation,
-  // checkPermission("update_order"), // chưa tạo mới quyền này
+  checkPermission("update_order_status"),
   wrapHandlerFunction(updateStatusItemInOrdersController)
 )
 
@@ -83,7 +83,7 @@ ordersRouter.patch(
 ordersRouter.post(
   "/create",
   accessTokenValidation,
-  // checkPermission("create_order"), // admin chưa có
+  checkPermission("create_order"), // admin chưa có
   adminCreateOrderValidation,
   wrapHandlerFunction(adminCreateOrderForTableController)
 )
