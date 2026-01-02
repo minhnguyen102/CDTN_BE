@@ -25,7 +25,7 @@ adminReviewsRoutes.get(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
-  // checkPermission("view_reviews"), // Chưa tạo mơi
+  checkPermission("view_reviews"), // Chưa tạo mơi
   getAllReviewForAdminValidation,
   wrapHandlerFunction(getAllReviewForAdminController)
 )
@@ -41,7 +41,7 @@ adminReviewsRoutes.post(
   accessTokenValidation,
   verifiedUserValidation,
   replyReviewValidation,
-  // checkPermission("active_hidden_review"), // Chưa tạo mơi
+  checkPermission("reply_review"),
   wrapHandlerFunction(replyReviewController)
 )
 
@@ -55,7 +55,7 @@ adminReviewsRoutes.patch(
   "/:reviewId/:status",
   accessTokenValidation,
   verifiedUserValidation,
-  // checkPermission("active_hidden_review"), // Chưa tạo mơi
+  checkPermission("active_hidden_review"),
   changeReviewStatusValidation,
   wrapHandlerFunction(changeReviewStatusController)
 )

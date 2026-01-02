@@ -2,6 +2,7 @@ import { Router } from "express"
 import { accessTokenValidation, verifiedUserValidation } from "../../middlewares/admins/accounts.middlewares"
 import { wrapHandlerFunction } from "../../utils/wrapHandler"
 import { getDashboardStatsController } from "../../controllers/admins/dashboard.controllers"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 
 const dashboardRoutes = Router()
 
@@ -16,6 +17,7 @@ dashboardRoutes.get(
   "/stats",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("view_dashboard"),
   wrapHandlerFunction(getDashboardStatsController)
 )
 

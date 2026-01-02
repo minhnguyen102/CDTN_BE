@@ -5,6 +5,7 @@ import { verifiedUserValidation } from "../../middlewares/admins/accounts.middle
 import { getSettingsController, updateSettingsController } from "../../controllers/setting/setting.controllers"
 import { updateSettingsValidation } from "../../middlewares/settings.middlewares"
 import { parseCloudinaryFiles, uploadCloud } from "../../utils/cloudinary"
+import { checkPermission } from "../../middlewares/admins/auth.middlewares"
 
 const settingsRouter = Router()
 
@@ -25,6 +26,7 @@ settingsRouter.patch(
   "/",
   accessTokenValidation,
   verifiedUserValidation,
+  checkPermission("update_setting"),
   uploadCloud.fields([
     { name: "logo", maxCount: 1 },
     { name: "favicon", maxCount: 1 },
