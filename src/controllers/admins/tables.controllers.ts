@@ -17,7 +17,7 @@ export const createTableController = async (req: Request<ParamsDictionary, any, 
 
 export const getAllTablesController = async (req: Request, res: Response) => {
   // Phân trang
-  const { page, limit } = paginationQueryParser(req, { defaultLimit: 5, allowLimits: [5, 10, 15] })
+  const { page, limit } = paginationQueryParser(req, { defaultLimit: 5 })
 
   // Xử lí status
   const status = (req.query.status as string) || undefined

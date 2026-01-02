@@ -25,6 +25,8 @@ export const paginationQueryParser = (req: Request, options: PaginationOptions =
     const parseLimit = Number(limitFromQuery)
     if (allowLimits.includes(parseLimit)) {
       limit = parseLimit
+    } else {
+      limit = parseLimit
     }
   }
 
