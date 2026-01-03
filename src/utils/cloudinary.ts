@@ -101,6 +101,10 @@ export const parseCloudinaryFiles = (req: Request, res: Response, next: NextFunc
       req.body.aboutUsSection.image = files.aboutUsImage[0].path
     }
 
+    if (req.body.mapUrl === "null" || req.body.mapUrl === "undefined") {
+      req.body.mapUrl = ""
+    }
+
     // Hero Images (Banner) -> Mảng String
     if (files.heroImages) {
       req.body.heroSection.images = files.heroImages.map((file) => file.path)

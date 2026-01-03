@@ -48,6 +48,7 @@ interface RestaurantSettingsType {
   address?: string
   hotline?: string
   email?: string
+  mapUrl?: string
   socialLinks?: SocialLink[]
   openingHours?: OpeningHour[]
   heroSection?: HeroSection
@@ -65,6 +66,7 @@ export default class RestaurantSettings {
   address: string
   hotline: string
   email: string
+  mapUrl: string
   socialLinks: SocialLink[]
   openingHours: OpeningHour[]
   heroSection: HeroSection
@@ -81,6 +83,7 @@ export default class RestaurantSettings {
     this.address = data.address || ""
     this.hotline = data.hotline || ""
     this.email = data.email || ""
+    this.mapUrl = data.mapUrl || ""
     this.socialLinks = data.socialLinks || []
     this.openingHours = data.openingHours || []
 

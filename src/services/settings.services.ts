@@ -77,6 +77,10 @@ class SettingsService {
           payload.gallerySection.description = currentSettings.gallerySection.description
         }
       }
+
+      if (!payload.mapUrl && currentSettings.mapUrl) {
+        payload.mapUrl = currentSettings.mapUrl
+      }
     }
 
     // =================================================================
