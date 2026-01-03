@@ -154,6 +154,7 @@ export const initSocket = (httpServer: HttpServer) => {
       const flag = order.items.some(
         (item) => item.status === OrderItemStatus.Pending || item.status === OrderItemStatus.Cooking
       )
+      console.log("flag: ", flag)
       // [REAL-TIME] Bắn Socket thông báo
       const io = getIO()
       if (flag) {
@@ -161,6 +162,7 @@ export const initSocket = (httpServer: HttpServer) => {
           message: "Tồn tại đơn hàng chưa phục vụ. Chưa thể thanh toán",
           status: HTTP_STATUS.BAD_REQUEST
         })
+        return
       }
       // Update Database (Chuyển trạng thái thành PAID, chuyển trạng thái, currentOrderId của bàn)
       await Promise.all([
