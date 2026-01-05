@@ -13,9 +13,7 @@ export enum TokenType {
 
 export enum TableStatus {
   AVAILABLE = "available", // còn trống
-  OCCUPIED = "occupied", // đã có khách
-  RESERVED = "reserved", // đã đặt trước
-  NEEDS_CLEANING = "needs_cleaning" // cần dọn dẹp
+  OCCUPIED = "occupied" // đã có khách
 } // done
 
 export enum SupplierStatus {
