@@ -174,7 +174,7 @@ class AccountsServices {
       user_id: user_id.toString(),
       verify: AccountVerifyStatus.UNVERIFIED
     })
-    const verificationLink = `${process.env.BASE_URL}/verify-email?token=${email_verify_token}`
+    const verificationLink = `${process.env.BASE_URL_ADMIN}/verify-email?token=${email_verify_token}`
     const html = `
       <div style="font-family: Arial, sans-serif; padding: 20px;">
         <h2>Xin chào!</h2>

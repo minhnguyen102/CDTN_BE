@@ -168,7 +168,7 @@ export const loginValidation = validate(
             if (account.status === AccountStatus.INACTIVE) {
               throw new ErrorWithStatus({
                 message: USER_MESSAGES.ACCOUNT_INACTIVE,
-                status: HTTP_STATUS.BAD_REQUEST
+                status: HTTP_STATUS.FORBIDDEN
               })
             }
             req.account = account

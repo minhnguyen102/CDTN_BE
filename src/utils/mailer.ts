@@ -26,7 +26,7 @@ export const sendVerificationEmail = async ({
   html: string
 }) => {
   const mailOptions = {
-    from: '"Nhà hàng QR" <no-reply@restaurant.com>',
+    from: "Snackio <contact@snackio.vn>",
     to: toEmail,
     subject,
     html
