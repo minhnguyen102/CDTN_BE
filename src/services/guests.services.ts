@@ -198,7 +198,7 @@ class GuestService {
       .toArray()
     return dishCategories
   }
-  // Lấy danh sách đơn hàng
+
   async getMenu({
     categoryId,
     page,
@@ -216,41 +216,112 @@ class GuestService {
     minPrice?: number
     maxPrice?: number
   }) {
-    const objectFind: any = {
+    const matchStage: any = {
       deleted: false,
       status: DishStatus.AVAILABLE,
       categoryId: new ObjectId(categoryId)
     }
-    if (rating) {
-      objectFind.ratingAverage = {
-        $gte: rating
-      }
-    }
-    if (isFeatured) {
-      objectFind.isFeatured = isFeatured
-    }
+
+    if (rating) matchStage.ratingAverage = { $gte: rating }
+    if (isFeatured) matchStage.isFeatured = isFeatured
     if (minPrice !== undefined || maxPrice !== undefined) {
-      objectFind.price = {}
-      if (minPrice !== undefined) objectFind.price.$gte = minPrice // Lớn hơn hoặc bằng
-      if (maxPrice !== undefined) objectFind.price.$lte = maxPrice // Nhỏ hơn hoặc bằng
+      matchStage.price = {}
+      if (minPrice !== undefined) matchStage.price.$gte = minPrice
+      if (maxPrice !== undefined) matchStage.price.$lte = maxPrice
     }
-    // console.log(objectFind)
-    const [menu, total] = await Promise.all([
-      databaseService.dishes
-        .find(objectFind, {
-          projection: {
-            name_search: 0,
-            deleted: 0,
-            deletedAt: 0,
-            createdAt: 0,
-            updatedAt: 0
+
+    const pipeline = [
+      { $match: matchStage },
+
+      {
+        $lookup: {
+          from: "ingredients",
+          localField: "recipe.ingredientId",
+          foreignField: "_id",
+          as: "ingredient_details"
+        }
+      },
+
+      // Tính toán xem món này có đủ nguyên liệu không
+      {
+        $addFields: {
+          isStockAvailable: {
+            $cond: {
+              // Trường hợp 1: Món không có công thức (VD: Coca lon, nước suối...) -> Luôn Available
+              if: {
+                $or: [
+                  { $eq: ["$recipe", null] },
+                  { $eq: [{ $size: { $ifNull: ["$recipe", []] } }, 0] } // recipe rỗng
+                ]
+              },
+              then: true,
+              // Trường hợp 2: Có công thức -> Duyệt từng nguyên liệu để check
+              else: {
+                $allElementsTrue: {
+                  $map: {
+                    input: "$recipe",
+                    as: "item",
+                    in: {
+                      $let: {
+                        vars: {
+                          // Tìm nguyên liệu tương ứng trong mảng ingredient_details vừa lookup được
+                          stockItem: {
+                            $arrayElemAt: [
+                              {
+                                $filter: {
+                                  input: "$ingredient_details",
+                                  as: "ing",
+                                  cond: { $eq: ["$$ing._id", "$$item.ingredientId"] }
+                                }
+                              },
+                              0
+                            ]
+                          }
+                        },
+                        // Kiểm tra: Tồn kho >= Số lượng cần trong công thức
+                        in: { $gte: ["$$stockItem.currentStock", "$$item.quantity"] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
-        })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .toArray(),
-      databaseService.dishes.countDocuments(objectFind)
-    ])
+        }
+      },
+
+      // Lọc bỏ những món không đủ nguyên liệu
+      { $match: { isStockAvailable: true } },
+
+      // Project để bỏ các trường thừa (ingredient_details, isStockAvailable...)
+      // Giữ lại các trường cần thiết như logic cũ
+      {
+        $project: {
+          ingredient_details: 0,
+          isStockAvailable: 0,
+          name_search: 0,
+          deleted: 0,
+          deletedAt: 0,
+          createdAt: 0,
+          updatedAt: 0
+        }
+      },
+
+      // Facet để vừa đếm tổng số lượng (sau khi lọc kho) vừa phân trang
+      {
+        $facet: {
+          data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+          totalCount: [{ $count: "count" }]
+        }
+      }
+    ]
+
+    const result = await databaseService.dishes.aggregate(pipeline).toArray()
+
+    // Xử lý kết quả trả về từ Facet
+    const menu = result[0].data
+    const total = result[0].totalCount[0] ? result[0].totalCount[0].count : 0
+
     return {
       menu,
       pagination: {

@@ -16,6 +16,7 @@ const USER_MESSAGES = {
   PASSWORD_MUST_BE_STRONG:
     "Mật khẩu phải dài ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 ký hiệu đặc biệt.",
   ACCOUNTS_FETCHED_SUCCESSFULLY: "Lấy danh sách tài khoản thành công",
+  ACCOUNT_INACTIVE: "Tài khoản đã bị khóa",
   NAME_IS_REQUIRED: "Tên là bắt buộc",
   NAME_MUST_BE_STRING: "Tên phải là một chuỗi",
   NAME_LENGTH: "Tên phải từ 1 đến 50 ký tự",

@@ -158,10 +158,16 @@ export const loginValidation = validate(
               password: hashPassword(req.body.password)
             })
             // Nếu không tồn tại user trong db => throw lỗi
-            // console.log(account)
             if (!account) {
               throw new ErrorWithStatus({
                 message: USER_MESSAGES.EMAIL_OR_PASSWORD_IS_INCORRECT,
+                status: HTTP_STATUS.BAD_REQUEST
+              })
+            }
+
+            if (account.status === AccountStatus.INACTIVE) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.ACCOUNT_INACTIVE,
                 status: HTTP_STATUS.BAD_REQUEST
               })
             }
