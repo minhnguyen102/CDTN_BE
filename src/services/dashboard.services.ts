@@ -13,49 +13,114 @@ class DashboardService {
   }
 
   // Hàm lấy khung thời gian
-  private getTimeRange(type: "day" | "week" | "month") {
-    const now = new Date()
-    let start, end, prevStart, prevEnd
+  private getTimeRange(params: {
+    type?: "day" | "week" | "month" | "year" | "custom"
+    specificDate?: string // Ngày cụ thể để tính toán (YYYY-MM-DD)
+    startDate?: string
+    endDate?: string
+    startHour?: number
+    endHour?: number
+    startDay?: number
+    endDay?: number
+    startDayOfMonth?: number
+    endDayOfMonth?: number
+    startMonth?: number
+    endMonth?: number
+  }) {
+    const { type = "day", specificDate } = params
+    const now = specificDate ? new Date(specificDate) : new Date()
+    let start: Date, end: Date, prevStart: Date, prevEnd: Date
     let labelCompare = ""
     let chartFormat = ""
 
-    if (type === "week") {
-      const dayOfWeek = now.getDay()
-      const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
-      start = new Date(now.setDate(diff))
+    if (type === "custom") {
+      // Custom date range
+      start = new Date(params.startDate!)
       start.setHours(0, 0, 0, 0)
-      end = new Date()
+      end = new Date(params.endDate!)
+      end.setHours(23, 59, 59, 999)
+
+      const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      prevStart = new Date(start)
+      prevStart.setDate(prevStart.getDate() - diffDays)
+      prevEnd = new Date(start)
+      prevEnd.setSeconds(-1)
+
+      labelCompare = "so với kỳ trước"
+      chartFormat = diffDays <= 1 ? "%H" : "%Y-%m-%d"
+    } else if (type === "year") {
+      // Trong năm - chọn tháng (có thể chọn năm cụ thể qua specificDate)
+      const startM = params.startMonth || 1
+      const endM = params.endMonth || 12
+
+      start = new Date(now.getFullYear(), startM - 1, 1, 0, 0, 0, 0)
+      end = new Date(now.getFullYear(), endM, 0, 23, 59, 59, 999)
+
+      prevStart = new Date(now.getFullYear() - 1, startM - 1, 1, 0, 0, 0, 0)
+      prevEnd = new Date(now.getFullYear() - 1, endM, 0, 23, 59, 59, 999)
+
+      labelCompare = "so với năm trước"
+      chartFormat = "%Y-%m"
+    } else if (type === "month") {
+      // Trong tháng - chọn ngày (có thể chọn tháng/năm cụ thể qua specificDate)
+      const startD = params.startDayOfMonth || 1
+      const endD = params.endDayOfMonth || new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+
+      start = new Date(now.getFullYear(), now.getMonth(), startD, 0, 0, 0, 0)
+      end = new Date(now.getFullYear(), now.getMonth(), endD, 23, 59, 59, 999)
 
       prevStart = new Date(start)
-      prevStart.setDate(prevStart.getDate() - 7)
-      prevEnd = new Date(prevStart)
-      prevEnd.setDate(prevEnd.getDate() + 6)
-      prevEnd.setHours(23, 59, 59, 999)
-
-      labelCompare = "so với tuần trước"
-      chartFormat = "%Y-%m-%d"
-    } else if (type === "month") {
-      start = new Date(now.getFullYear(), now.getMonth(), 1)
-      end = new Date()
-
-      prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-      prevEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+      prevStart.setMonth(prevStart.getMonth() - 1)
+      prevEnd = new Date(end)
+      prevEnd.setMonth(prevEnd.getMonth() - 1)
 
       labelCompare = "so với tháng trước"
       chartFormat = "%Y-%m-%d"
+    } else if (type === "week") {
+      // Trong tuần - chọn ngày trong tuần (có thể chọn tuần cụ thể qua specificDate)
+      const dayOfWeek = now.getDay()
+      const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
+      const weekStart = new Date(now)
+      weekStart.setDate(diff)
+      weekStart.setHours(0, 0, 0, 0)
+
+      const startD = params.startDay !== undefined ? params.startDay : 1 // Monday
+      const endD = params.endDay !== undefined ? params.endDay : 0 // Sunday
+
+      start = new Date(weekStart)
+      start.setDate(start.getDate() + (startD === 0 ? 6 : startD - 1))
+
+      end = new Date(weekStart)
+      end.setDate(end.getDate() + (endD === 0 ? 6 : endD - 1))
+      end.setHours(23, 59, 59, 999)
+
+      prevStart = new Date(start)
+      prevStart.setDate(prevStart.getDate() - 7)
+      prevEnd = new Date(end)
+      prevEnd.setDate(prevEnd.getDate() - 7)
+
+      labelCompare = "so với tuần trước"
+      chartFormat = "%Y-%m-%d"
     } else {
-      start = new Date()
-      start.setHours(0, 0, 0, 0)
-      end = new Date()
+      // day - chọn giờ trong ngày (có thể chọn ngày cụ thể qua specificDate)
+      const startH = params.startHour !== undefined ? params.startHour : 0
+      const endH = params.endHour !== undefined ? params.endHour : 23
+
+      start = new Date(now)
+      start.setHours(startH, 0, 0, 0)
+
+      end = new Date(now)
+      end.setHours(endH, 59, 59, 999)
 
       prevStart = new Date(start)
       prevStart.setDate(prevStart.getDate() - 1)
-      prevEnd = new Date(start)
-      prevEnd.setSeconds(-1)
+      prevEnd = new Date(end)
+      prevEnd.setDate(prevEnd.getDate() - 1)
 
       labelCompare = "so với hôm qua"
       chartFormat = "%H"
     }
+
     return { start, end, prevStart, prevEnd, labelCompare, chartFormat }
   }
 
@@ -71,7 +136,7 @@ class DashboardService {
   }
 
   async getDashboardStats(type: "day" | "week" | "month" = "day") {
-    const { start, end, prevStart, prevEnd, labelCompare, chartFormat } = this.getTimeRange(type)
+    const { start, end, prevStart, prevEnd, labelCompare, chartFormat } = this.getTimeRange({ type })
 
     // --- QUERY 1: Lấy số liệu Thống kê (Hiện tại & Quá khứ) ---
     // Chỉ tính các đơn ĐÃ THANH TOÁN (PAID) cho doanh thu và số lượng
@@ -281,6 +346,413 @@ class DashboardService {
         type: "Dùng tại bàn",
         time: o.createdAt.getTime()
       }))
+    }
+  }
+
+  /**
+   * 1️⃣ Doanh thu theo phương thức thanh toán
+   * Biểu đồ: Pie chart / Donut chart
+   * Mục đích: Phân tích hành vi thanh toán khách hàng
+   */
+  async getRevenueByPaymentMethod(type: "day" | "week" | "month" | "year" = "day", params?: any) {
+    const { start, end } = this.getTimeRange(params || { type })
+
+    // 🔍 DEBUG: First check ALL payment methods in database (no time filter)
+    const allPaymentMethods = await databaseService.orders
+      .aggregate([
+        {
+          $group: {
+            _id: "$paymentMethod",
+            count: { $sum: 1 }
+          }
+        }
+      ])
+      .toArray()
+
+    console.log("🔍 ALL Payment Methods in DB (no time filter):", JSON.stringify(allPaymentMethods, null, 2))
+
+    // 🔍 DEBUG: Log query parameters
+    console.log("🔍 Query Parameters:", {
+      type,
+      params,
+      start: start.toISOString(),
+      end: end.toISOString()
+    })
+
+    const result = await databaseService.orders
+      .aggregate([
+        {
+          $match: {
+            // ⚠️ TEMPORARILY REMOVED PaymentStatus filter to debug
+            // paymentStatus: PaymentStatus.PAID,
+            createdAt: { $gte: start, $lte: end }
+          }
+        },
+        {
+          $group: {
+            _id: "$paymentMethod",
+            totalRevenue: { $sum: "$totalAmount" },
+            orderCount: { $sum: 1 }
+          }
+        },
+        { $sort: { totalRevenue: -1 } }
+      ])
+      .toArray()
+
+    // 🔍 DEBUG: Log raw data to see what's in database
+    console.log("🔍 Revenue by Payment Method - Raw Data:", JSON.stringify(result, null, 2))
+
+    // Tính tổng để có %
+    const totalRevenue = result.reduce((sum, item) => sum + item.totalRevenue, 0)
+
+    // Map payment method to Vietnamese labels
+    const paymentMethodLabels: Record<string, string> = {
+      Cash: "Tiền mặt",
+      Bank: "Chuyển khoản"
+    }
+
+    return {
+      data: result.map((item) => ({
+        method: paymentMethodLabels[item._id] || item._id,
+        revenue: item.totalRevenue,
+        orderCount: item.orderCount,
+        percentage: totalRevenue > 0 ? Math.round((item.totalRevenue / totalRevenue) * 100 * 10) / 10 : 0
+      })),
+      total: totalRevenue
+    }
+  }
+
+  /**
+   * 2️⃣ Món bán chậm
+   * Biểu đồ: Bar chart
+   * Mục đích: Loại bỏ hoặc cải tiến món
+   */
+  async getSlowMovingDishes(type: "day" | "week" | "month" = "day", limit: number = 10) {
+    const { start, end } = this.getTimeRange({ type })
+
+    // Lấy tất cả món ăn active
+    const allDishes = await databaseService.dishes
+      .find({ deleted: false, status: "available" as any })
+      .project({ _id: 1, name: 1, price: 1 })
+      .toArray()
+
+    // Lấy dữ liệu bán hàng
+    const salesData = await databaseService.orders
+      .aggregate([
+        {
+          $match: {
+            paymentStatus: PaymentStatus.PAID,
+            createdAt: { $gte: start, $lte: end }
+          }
+        },
+        { $unwind: "$items" },
+        {
+          $group: {
+            _id: "$items.dishId",
+            totalSales: { $sum: "$items.quantity" },
+            revenue: { $sum: { $multiply: ["$items.dishPrice", "$items.quantity"] } }
+          }
+        }
+      ])
+      .toArray()
+
+    // Map sales data
+    const salesMap = new Map(salesData.map((item) => [item._id.toString(), item]))
+
+    // Kết hợp dữ liệu
+    const dishesWithSales = allDishes.map((dish) => {
+      const sales = salesMap.get(dish._id.toString())
+      return {
+        id: dish._id,
+        name: dish.name,
+        price: dish.price,
+        sales: sales?.totalSales || 0,
+        revenue: sales?.revenue || 0
+      }
+    })
+
+    // Sort theo số lượng bán tăng dần (món bán ít nhất)
+    dishesWithSales.sort((a, b) => a.sales - b.sales)
+
+    return {
+      data: dishesWithSales.slice(0, limit)
+    }
+  }
+
+  /**
+   * 3️⃣ Doanh thu theo nhóm món
+   * Biểu đồ: Pie chart / Stacked bar
+   * Mục đích: Biết nhóm món nào sinh lời cao
+   */
+  async getRevenueByDishCategory(type: "day" | "week" | "month" = "day") {
+    const { start, end } = this.getTimeRange({ type })
+
+    const result = await databaseService.orders
+      .aggregate([
+        {
+          $match: {
+            paymentStatus: PaymentStatus.PAID,
+            createdAt: { $gte: start, $lte: end }
+          }
+        },
+        { $unwind: "$items" },
+        {
+          $lookup: {
+            from: "dishes",
+            localField: "items.dishId",
+            foreignField: "_id",
+            as: "dishInfo"
+          }
+        },
+        { $unwind: "$dishInfo" },
+        {
+          $lookup: {
+            from: "dish_categories",
+            localField: "dishInfo.categoryId",
+            foreignField: "_id",
+            as: "categoryInfo"
+          }
+        },
+        { $unwind: "$categoryInfo" },
+        {
+          $group: {
+            _id: "$categoryInfo._id",
+            categoryName: { $first: "$categoryInfo.name" },
+            revenue: { $sum: { $multiply: ["$items.dishPrice", "$items.quantity"] } },
+            quantity: { $sum: "$items.quantity" },
+            orderCount: { $addToSet: "$_id" } // Đếm số đơn unique
+          }
+        },
+        {
+          $project: {
+            categoryName: 1,
+            revenue: 1,
+            quantity: 1,
+            orderCount: { $size: "$orderCount" }
+          }
+        },
+        { $sort: { revenue: -1 } }
+      ])
+      .toArray()
+
+    const totalRevenue = result.reduce((sum, item) => sum + item.revenue, 0)
+
+    return {
+      data: result.map((item) => ({
+        categoryId: item._id,
+        categoryName: item.categoryName,
+        revenue: item.revenue,
+        quantity: item.quantity,
+        orderCount: item.orderCount,
+        percentage: totalRevenue > 0 ? Math.round((item.revenue / totalRevenue) * 100 * 10) / 10 : 0
+      })),
+      total: totalRevenue
+    }
+  }
+
+  /**
+   * 4️⃣ Tần suất sử dụng bàn
+   * Biểu đồ: Bar chart / Heatmap
+   * Mục đích: Bố trí lại sơ đồ bàn hợp lý
+   */
+  async getTableUsageFrequency(type: "day" | "week" | "month" = "day") {
+    const { start, end } = this.getTimeRange({ type })
+
+    const result = await databaseService.orders
+      .aggregate([
+        {
+          $match: {
+            createdAt: { $gte: start, $lte: end }
+          }
+        },
+        {
+          $group: {
+            _id: "$tableNumber",
+            usageCount: { $sum: 1 },
+            totalRevenue: {
+              $sum: {
+                $cond: [{ $eq: ["$paymentStatus", PaymentStatus.PAID] }, "$totalAmount", 0]
+              }
+            },
+            avgOrderValue: {
+              $avg: {
+                $cond: [{ $eq: ["$paymentStatus", PaymentStatus.PAID] }, "$totalAmount", null]
+              }
+            }
+          }
+        },
+        { $sort: { usageCount: -1 } }
+      ])
+      .toArray()
+
+    // Lấy thông tin bàn từ collection tables
+    const tables = await databaseService.tables.find({}).toArray()
+    const tableMap = new Map(tables.map((t) => [t.number, t]))
+
+    return {
+      data: result.map((item) => {
+        const tableInfo = tableMap.get(item._id)
+        return {
+          tableNumber: item._id,
+          capacity: tableInfo?.capacity || 0,
+          usageCount: item.usageCount,
+          totalRevenue: item.totalRevenue,
+          avgOrderValue: Math.round(item.avgOrderValue || 0)
+        }
+      })
+    }
+  }
+
+  /**
+   * 5️⃣ Lượng khách theo khung giờ
+   * Biểu đồ: Line chart / Column chart
+   * Mục đích: Tối ưu phục vụ & nhân lực
+   */
+  async getCustomersByTimeSlot(type: "day" | "week" | "month" = "day") {
+    const { start, end } = this.getTimeRange({ type })
+
+    const result = await databaseService.orders
+      .aggregate([
+        {
+          $match: {
+            createdAt: { $gte: start, $lte: end }
+          }
+        },
+        {
+          $project: {
+            hour: { $hour: { date: "$createdAt", timezone: "+07:00" } },
+            totalAmount: 1,
+            paymentStatus: 1
+          }
+        },
+        {
+          $group: {
+            _id: "$hour",
+            orderCount: { $sum: 1 },
+            revenue: {
+              $sum: {
+                $cond: [{ $eq: ["$paymentStatus", PaymentStatus.PAID] }, "$totalAmount", 0]
+              }
+            }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ])
+      .toArray()
+
+    // Tạo array 24 giờ với giá trị mặc định
+    const hourlyData = Array.from({ length: 24 }, (_, hour) => {
+      const found = result.find((item) => item._id === hour)
+      return {
+        hour: `${hour.toString().padStart(2, "0")}:00`,
+        orderCount: found?.orderCount || 0,
+        revenue: found?.revenue || 0
+      }
+    })
+
+    // Tìm giờ cao điểm và thấp điểm
+    const maxOrders = Math.max(...hourlyData.map((h) => h.orderCount))
+    const minOrders = Math.min(...hourlyData.filter((h) => h.orderCount > 0).map((h) => h.orderCount))
+
+    const peakHours = hourlyData.filter((h) => h.orderCount === maxOrders).map((h) => h.hour)
+    const lowHours = hourlyData.filter((h) => h.orderCount === minOrders && h.orderCount > 0).map((h) => h.hour)
+
+    return {
+      data: hourlyData,
+      insights: {
+        peakHours,
+        lowHours,
+        totalOrders: hourlyData.reduce((sum, h) => sum + h.orderCount, 0)
+      }
+    }
+  }
+
+  /**
+   * 6️⃣ Thời gian phục vụ trung bình
+   * Biểu đồ: Line chart
+   * Mục đích: Cải thiện tốc độ phục vụ
+   */
+  async getAverageServiceTime(type: "day" | "week" | "month" = "day") {
+    const { start, end } = this.getTimeRange({ type })
+
+    const result = await databaseService.orders
+      .aggregate([
+        {
+          $match: {
+            createdAt: { $gte: start, $lte: end }
+          }
+        },
+        { $unwind: "$items" },
+        {
+          $project: {
+            dishName: "$items.dishName",
+            orderTime: "$items.createdAt",
+            processingHistory: "$items.processingHistory",
+            // Tìm thời điểm món được serve
+            servedTime: {
+              $arrayElemAt: [
+                {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: "$items.processingHistory",
+                        as: "history",
+                        cond: { $eq: ["$$history.status", OrderItemStatus.Served] }
+                      }
+                    },
+                    as: "served",
+                    in: "$$served.updatedAt"
+                  }
+                },
+                0
+              ]
+            }
+          }
+        },
+        {
+          $match: {
+            servedTime: { $exists: true, $ne: null }
+          }
+        },
+        {
+          $project: {
+            dishName: 1,
+            serviceTimeMs: { $subtract: ["$servedTime", "$orderTime"] }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            avgServiceTimeMs: { $avg: "$serviceTimeMs" },
+            minServiceTimeMs: { $min: "$serviceTimeMs" },
+            maxServiceTimeMs: { $max: "$serviceTimeMs" },
+            totalServedItems: { $sum: 1 }
+          }
+        }
+      ])
+      .toArray()
+
+    if (result.length === 0) {
+      return {
+        avgServiceTime: 0,
+        minServiceTime: 0,
+        maxServiceTime: 0,
+        totalServedItems: 0,
+        message: "Chưa có dữ liệu món đã phục vụ trong khoảng thời gian này"
+      }
+    }
+
+    const data = result[0]
+
+    // Convert từ milliseconds sang phút
+    const msToMinutes = (ms: number) => Math.round(ms / 1000 / 60)
+
+    return {
+      avgServiceTime: msToMinutes(data.avgServiceTimeMs),
+      minServiceTime: msToMinutes(data.minServiceTimeMs),
+      maxServiceTime: msToMinutes(data.maxServiceTimeMs),
+      totalServedItems: data.totalServedItems,
+      unit: "minutes"
     }
   }
 }
