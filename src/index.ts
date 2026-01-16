@@ -18,6 +18,7 @@ import publicsRouter from "./routes/public/public.routes"
 export const WHILELIST_DOMAINS: string[] = [
   // Môi trường Local
   "http://localhost:3000",
+  "http://localhost:3001",
   "http://admin.localhost:3000",
   // "http://localhost:4000",
 
