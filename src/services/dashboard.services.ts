@@ -427,8 +427,8 @@ class DashboardService {
    * Biểu đồ: Bar chart
    * Mục đích: Loại bỏ hoặc cải tiến món
    */
-  async getSlowMovingDishes(type: "day" | "week" | "month" = "day", limit: number = 10) {
-    const { start, end } = this.getTimeRange({ type })
+  async getSlowMovingDishes(type: "day" | "week" | "month" | "year" = "day", limit: number = 10, params?: any) {
+    const { start, end } = this.getTimeRange(params || { type })
 
     // Lấy tất cả món ăn active
     const allDishes = await databaseService.dishes
@@ -484,8 +484,8 @@ class DashboardService {
    * Biểu đồ: Pie chart / Stacked bar
    * Mục đích: Biết nhóm món nào sinh lời cao
    */
-  async getRevenueByDishCategory(type: "day" | "week" | "month" = "day") {
-    const { start, end } = this.getTimeRange({ type })
+  async getRevenueByDishCategory(type: "day" | "week" | "month" | "year" = "day", params?: any) {
+    const { start, end } = this.getTimeRange(params || { type })
 
     const result = await databaseService.orders
       .aggregate([
@@ -555,8 +555,8 @@ class DashboardService {
    * Biểu đồ: Bar chart / Heatmap
    * Mục đích: Bố trí lại sơ đồ bàn hợp lý
    */
-  async getTableUsageFrequency(type: "day" | "week" | "month" = "day") {
-    const { start, end } = this.getTimeRange({ type })
+  async getTableUsageFrequency(type: "day" | "week" | "month" | "year" = "day", params?: any) {
+    const { start, end } = this.getTimeRange(params || { type })
 
     const result = await databaseService.orders
       .aggregate([
@@ -608,8 +608,8 @@ class DashboardService {
    * Biểu đồ: Line chart / Column chart
    * Mục đích: Tối ưu phục vụ & nhân lực
    */
-  async getCustomersByTimeSlot(type: "day" | "week" | "month" = "day") {
-    const { start, end } = this.getTimeRange({ type })
+  async getCustomersByTimeSlot(type: "day" | "week" | "month" | "year" = "day", params?: any) {
+    const { start, end } = this.getTimeRange(params || { type })
 
     const result = await databaseService.orders
       .aggregate([
@@ -672,8 +672,8 @@ class DashboardService {
    * Biểu đồ: Line chart
    * Mục đích: Cải thiện tốc độ phục vụ
    */
-  async getAverageServiceTime(type: "day" | "week" | "month" = "day") {
-    const { start, end } = this.getTimeRange({ type })
+  async getAverageServiceTime(type: "day" | "week" | "month" | "year" = "day", params?: any) {
+    const { start, end } = this.getTimeRange(params || { type })
 
     const result = await databaseService.orders
       .aggregate([
