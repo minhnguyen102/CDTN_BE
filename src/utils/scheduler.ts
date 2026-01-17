@@ -1,6 +1,6 @@
 import cron from "node-cron"
 import orderServices from "../services/orders.services"
-import aiService from "../services/ai.services"
+import aiService from "../services/legacyAI.services"
 import { sendWeeklyReportToManager } from "./mailer"
 
 const handleWeeklyReport = async ({ toEmail = "minhkhac1002@gmail.com" }: { toEmail?: string }) => {
