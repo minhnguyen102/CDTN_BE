@@ -1,218 +1,136 @@
-import { ObjectId } from "mongodb"
-import databaseService from "./database.servies"
-import { DishStatus } from "../constants/enums"
-import { GoogleGenerativeAI } from "@google/generative-ai"
-import { config } from "dotenv"
-config()
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string)
+import OpenAI from "openai";
 
 class AIService {
-  // Gợi ý món ăn khu vực giỏ hàng
-  async getCartRecomendations({ dishIds }: { dishIds: string[] }) {
-    // Nếu giỏ hàng chưa có gì => Đề xuất các món nổi bật
-    if (!dishIds || dishIds.length === 0) {
-      return databaseService.dishes
-        .find(
-          {
-            isFeatured: true
-          },
-          {
-            projection: {
-              _id: 1,
-              name: 1,
-              price: 1,
-              image: 1,
-              ratingAverage: 1,
-              reviewCount: 1
-            }
-          }
-        )
-        .limit(3)
-        .toArray()
-    }
-    // Nếu có => tìm kiếm trong collection recomendation (combinationKey)
-    const sortedIds = dishIds.sort().join("_")
-    const cacheRecomendation = await databaseService.recommendations.findOne({
-      combinationKey: sortedIds
-    })
-    if (cacheRecomendation) {
-      return databaseService.dishes
-        .find({ _id: { $in: cacheRecomendation.recommendedDishIds } })
-        .project({ name: 1, price: 1, image: 1, ratingAverage: 1, reviewCount: 1 }) // Cân nhắc dữ liệu trả về
-        .toArray()
-    }
-    // Nếu không có => Tạo mới bản ghi + hỏi AI
-    // Lấy tên món ăn
-    const dishObjectIds = dishIds.map((dishId) => new ObjectId(dishId))
+  private client: OpenAI;
 
-    const [cartItems, minimizedMenu] = await Promise.all([
-      databaseService.dishes
-        .find({ _id: { $in: dishObjectIds } })
-        .project({ name: 1 })
-        .toArray(),
-      databaseService.dishes // Lấy menu rút gọn: Gồm các món ăn ngoại trừ các món có trong cart
-        .aggregate([
-          {
-            $match: {
-              _id: { $nin: dishObjectIds },
-              status: DishStatus.AVAILABLE
-            }
-          },
-          {
-            $sample: { size: 30 }
-          },
-          {
-            $lookup: {
-              from: "dish_categories",
-              localField: "categoryId",
-              foreignField: "_id",
-              as: "dishCategoriesInfo"
-            }
-          },
-          {
-            $unwind: {
-              path: "$dishCategoriesInfo",
-              preserveNullAndEmptyArrays: true
-            }
-          },
-          {
-            $project: {
-              _id: 1,
-              name: 1,
-              dishCategoryName: "$dishCategoriesInfo.name"
-            }
-          }
-        ])
-        .toArray()
-    ])
+  constructor() {
+    // Groq API (compatible with OpenAI SDK)
+    this.client = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY || "",
+      baseURL: "https://api.groq.com/openai/v1"
+    });
+  }
 
-    const cartNames = cartItems.map((item) => item.name).join(", ")
+  async analyzeRestaurantData(data: any) {
+    const systemPrompt = this.buildSystemPrompt();
+    const userPrompt = this.buildUserPrompt(data);
 
-    const prompt = `
-            Giỏ hàng: "${cartNames}".
-            Menu: ${JSON.stringify(minimizedMenu)}.
-            Chọn 3 món từ Menu hợp nhất để ăn kèm.
-            Output JSON: ["id1", "id2", "id3"]
-        `
     try {
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-lite",
+      const completion = await this.client.chat.completions.create({
+        model: "llama-3.3-70b-versatile", // Latest Groq model (280 tokens/sec)
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+        response_format: { type: "json_object" }
+      });
 
-        generationConfig: {
-          temperature: 0.3,
-          topK: 20,
-          topP: 0.95,
-          maxOutputTokens: 100,
-          responseMimeType: "application/json"
-        }
-      })
-      const aiCall = model.generateContent(prompt)
-      const timeOut = new Promise((_, reject) => setTimeout(() => reject(new Error("TIME OUT")), 2500))
-
-      const result: any = await Promise.race([aiCall, timeOut])
-      const cleanText = result.response
-        .text()
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim()
-      const recommendedIdsString = JSON.parse(cleanText)
-      const recommendedObjectIds = recommendedIdsString.map((id: string) => new ObjectId(id))
-
-      databaseService.recommendations
-        .insertOne({
-          combinationKey: sortedIds,
-          recommendedDishIds: recommendedObjectIds,
-          updatedAt: new Date()
-        })
-        .catch((err) => console.error("Lỗi lưu cache:", err))
-
-      return databaseService.dishes
-        .find({ _id: { $in: recommendedObjectIds } })
-        .project({ name: 1, price: 1, image: 1, ratingAverage: 1, reviewCount: 1 })
-        .toArray()
-    } catch (error: any) {
-      if (error.message !== "TIMEOUT") console.error("Lỗi AI:", error)
-      // Fallback: Trả về 3 món ngẫu nhiên nếu lỗi
-      return databaseService.dishes
-        .find(
-          {
-            isFeatured: true
-          },
-          {
-            projection: {
-              _id: 1,
-              name: 1,
-              price: 1,
-              image: 1,
-              ratingAverage: 1,
-              reviewCount: 1
-            }
-          }
-        )
-        .limit(5)
-        .toArray()
+      const content = completion.choices[0].message.content || "{}";
+      return JSON.parse(content);
+    } catch (error) {
+      console.error("Groq API Error:", error);
+      throw new Error("Failed to analyze data with AI");
     }
   }
 
-  // Gửi báo cáo hàng tuần
-  async generateWeeklyReport(data: any) {
-    const prompt = `
-      Bạn là "Trợ lý Quản lý Nhà hàng" (AI Manager).
-      Hãy phân tích dữ liệu kinh doanh tuần qua (${data.range.from} - ${data.range.to}) và viết email báo cáo gửi cho Chủ quán.
+  private buildSystemPrompt(): string {
+    return `Bạn là chuyên gia phân tích kinh doanh nhà hàng với 10+ năm kinh nghiệm.
+Nhiệm vụ: Phân tích dữ liệu và đưa ra insights cho chủ nhà hàng.
 
-      DỮ LIỆU THỐNG KÊ:
-      ${JSON.stringify(data)}
-
-      YÊU CẦU OUTPUT (HTML BODY):
-      - Trả về mã HTML (không cần thẻ <html>, <head>, chỉ cần nội dung body).
-      - Style gọn gàng, dùng các thẻ <h2>, <ul>, <li>, <b>, <p>.
-      - Tone giọng: Chuyên nghiệp, khách quan, đóng vai trò người cố vấn.
-
-      CẤU TRÚC BÁO CÁO:
-      1. <h2>📊 Tổng quan tài chính</h2>:
-         - Báo cáo Doanh thu (${data.summary.totalRevenue}đ) và Số đơn (${data.summary.totalOrders}).
-         - Nhận xét ngắn về hiệu suất (Tốt/Trung bình/Cần cải thiện).
-
-      2. <h2>🏆 Hiệu suất Menu</h2>:
-         - **Ngôi sao:** Khen ngợi Top 1 bán chạy (${data.performance.bestSellers[0]?.dishName || "N/A"}).
-         - **Cảnh báo (Zero Sales):** Phân tích kỹ danh sách 'zeroSales'. Tại sao các món này (đặc biệt món giá cao) lại không bán được? Đặt câu hỏi nghi vấn về giá cả hoặc hiển thị.
-
-      3. <h2>⭐ Trải nghiệm Khách hàng</h2>:
-         - Dựa vào Rating (${data.customerFeedback.averageRating}/5).
-         - Nếu ít review (< 5): Cảnh báo cần tăng tương tác khách hàng.
-         - Nếu Rating thấp (< 4.0): Cảnh báo khẩn cấp về chất lượng.
-
-      4. <h2>💡 Đề xuất tuần tới (Action Items)</h2>:
-         - Đưa ra 3 hành động cụ thể. Ví dụ: Chạy khuyến mãi xả hàng cho món Zero Sales, Upsell món kèm theo, v.v.
-
-      Lưu ý: Chỉ phân tích dựa trên số liệu thật. Không bịa đặt.
-    `
-
-    try {
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-lite",
-        generationConfig: {
-          temperature: 0.7
-        }
-      })
-
-      const result = await model.generateContent(prompt)
-      const response = await result.response
-      const text = response.text()
-
-      // Làm sạch markdown nếu AI trả về dính ```html
-      return text.replace(/```html|```/g, "").trim()
-    } catch (error) {
-      console.error("❌ Lỗi AI Weekly Report:", error)
-      return `
-        <h2>Báo cáo tuần</h2>
-        <p>Hệ thống AI đang bận. Dưới đây là dữ liệu thô:</p>
-        <pre>${JSON.stringify(data, null, 2)}</pre>
-      `
+QUAN TRỌNG: Trả về ĐÚNG format JSON sau (không thêm markdown, không thêm text khác):
+{
+  "summary": "Tóm tắt tình hình kinh doanh trong 2-3 câu",
+  "strengths": [
+    {
+      "title": "Tiêu đề điểm mạnh",
+      "description": "Mô tả chi tiết",
+      "evidence": "Số liệu chứng minh",
+      "impact": "Tác động tích cực"
     }
+  ],
+  "weaknesses": [
+    {
+      "title": "Tiêu đề điểm yếu",
+      "description": "Mô tả vấn đề",
+      "evidence": "Số liệu chứng minh",
+      "severity": "low hoặc medium hoặc high"
+    }
+  ],
+  "recommendations": [
+    {
+      "title": "Tiêu đề gợi ý",
+      "description": "Mô tả chi tiết",
+      "action": "Hành động cụ thể cần làm",
+      "expectedImpact": "Kết quả mong đợi",
+      "priority": "low hoặc medium hoặc high"
+    }
+  ]
+}
+
+Phong cách:
+- Chuyên nghiệp nhưng dễ hiểu
+- Cụ thể, có số liệu minh chứng
+- Hành động cụ thể, không chung chung
+- Tối thiểu 2 strengths, 2 weaknesses, 3 recommendations`;
+  }
+
+  private buildUserPrompt(data: any): string {
+    const formatCurrency = (value: number) => 
+      new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+
+    return `Phân tích dữ liệu nhà hàng sau và trả về JSON theo format đã cho:
+
+📊 TỔNG QUAN:
+- Tổng doanh thu: ${formatCurrency(data.totalRevenue)}
+- Tổng đơn hàng: ${data.totalOrders}
+- Giá trị đơn trung bình: ${formatCurrency(data.avgOrderValue)}
+
+💰 DOANH THU THEO PHƯƠNG THỨC THANH TOÁN:
+${data.revenueByPaymentMethod.data.map((m: any) => 
+  `- ${m.method}: ${formatCurrency(m.revenue)} (${m.percentage}%)`
+).join('\n')}
+
+🍽️ DOANH THU THEO DANH MỤC MÓN ĂN:
+${data.revenueByDishCategory.data.map((c: any) => 
+  `- ${c.categoryName}: ${formatCurrency(c.revenue)} (${c.percentage}%)`
+).join('\n')}
+
+📉 TOP 5 MÓN BÁN CHẬM:
+${data.slowMovingDishes.data.slice(0, 5).map((d: any) => 
+  `- ${d.name}: ${d.sales} phần bán, doanh thu ${formatCurrency(d.revenue)}`
+).join('\n')}
+
+🪑 TOP 5 BÀN ĐƯỢC SỬ DỤNG NHIỀU NHẤT:
+${data.tableUsageFrequency.data.slice(0, 5).map((t: any) => 
+  `- Bàn ${t.tableNumber}: ${t.usageCount} lần sử dụng, doanh thu ${formatCurrency(t.totalRevenue)}`
+).join('\n')}
+
+👥 KHÁCH HÀNG THEO KHUNG GIỜ:
+- Giờ cao điểm: ${data.customersByTimeSlot.insights.peakHours.join(', ')}
+- Giờ thấp điểm: ${data.customersByTimeSlot.insights.lowHours.join(', ')}
+- Tổng đơn hàng: ${data.customersByTimeSlot.insights.totalOrders}
+
+⏱️ THỜI GIAN PHỤC VỤ:
+- Thời gian trung bình: ${data.averageServiceTime.avgServiceTime} phút
+- Nhanh nhất: ${data.averageServiceTime.minServiceTime} phút
+- Chậm nhất: ${data.averageServiceTime.maxServiceTime} phút
+
+📦 NGUYÊN LIỆU SẮP HẾT:
+${data.lowStockIngredients.length > 0 
+  ? data.lowStockIngredients.map((i: any) => 
+      `- ${i.name}: còn ${i.currentStock}${i.unit} (tối thiểu ${i.minStock}${i.unit})`
+    ).join('\n')
+  : '- Không có nguyên liệu nào sắp hết'
+}
+
+⭐ ĐÁNH GIÁ KHÁCH HÀNG:
+- Rating trung bình: ${data.averageRating.toFixed(1)}/5
+- Tổng số reviews: ${data.totalReviews}
+
+Hãy phân tích và trả về JSON theo đúng format đã cho.`;
   }
 }
 
-const aiService = new AIService()
-export default aiService
+export default new AIService();

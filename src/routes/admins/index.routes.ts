@@ -13,6 +13,7 @@ import ordersRouter from "./orders.routes"
 import adminReviewsRoutes from "./reviews.routes"
 import bookingAdminRoutes from "./bookings.routes"
 import dashboardRoutes from "./dashboard.routes"
+import aiRouter from "./ai.routes"
 
 export const routesAdmin = (app: Express) => {
   const PATH_ADMIN = "/admin"
@@ -30,4 +31,5 @@ export const routesAdmin = (app: Express) => {
   app.use(PATH_ADMIN + "/reviews", adminReviewsRoutes)
   app.use(PATH_ADMIN + "/bookings", bookingAdminRoutes)
   app.use(PATH_ADMIN + "/dashboard", dashboardRoutes)
+  app.use(PATH_ADMIN + "/ai", aiRouter)
 }
