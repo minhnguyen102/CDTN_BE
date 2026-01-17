@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import aiService from "../../services/ai.services"
+import aiService from "../../services/legacyAI.services"
 import { getRecommnentReqBody } from "../../models/requests/Recommentdation.request"
 
 export const getRecommentdationController = async (
