@@ -6,7 +6,8 @@ import { ErrorWithStatus } from "../models/Errors"
 import USER_MESSAGES from "../constants/message"
 import HTTP_STATUS from "../constants/httpStatus"
 import { removeAccents } from "../utils/helpers"
-import { CategoryTypeStatus } from "../constants/enums"
+import { CategoryTypeStatus, NotificationType } from "../constants/enums"
+import { getIO } from "../utils/socket"
 
 class IngredientServices {
   async createIngredient({ payload }: { payload: createIngredientReqBody }) {
@@ -254,6 +255,12 @@ class IngredientServices {
         }
       }
     )
+
+    // Check and emit low stock alert after update
+    if (payload.currentStock !== undefined || payload.minStock !== undefined) {
+      await this.checkAndEmitLowStockAlert(id)
+    }
+
     const [updatedIngredient] = await databaseService.ingredients
       .aggregate([
         { $match: { _id: ingredientId } },
@@ -303,6 +310,42 @@ class IngredientServices {
       ])
       .toArray()
     return updatedIngredient
+  }
+
+  async checkAndEmitLowStockAlert(ingredientId: string) {
+    const ingredient = await databaseService.ingredients.findOne({
+      _id: new ObjectId(ingredientId),
+      deleted: false
+    })
+
+    if (!ingredient) return
+
+    // ALWAYS emit if stock is low - Frontend will handle deduplication
+    if (ingredient.currentStock <= ingredient.minStock) {
+      const io = getIO()
+      const alertLevel = ingredient.currentStock === 0 ? "critical" : "low"
+      const stockPercentage = ingredient.minStock > 0 
+        ? Math.round((ingredient.currentStock / ingredient.minStock) * 100)
+        : 0
+
+      // Emit to chef_room - Frontend decides whether to show notification
+      io.to("chef_room").emit("low_ingredient_alert", {
+        notificationType: NotificationType.SYSTEM,
+        ingredientId: ingredient._id.toString(),
+        ingredientName: ingredient.name,
+        currentStock: ingredient.currentStock,
+        minStock: ingredient.minStock,
+        unit: ingredient.unit,
+        alertLevel, // "low" or "critical"
+        stockPercentage,
+        message: ingredient.currentStock === 0 
+          ? `Nguyên liệu "${ingredient.name}" đã hết!`
+          : `Nguyên liệu "${ingredient.name}" sắp hết (còn ${ingredient.currentStock}${ingredient.unit})`,
+        timestamp: new Date()
+      })
+
+      console.log(`Low stock alert emitted for: ${ingredient.name} (currentStock: ${ingredient.currentStock})`)
+    }
   }
 
   async delete({ id }: { id: string }) {

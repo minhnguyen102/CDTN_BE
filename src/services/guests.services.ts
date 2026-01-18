@@ -19,6 +19,7 @@ import USER_MESSAGES from "../constants/message"
 import { CreateBookingReqBody } from "../models/requests/Guest.request"
 import { parseTimeToMinutes, removeAccents } from "../utils/helpers"
 import Booking from "../models/schema/Booking.schema"
+import ingredientServices from "../services/ingredients.services"
 
 export interface DishItemInputFE {
   dishId: string
@@ -136,6 +137,13 @@ class GuestService {
         }
       }
       await session.commitTransaction()
+      
+      // Emit alerts for low stock after transaction success
+      for (const [ingredientId] of ingredientUpdates) {
+        ingredientServices.checkAndEmitLowStockAlert(ingredientId).catch(err => {
+          console.error(`Error emitting low stock alert for ${ingredientId}:`, err)
+        })
+      }
     } catch (error) {
       await session.abortTransaction() // Nếu có bất kì 1 lỗi => Hủy toàn bộ các thay đổi trước đó
       throw error
