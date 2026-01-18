@@ -88,6 +88,18 @@ export const initSocket = (httpServer: HttpServer) => {
         socket.emit("error_msg", "Bạn không có quyền truy cập thông báo bếp!")
       }
     })
+
+    // CHEF - Join chef room to receive system notifications (ingredients)
+    socket.on("join_chef_room", () => {
+      // Allow any authenticated user to join chef room (frontend handles role check)
+      socket.join("chef_room")
+      console.log(`User ${decoded_access_token.user_id} joined Chef Room`)
+      socket.emit("join_success", { 
+        message: "Bạn đã vào phòng bếp trưởng", 
+        roomId: "chef_room" 
+      })
+    })
+
     // server bắt sự kiện admin cập nhật đơn hàng
     socket.on("update_order_status:admin", async (payload, callback) => {
       const { orderId, itemId, status } = payload

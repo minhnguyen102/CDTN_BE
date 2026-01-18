@@ -11,5 +11,6 @@ export interface createIngredientReqBody {
 export interface updateIngredientReqBody {
   categoryId?: ObjectId
   minStock?: number
+  currentStock?: number
   supplierIds?: ObjectId[]
 }

@@ -97,3 +97,10 @@ export enum BookingStatus {
   CANCELLED = "Cancelled",
   NO_SHOW = "No_show"
 }
+
+export enum NotificationType {
+  ORDER = "order",
+  PAYMENT = "payment",
+  SYSTEM = "system"
+}
+
